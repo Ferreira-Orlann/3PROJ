@@ -1,8 +1,8 @@
 import { Provider } from "@nestjs/common";
-import { DatabaseType, DataSource, DataSourceOptions } from "typeorm";
+import { DataSource, DataSourceOptions } from "typeorm";
 
 export const DataSourceProvider: Provider = {
-    provide: "DataSource",
+    provide: "DataSourceProvider",
     useFactory: async () => {
         const dataSource = new DataSource({
             type: "mariadb",
