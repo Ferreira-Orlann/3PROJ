@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Workspace } from "./workspace.entity";
+import { Workspace } from "./workspaces.entity";
 import { Repository } from "typeorm";
-import { CreateWorkspaceDto } from "./workspace.dto";
+import { CreateWorkspaceDto } from "./workspaces.dto";
 
 @Injectable()
 export class WorkspaceService {

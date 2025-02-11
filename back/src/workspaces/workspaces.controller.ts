@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post } from "@nestjs/common";
-import { WorkspaceService } from "./workspace.service";
-import { CreateWorkspaceDto } from "./workspace.dto";
+import { WorkspaceService } from "./workspaces.service";
+import { CreateWorkspaceDto } from "./workspaces.dto";
 
 @Controller("workspaces")
 export class WorkspaceController {

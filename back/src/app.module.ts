@@ -1,9 +1,9 @@
 import { Module } from "@nestjs/common";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
-import { WorkspaceModule } from "./workspace/workspace.module";
+import { WorkspaceModule } from "./workspaces/workspace.module";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { Workspace } from "./workspace/workspace.entity";
+import { Workspace } from "./workspaces/workspace.entity";
 
 @Module({
     imports: [
