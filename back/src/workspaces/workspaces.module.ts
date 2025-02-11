@@ -9,4 +9,4 @@ import { Workspace } from "./workspaces.entity";
     controllers: [WorkspacesController],
     providers: [WorkspacesService],
 })
-export class WorkspaceModule {}
+export class WorkspacesModule {}
