@@ -1,5 +1,6 @@
 import { UUID } from "crypto";
-import { Entity, Column, PrimaryGeneratedColumn, Generated } from "typeorm";
+import { User } from "src/users/users.entity";
+import { Entity, Column, PrimaryGeneratedColumn, Generated, OneToOne, JoinColumn, OneToMany, ManyToOne } from "typeorm";
 
 @Entity()
 export class Workspace {
@@ -13,6 +14,15 @@ export class Workspace {
     @Column()
     name: string;
 
-    @Column({default: false})
+    @Column({
+        name: "is_public",
+        default: false
+    })
     isPublic: boolean
+
+    @ManyToOne(() => User, (user) => user.ownedWorkspaces, {})
+    @JoinColumn({
+        name: "owner_id"
+    })
+    owner: User
 }
