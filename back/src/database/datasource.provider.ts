@@ -5,12 +5,12 @@ export const DataSourceProvider: Provider = {
     provide: "DataSourceProvider",
     useFactory: async () => {
         const dataSource = new DataSource({
-            type: "mariadb",
+            type: "postgres",
             host: "127.0.0.1",
-            port: 3006,
-            username: "test",
-            password: "test",
-            database: "test",
+            port: 5432,
+            username: "postgres",
+            password: "postgres",
+            database: "postgres",
             entities: [__dirname + "/../**/*.entity{.ts,.js}"],
             // synchronize: configService.get<string>("ENV") == EnvType.DEV,
         } as DataSourceOptions);
