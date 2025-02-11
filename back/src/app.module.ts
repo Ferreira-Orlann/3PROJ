@@ -6,6 +6,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { Workspace } from "./workspaces/workspaces.entity";
 import { UsersModule } from "./users/users.module";
 import { User } from "./users/users.entity";
+import { Channel } from "./channels/channels.entity";
 import { AuthModule } from "./authentication/auth.module";
 
 @Module({
@@ -17,12 +18,13 @@ import { AuthModule } from "./authentication/auth.module";
             username: "postgres",
             password: "postgres",
             database: "postgres",
-            entities: [Workspace, User],
+            entities: [Workspace, User, Channel],
             // synchronize: configService.get<string>("ENV") == EnvType.DEV,
             synchronize: true,
         }),
         WorkspacesModule,
         UsersModule,
+        Channel,
         AuthModule,
     ],
     controllers: [AppController],
