@@ -7,7 +7,7 @@ import { Workspace } from "./workspaces/workspaces.entity";
 import { UsersModule } from "./users/users.module";
 import { User } from "./users/users.entity";
 import { Channel } from "./channels/channels.entity";
-import { AuthModule } from "./authentication/auth.module";
+import { ChannelsModule } from "./channels/channels.module";
 
 @Module({
     imports: [
@@ -24,8 +24,7 @@ import { AuthModule } from "./authentication/auth.module";
         }),
         WorkspacesModule,
         UsersModule,
-        Channel,
-        AuthModule,
+        ChannelsModule
     ],
     controllers: [AppController],
     providers: [AppService],

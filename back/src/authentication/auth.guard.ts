@@ -4,8 +4,8 @@ import {
     Injectable,
     UnauthorizedException,
 } from "@nestjs/common";
-import { JwtService } from "@nestjs/jwt";
 import { jwtConstants } from "./const";
+import { JwtService } from "@nestjs/jwt";
 
 type IAuthRequest = Request & {
     headers: { authorization: string };
