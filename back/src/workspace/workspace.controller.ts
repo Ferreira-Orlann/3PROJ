@@ -7,7 +7,7 @@ export class WorkspaceController {
     constructor(private readonly workspaceService: WorkspaceService) {}
 
     @Get()
-    getHello() {
+    get() {
         return this.workspaceService.findAll();
     }
 

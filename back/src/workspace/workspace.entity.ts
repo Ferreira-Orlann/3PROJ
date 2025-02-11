@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
+import { UUID } from "crypto";
+import { Entity, Column, PrimaryGeneratedColumn, Generated } from "typeorm";
 
 @Entity()
 export class Workspace {
@@ -6,8 +7,12 @@ export class Workspace {
     id: number;
 
     @Column()
+    @Generated("uuid")
+    uuid: UUID;
+
+    @Column()
     name: string;
 
-    @Column({ default: true })
-    isActive: boolean;
+    @Column({default: false})
+    isPublic: boolean
 }
