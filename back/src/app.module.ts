@@ -1,9 +1,9 @@
 import { Module } from "@nestjs/common";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
-import { WorkspaceModule } from "./workspaces/workspace.module";
+import { WorkspacesModule } from "./workspaces/workspaces.module";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { Workspace } from "./workspaces/workspace.entity";
+import { Workspace } from "./workspaces/workspaces.entity";
 
 @Module({
     imports: [
@@ -18,7 +18,7 @@ import { Workspace } from "./workspaces/workspace.entity";
             // synchronize: configService.get<string>("ENV") == EnvType.DEV,
             synchronize: true,
         }),
-        WorkspaceModule,
+        WorkspacesModule,
     ],
     controllers: [AppController],
     providers: [AppService],
