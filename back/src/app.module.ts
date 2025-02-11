@@ -6,6 +6,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { Workspace } from "./workspaces/workspaces.entity";
 import { UsersModule } from "./users/users.module";
 import { User } from "./users/users.entity";
+import { AuthModule } from "./authentication/auth.module";
 
 @Module({
     imports: [
@@ -21,7 +22,8 @@ import { User } from "./users/users.entity";
             synchronize: true,
         }),
         WorkspacesModule,
-        UsersModule
+        UsersModule,
+        AuthModule,
     ],
     controllers: [AppController],
     providers: [AppService],

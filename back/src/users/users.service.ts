@@ -8,7 +8,7 @@ import { CreateUserDto } from "./users.dto";
 export class UsersService {
     constructor(
         @InjectRepository(User)
-        private readonly usersRepo: Repository<User>
+        private readonly usersRepo: Repository<User>,
     ) {}
 
     findAll(): Promise<User[]> {
@@ -24,6 +24,6 @@ export class UsersService {
     }
 
     async add(dto: CreateUserDto): Promise<User> {
-        return this.usersRepo.save(dto)
+        return this.usersRepo.save(dto);
     }
 }

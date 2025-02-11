@@ -7,34 +7,34 @@ import { Workspace } from "src/workspaces/workspaces.entity";
 @Entity()
 export class User {
     @PrimaryGeneratedColumn()
-    id: number
+    id: number;
 
     @Column()
     @Generated("uuid")
-    uuid: UUID
+    uuid: UUID;
 
     @Column()
-    username: string
+    username: string;
 
     @Column()
-    firstname: string
+    firstname: string;
 
     @Column()
-    lastname: string
+    lastname: string;
 
     @Column()
-    email: string
+    email: string;
 
     @Column()
-    address: string
+    address: string;
 
     @Column({
         type: "enum",
         enum: UserStatus,
-        default: UserStatus.OFFLINE
+        default: UserStatus.OFFLINE,
     })
-    status: UserStatus
+    status: UserStatus;
 
     @OneToMany(() => Workspace, (workspace) => workspace.owner)
-    ownedWorkspaces: Workspace[]
+    ownedWorkspaces: Workspace[];
 }

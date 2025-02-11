@@ -13,7 +13,7 @@ export class WorkspacesController {
 
     @Post()
     async create(@Body() dto: CreateWorkspaceDto) {
-        let entity = await this.workspacesService.add(dto)
-        return entity
+        const entity = await this.workspacesService.add(dto);
+        return entity;
     }
 }

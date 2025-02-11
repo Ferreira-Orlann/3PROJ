@@ -1,6 +1,15 @@
 import { UUID } from "crypto";
 import { User } from "src/users/users.entity";
-import { Entity, Column, PrimaryGeneratedColumn, Generated, OneToOne, JoinColumn, OneToMany, ManyToOne } from "typeorm";
+import {
+    Entity,
+    Column,
+    PrimaryGeneratedColumn,
+    Generated,
+    OneToOne,
+    JoinColumn,
+    OneToMany,
+    ManyToOne,
+} from "typeorm";
 
 @Entity()
 export class Workspace {
@@ -16,13 +25,13 @@ export class Workspace {
 
     @Column({
         name: "is_public",
-        default: false
+        default: false,
     })
-    isPublic: boolean
+    isPublic: boolean;
 
     @ManyToOne(() => User, (user) => user.ownedWorkspaces, {})
     @JoinColumn({
-        name: "owner_id"
+        name: "owner_id",
     })
-    owner: User
+    owner: User;
 }

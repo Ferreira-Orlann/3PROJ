@@ -10,7 +10,7 @@ export class WorkspacesService {
         @InjectRepository(Workspace)
         private readonly workspacesRepo: Repository<Workspace>,
     ) {}
-    
+
     findAll(): Promise<Workspace[]> {
         return this.workspacesRepo.find();
     }
@@ -24,6 +24,6 @@ export class WorkspacesService {
     }
 
     async add(dto: CreateWorkspaceDto): Promise<Workspace> {
-        return this.workspacesRepo.save(dto)
+        return this.workspacesRepo.save(dto);
     }
 }

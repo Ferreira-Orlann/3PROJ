@@ -4,8 +4,8 @@ import { ConsoleLogger } from "@nestjs/common";
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule, {
-        logger: new ConsoleLogger("SupPhone")
-    });      
+        logger: new ConsoleLogger("SupPhone"),
+    });
     app.enableCors();
     await app.listen(process.env.PORT ?? 3000);
 }
