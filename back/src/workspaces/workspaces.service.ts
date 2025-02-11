@@ -23,7 +23,10 @@ export class WorkspacesService {
         this.workspacesRepo.delete(id);
     }
 
-    async add(dto: CreateWorkspaceDto): Promise<Workspace> {
-        return this.workspacesRepo.save(dto);
+    async add(name: string, owner_uuid: string): Promise<Workspace> {
+        return this.workspacesRepo.save({
+            name: name,
+            owner_uuid: owner_uuid
+        });
     }
 }

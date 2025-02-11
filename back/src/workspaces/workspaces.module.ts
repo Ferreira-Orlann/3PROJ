@@ -4,10 +4,9 @@ import { WorkspacesService } from "./workspaces.service";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { Workspace } from "./workspaces.entity";
 import { AuthModule } from "src/authentication/auth.module";
-import { JwtModule } from "@nestjs/jwt";
 
 @Module({
-    imports: [AuthModule, TypeOrmModule.forFeature([Workspace]), JwtModule],
+    imports: [AuthModule, TypeOrmModule.forFeature([Workspace])],
     controllers: [WorkspacesController],
     providers: [WorkspacesService],
 })

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Post, Req, UseGuards } from "@nestjs/common";
 import { WorkspacesService } from "./workspaces.service";
 import { CreateWorkspaceDto } from "./workspaces.dto";
 import { AuthGuard } from "src/authentication/auth.guard";
@@ -14,8 +14,8 @@ export class WorkspacesController {
 
     @UseGuards(AuthGuard)
     @Post()
-    async create(@Body() dto: CreateWorkspaceDto) {
-        const entity = await this.workspacesService.add(dto);
+    async create(@Req() request: Request, @Body() dto: CreateWorkspaceDto) {
+        const entity = await this.workspacesService.add(dto.name, request["user_id"]);
         return entity;
     }
 }

@@ -5,9 +5,9 @@ import { AuthGuard } from "./auth.guard";
 import { jwtConstants } from "./const";
 
 @Module({
-    imports: [JwtModule.register({ secret: jwtConstants.secret })],
+    imports: [JwtModule.register({ secret: jwtConstants.secret, global: true})],
     controllers: [AuthController],
     providers: [AuthGuard],
-    exports: [AuthGuard, JwtModule]
+    exports: [AuthGuard]
 })
 export class AuthModule {}
