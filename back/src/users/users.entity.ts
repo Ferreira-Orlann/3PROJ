@@ -1,7 +1,8 @@
-import { Entity } from "typeorm";
+import { Entity, ManyToOne, OneToMany } from "typeorm";
 import { UUID } from "crypto";
 import { Column, Generated, PrimaryGeneratedColumn } from "typeorm";
 import { UserStatus } from "./users.status.enum";
+import { Workspace } from "src/workspaces/workspaces.entity";
 
 @Entity()
 export class User {
@@ -33,4 +34,7 @@ export class User {
         default: UserStatus.OFFLINE
     })
     status: UserStatus
+
+    @OneToMany(() => Workspace, (workspace) => workspace.owner)
+    ownedWorkspaces: Workspace[]
 }
