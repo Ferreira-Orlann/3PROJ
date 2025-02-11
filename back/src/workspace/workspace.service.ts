@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Workspace } from "./workspace.entity";
 import { Repository } from "typeorm";
+import { CreateWorkspaceDto } from "./workspace.dto";
 
 @Injectable()
 export class WorkspaceService {
@@ -19,5 +20,9 @@ export class WorkspaceService {
 
     async remove(id: number): Promise<void> {
         this.workspacesRepo.delete(id);
+    }
+
+    async add(dto: CreateWorkspaceDto): Promise<Workspace> {
+        return this.workspacesRepo.save(dto)
     }
 }
