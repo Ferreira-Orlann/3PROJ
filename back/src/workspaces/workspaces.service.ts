@@ -10,6 +10,7 @@ export class WorkspacesService {
         @InjectRepository(Workspace)
         private readonly workspacesRepo: Repository<Workspace>,
     ) {}
+    
     findAll(): Promise<Workspace[]> {
         return this.workspacesRepo.find();
     }

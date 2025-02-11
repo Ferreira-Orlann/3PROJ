@@ -4,6 +4,8 @@ import { AppService } from "./app.service";
 import { WorkspacesModule } from "./workspaces/workspaces.module";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { Workspace } from "./workspaces/workspaces.entity";
+import { UsersModule } from "./users/users.module";
+import { User } from "./users/users.entity";
 
 @Module({
     imports: [
@@ -14,11 +16,12 @@ import { Workspace } from "./workspaces/workspaces.entity";
             username: "postgres",
             password: "postgres",
             database: "postgres",
-            entities: [Workspace],
+            entities: [Workspace, User],
             // synchronize: configService.get<string>("ENV") == EnvType.DEV,
             synchronize: true,
         }),
         WorkspacesModule,
+        UsersModule
     ],
     controllers: [AppController],
     providers: [AppService],
