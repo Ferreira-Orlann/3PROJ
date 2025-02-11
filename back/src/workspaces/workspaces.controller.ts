@@ -1,19 +1,19 @@
 import { Body, Controller, Get, Post } from "@nestjs/common";
-import { WorkspaceService } from "./workspaces.service";
+import { WorkspacesService } from "./workspaces.service";
 import { CreateWorkspaceDto } from "./workspaces.dto";
 
 @Controller("workspaces")
-export class WorkspaceController {
-    constructor(private readonly workspaceService: WorkspaceService) {}
+export class WorkspacesController {
+    constructor(private readonly workspacesService: WorkspacesService) {}
 
     @Get()
     get() {
-        return this.workspaceService.findAll();
+        return this.workspacesService.findAll();
     }
 
     @Post()
     async createWorkspace(@Body() dto: CreateWorkspaceDto) {
-        let entity = await this.workspaceService.add(dto)
+        let entity = await this.workspacesService.add(dto)
         return entity
     }
 }

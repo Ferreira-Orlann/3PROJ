@@ -5,7 +5,7 @@ import { Repository } from "typeorm";
 import { CreateWorkspaceDto } from "./workspaces.dto";
 
 @Injectable()
-export class WorkspaceService {
+export class WorkspacesService {
     constructor(
         @InjectRepository(Workspace)
         private readonly workspacesRepo: Repository<Workspace>,
