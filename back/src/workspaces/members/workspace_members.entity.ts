@@ -5,14 +5,12 @@ import {
     Column,
     PrimaryGeneratedColumn,
     Generated,
-    OneToOne,
     JoinColumn,
-    OneToMany,
     ManyToOne,
 } from "typeorm";
 
 @Entity()
-export class Workspace {
+export class WorkspaceMember {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -29,9 +27,9 @@ export class Workspace {
     })
     isPublic: boolean;
 
-    @ManyToOne(() => User, (user) => user.ownedWorkspaces, {})
+    @ManyToOne(() => User, (user) => user.workspace_members, {})
     @JoinColumn({
-        name: "owner_uuid",
+        name: "user_uuid",
     })
-    owner: User;
+    user: User;
 }

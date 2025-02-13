@@ -3,6 +3,7 @@ import { UUID } from "crypto";
 import { Column, Generated, PrimaryGeneratedColumn } from "typeorm";
 import { UserStatus } from "./users.status.enum";
 import { Workspace } from "src/workspaces/workspaces.entity";
+import { WorkspaceMember } from "src/workspaces/members/workspace_members.entity";
 
 @Entity()
 export class User {
@@ -37,4 +38,7 @@ export class User {
 
     @OneToMany(() => Workspace, (workspace) => workspace.owner)
     ownedWorkspaces: Workspace[];
+
+    @OneToMany(() => WorkspaceMember, (member) => member.user)
+    workspace_members: WorkspaceMember[]
 }
