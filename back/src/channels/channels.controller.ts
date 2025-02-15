@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Delete } from "@nestjs/common";
 import { ChannelsService } from "./channels.service";
 import { CreateChannelDto } from "./channels.dto";
 
@@ -16,5 +16,12 @@ export class ChannelsController {
         let entity = await this.ChannelService.add(dto)
         return entity
     }
+
+    @Delete()
+    async deleteChannel(@Param('id') id: number) {
+        let entity = await this.ChannelService.remove(id)
+        return entity
+    }
+
 }
      

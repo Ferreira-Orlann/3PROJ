@@ -8,6 +8,8 @@ import { UsersModule } from "./users/users.module";
 import { User } from "./users/users.entity";
 import { Channel } from "./channels/channels.entity";
 import { ChannelsModule } from "./channels/channels.module";
+import { Messaging } from "./messagings/messagings.entity";
+import { MessagingsModule } from "./messagings/messagings.module";
 
 @Module({
     imports: [
@@ -18,13 +20,14 @@ import { ChannelsModule } from "./channels/channels.module";
             username: "postgres",
             password: "postgres",
             database: "postgres",
-            entities: [Workspace, User, Channel],
+            entities: [Workspace, User, Channel, Messaging],
             // synchronize: configService.get<string>("ENV") == EnvType.DEV,
             synchronize: true,
         }),
         WorkspacesModule,
         UsersModule,
-        ChannelsModule
+        ChannelsModule,
+        MessagingsModule
     ],
     controllers: [AppController],
     providers: [AppService],
