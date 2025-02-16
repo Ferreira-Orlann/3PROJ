@@ -1,15 +1,14 @@
 import { Body, Controller, Get, Post, Query } from "@nestjs/common";
-import { JwtService } from "@nestjs/jwt";
 import { UUID } from "crypto";
+import { AuthService } from "./auth.service";
+import { UsersService } from "src/users/users.service";
 
 @Controller("auth")
 export class AuthController {
-    constructor(private jwtService: JwtService) {}
+    constructor(private readonly authService: AuthService, private usersService: UsersService) {}
 
     @Get("signin")
     async signin(@Query("uuid") uuid: UUID) {
-        return {
-            access_token: await this.jwtService.signAsync(uuid),
-        };
+        return await this.authService.createSession(await this.usersService.findOneByUuid(uuid))
     }
 }

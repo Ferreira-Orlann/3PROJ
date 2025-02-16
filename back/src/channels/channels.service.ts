@@ -10,6 +10,7 @@ export class ChannelsService {
         @InjectRepository(Channel)
         private readonly channelsRepo: Repository<Channel>,
     ) {}
+    
     findAll(): Promise<Channel[]> {
         return this.channelsRepo.find();
     }

@@ -12,8 +12,8 @@ import { Messaging } from "./messagings/messagings.entity";
 import { MessagingsModule } from "./messagings/messagings.module";
 import { EventEmitterModule } from "@nestjs/event-emitter";
 import { WorkspaceMember } from "./workspaces/members/workspace_members.entity";
-import { WebSocketPool } from "./websocket/websocket_pool.gateway";
-import { WebSocketAuth } from "./websocket/websocket_auth.gateway";
+import { Session } from "./authentication/session.entity";
+import { WebSocketModule } from "./websocket/websocket.module";
 import { AuthModule } from "./authentication/auth.module";
 
 @Module({
@@ -34,7 +34,7 @@ import { AuthModule } from "./authentication/auth.module";
             username: "postgres",
             password: "postgres",
             database: "postgres",
-            entities: [Workspace, User, Channel, Messaging, WorkspaceMember],
+            entities: [Workspace, User, Channel, Messaging, WorkspaceMember, Session],
             // synchronize: configService.get<string>("ENV") == EnvType.DEV,
             synchronize: true,
         }),
@@ -42,9 +42,10 @@ import { AuthModule } from "./authentication/auth.module";
         UsersModule,
         ChannelsModule,
         MessagingsModule,
+        WebSocketModule,
         AuthModule
     ],
     controllers: [AppController],
-    providers: [AppService, WebSocketPool, WebSocketAuth],
+    providers: [AppService],
 })
 export class AppModule {}

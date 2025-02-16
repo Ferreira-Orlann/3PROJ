@@ -3,6 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "./users.entity";
 import { Repository } from "typeorm";
 import { CreateUserDto } from "./users.dto";
+import { UUID } from "crypto";
 
 @Injectable()
 export class UsersService {
@@ -15,10 +16,16 @@ export class UsersService {
         return this.usersRepo.find();
     }
 
-    findOne(id: number): Promise<User | null> {
+    findOneById(id: number): Promise<User | null> {
         return this.usersRepo.findOneBy({ id });
     }
 
+    findOneByUuid(uuid: UUID): Promise<User | null> {
+        return this.usersRepo.findOneBy({
+            uuid: uuid
+        })
+    }
+ 
     async remove(id: number): Promise<void> {
         this.usersRepo.delete(id);
     }
