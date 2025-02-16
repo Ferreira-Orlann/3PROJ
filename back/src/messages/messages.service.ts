@@ -1,20 +1,20 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Messaging } from "./messagings.entity";
 import { Repository } from "typeorm";
-import { CreateMessagingDto } from "./messagings.dto";
+import { Message } from "./messages.entity";
+import { CreateMessageDto } from "./messages.dto";
 
 @Injectable()
-export class MessagingsService {
+export class MessagesService {
     constructor(
-        @InjectRepository(Messaging)
-        private readonly messagingsRepo: Repository<Messaging>,
+        @InjectRepository(Message)
+        private readonly messagingsRepo: Repository<Message>,
     ) {}
-    findAll(): Promise<Messaging[]> {
+    findAll(): Promise<Message[]> {
         return this.messagingsRepo.find();
     }
 
-    findOne(id: number): Promise<Messaging | null> {
+    findOne(id: number): Promise<Message | null> {
         return this.messagingsRepo.findOneBy({ id });
     }
 
@@ -22,7 +22,7 @@ export class MessagingsService {
         this.messagingsRepo.delete(id);
     }
 
-    async add(dto: CreateMessagingDto): Promise<Messaging> {
+    async add(dto: CreateMessageDto): Promise<Message> {
         return this.messagingsRepo.save({
             message: dto.message,
             isPublic: dto.isPublic ?? false,

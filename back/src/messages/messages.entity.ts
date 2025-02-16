@@ -10,7 +10,7 @@ import {
 import { User } from "../users/users.entity";
 
 @Entity()
-export class Messaging {
+export class Message {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -27,7 +27,7 @@ export class Messaging {
     @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
     date: Date;
 
-    @ManyToOne(() => User, (user) => user.messaging, {})
+    @ManyToOne(() => User)
     @JoinColumn({
         name: "user_uuid",
     })

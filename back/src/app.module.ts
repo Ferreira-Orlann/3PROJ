@@ -8,13 +8,13 @@ import { UsersModule } from "./users/users.module";
 import { User } from "./users/users.entity";
 import { Channel } from "./channels/channels.entity";
 import { ChannelsModule } from "./channels/channels.module";
-import { Messaging } from "./messagings/messagings.entity";
-import { MessagingsModule } from "./messagings/messagings.module";
 import { EventEmitterModule } from "@nestjs/event-emitter";
 import { WorkspaceMember } from "./workspaces/members/workspace_members.entity";
 import { Session } from "./authentication/session.entity";
 import { WebSocketModule } from "./websocket/websocket.module";
 import { AuthModule } from "./authentication/auth.module";
+import { MessagesModule } from "./messages/messages.module";
+import { Message } from "./messages/messages.entity";
 
 @Module({
     imports: [
@@ -38,7 +38,7 @@ import { AuthModule } from "./authentication/auth.module";
                 Workspace,
                 User,
                 Channel,
-                Messaging,
+                Message,
                 WorkspaceMember,
                 Session,
             ],
@@ -48,7 +48,7 @@ import { AuthModule } from "./authentication/auth.module";
         WorkspacesModule,
         UsersModule,
         ChannelsModule,
-        MessagingsModule,
+        MessagesModule,
         WebSocketModule,
         AuthModule,
     ],
