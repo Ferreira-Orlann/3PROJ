@@ -6,18 +6,16 @@ import {
 } from "@nestjs/common";
 import { jwtConstants } from "./const";
 import { JwtService } from "@nestjs/jwt";
-
-type IAuthRequest = Request & {
-    headers: { authorization: string };
-};
+import { Socket } from "socket.io";
 
 @Injectable()
-export class AuthGuard implements CanActivate {
+export class WebSocketAuthGuard implements CanActivate {
     constructor(private jwtService: JwtService) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
-        const request = context.switchToHttp().getRequest();
-        const token = this.extractTokenFromHeader(request);
+        const socket = context.switchToWs().getClient()
+        const token = this.extractTokenFromHeader(socket);
+        console.log(token)
         if (!token) {
             throw new UnauthorizedException();
         }
@@ -25,15 +23,16 @@ export class AuthGuard implements CanActivate {
             const payload = await this.jwtService.verifyAsync(token, {
                 secret: jwtConstants.secret,
             });
-            request["user_uuid"] = payload;
+            socket["user_uuid"] = payload;
         } catch {
             throw new UnauthorizedException();
         }
         return true;
     }
 
-    private extractTokenFromHeader(request: IAuthRequest): string | undefined {
-        const [type, token] = request.headers.authorization?.split(" ") ?? [];
+    private extractTokenFromHeader(socket: Socket): string | undefined {
+        const [type, token] = socket.handshake.headers.authorization?.split(" ") ?? [];
+        console.log(socket.handshake.headers)
         return type === "Bearer" ? token : undefined;
     }
 }

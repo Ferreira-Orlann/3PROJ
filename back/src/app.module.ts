@@ -10,9 +10,23 @@ import { Channel } from "./channels/channels.entity";
 import { ChannelsModule } from "./channels/channels.module";
 import { Messaging } from "./messagings/messagings.entity";
 import { MessagingsModule } from "./messagings/messagings.module";
+import { EventEmitterModule } from "@nestjs/event-emitter";
+import { WorkspaceMember } from "./workspaces/members/workspace_members.entity";
+import { WebSocketPool } from "./websocket/websocket_pool.gateway";
+import { WebSocketAuth } from "./websocket/websocket_auth.gateway";
+import { AuthModule } from "./authentication/auth.module";
 
 @Module({
     imports: [
+        EventEmitterModule.forRoot({
+            wildcard: false,
+            delimiter: '.',
+            newListener: false,
+            removeListener: false,
+            maxListeners: 0,
+            verboseMemoryLeak: false,
+            ignoreErrors: false,
+        }),
         TypeOrmModule.forRoot({
             type: "postgres",
             host: "127.0.0.1",
@@ -20,16 +34,17 @@ import { MessagingsModule } from "./messagings/messagings.module";
             username: "postgres",
             password: "postgres",
             database: "postgres",
-            entities: [Workspace, User, Channel, Messaging],
+            entities: [Workspace, User, Channel, Messaging, WorkspaceMember],
             // synchronize: configService.get<string>("ENV") == EnvType.DEV,
             synchronize: true,
         }),
         WorkspacesModule,
         UsersModule,
         ChannelsModule,
-        MessagingsModule
+        MessagingsModule,
+        AuthModule
     ],
     controllers: [AppController],
-    providers: [AppService],
+    providers: [AppService, WebSocketPool, WebSocketAuth],
 })
 export class AppModule {}
