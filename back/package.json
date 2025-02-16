@@ -29,11 +29,13 @@
     "@nestjs/typeorm": "^11.0.0",
     "@nestjs/websockets": "^11.0.9",
     "casbin": "^5.38.0",
+    "nest-authz": "^2.14.0",
     "pg": "^8.13.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "socket.io": "^4.8.1",
-    "typeorm": "^0.3.20"
+    "typeorm": "^0.3.20",
+    "typeorm-adapter": "^1.7.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.4.9",

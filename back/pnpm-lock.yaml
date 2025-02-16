@@ -35,6 +35,9 @@ importers:
       casbin:
         specifier: ^5.38.0
         version: 5.38.0
+      nest-authz:
+        specifier: ^2.14.0
+        version: 2.14.0(@nestjs/common@11.0.9(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/core@11.0.9(@nestjs/common@11.0.9(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/platform-express@11.0.9)(@nestjs/websockets@11.0.9)(reflect-metadata@0.2.2)(rxjs@7.8.1))(reflect-metadata@0.2.2)(rxjs@7.8.1)
       pg:
         specifier: ^8.13.3
         version: 8.13.3
@@ -50,6 +53,9 @@ importers:
       typeorm:
         specifier: ^0.3.20
         version: 0.3.20(pg@8.13.3)(ts-node@10.9.2(@types/node@20.17.19)(typescript@5.7.3))
+      typeorm-adapter:
+        specifier: ^1.7.0
+        version: 1.7.0(pg@8.13.3)(ts-node@10.9.2(@types/node@20.17.19)(typescript@5.7.3))
     devDependencies:
       '@nestjs/cli':
         specifier: ^10.4.9
@@ -2258,6 +2264,15 @@ packages:
   neo-async@2.6.2:
     resolution: {integrity: sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==}
 
+  nest-authz@2.14.0:
+    resolution: {integrity: sha512-DdxqIFnThWXsWqF8//N8qivwzj4ZAUWnsrrx45vyRlTjRhUmlvGrTJTh5Wgkuyq2O6A77jWcEuxnRpSOk1JSaw==}
+    engines: {node: '>= 10.13.0'}
+    peerDependencies:
+      '@nestjs/common': ^9.0.3 || ^10.0.0
+      '@nestjs/core': ^9.0.3 || ^10.0.0
+      reflect-metadata: ^0.1.13
+      rxjs: ^7.5.6
+
   node-abort-controller@3.1.1:
     resolution: {integrity: sha512-AGK2yQKIjRuqnc6VkX2Xj5d+QW8xZ87pa1UK6yA6ouUyuxfHuMP6umE5QK7UmTeOAymo+Zx1Fxiuw9rVx8taHQ==}
 
@@ -2527,6 +2542,9 @@ packages:
   readdirp@3.6.0:
     resolution: {integrity: sha512-hOS089on8RduqdbhvQ5Z37A0ESjsqz6qnRcffsMU3495FuTdqSm+7bhJ29JvIOsBDEEnan5DPu9t3To9VRlMzA==}
     engines: {node: '>=8.10.0'}
+
+  reflect-metadata@0.1.14:
+    resolution: {integrity: sha512-ZhYeb6nRaXCfhnndflDK8qI6ZQ/YcWZCISRAWICW9XYqMUwjZM9Z0DveWX/ABN01oxSHwVxKQmxeYZSsm0jh5A==}
 
   reflect-metadata@0.2.2:
     resolution: {integrity: sha512-urBwgfrvVP/eAyXx4hluJivBKzuEbSQs9rKWCrCkbSxNv8mxPcUZKeuoF3Uy4mJl3Lwprp6yy5/39VWigZ4K6Q==}
@@ -2944,6 +2962,9 @@ packages:
 
   typedarray@0.0.6:
     resolution: {integrity: sha512-/aCDEGatGvZ2BIk+HmLf4ifCJFwvKFNb9/JeZPMulfgFracn9QFcAf5GO8B/mweUjSoblS5In0cWhqpfs/5PQA==}
+
+  typeorm-adapter@1.7.0:
+    resolution: {integrity: sha512-70TDkYTFn5nJ06neGTY8f7Ex6JfFd0SM+aXg/igqvKjnNLPFHYAU/sNGF0J4Vil5ZD3+fUklZr4/LI24Jre8sw==}
 
   typeorm@0.3.20:
     resolution: {integrity: sha512-sJ0T08dV5eoZroaq9uPKBoNcGslHBR4E4y+EBHs//SiGbblGe7IeduP/IH4ddCcj0qp3PHwDwGnuvqEAnKlq/Q==}
@@ -5795,6 +5816,14 @@ snapshots:
 
   neo-async@2.6.2: {}
 
+  nest-authz@2.14.0(@nestjs/common@11.0.9(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/core@11.0.9(@nestjs/common@11.0.9(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/platform-express@11.0.9)(@nestjs/websockets@11.0.9)(reflect-metadata@0.2.2)(rxjs@7.8.1))(reflect-metadata@0.2.2)(rxjs@7.8.1):
+    dependencies:
+      '@nestjs/common': 11.0.9(reflect-metadata@0.2.2)(rxjs@7.8.1)
+      '@nestjs/core': 11.0.9(@nestjs/common@11.0.9(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/platform-express@11.0.9)(@nestjs/websockets@11.0.9)(reflect-metadata@0.2.2)(rxjs@7.8.1)
+      casbin: 5.38.0
+      reflect-metadata: 0.2.2
+      rxjs: 7.8.1
+
   node-abort-controller@3.1.1: {}
 
   node-emoji@1.11.0:
@@ -6043,6 +6072,8 @@ snapshots:
   readdirp@3.6.0:
     dependencies:
       picomatch: 2.3.1
+
+  reflect-metadata@0.1.14: {}
 
   reflect-metadata@0.2.2: {}
 
@@ -6481,6 +6512,31 @@ snapshots:
       mime-types: 3.0.0
 
   typedarray@0.0.6: {}
+
+  typeorm-adapter@1.7.0(pg@8.13.3)(ts-node@10.9.2(@types/node@20.17.19)(typescript@5.7.3)):
+    dependencies:
+      casbin: 5.38.0
+      reflect-metadata: 0.1.14
+      typeorm: 0.3.20(pg@8.13.3)(ts-node@10.9.2(@types/node@20.17.19)(typescript@5.7.3))
+    transitivePeerDependencies:
+      - '@google-cloud/spanner'
+      - '@sap/hana-client'
+      - better-sqlite3
+      - hdb-pool
+      - ioredis
+      - mongodb
+      - mssql
+      - mysql2
+      - oracledb
+      - pg
+      - pg-native
+      - pg-query-stream
+      - redis
+      - sql.js
+      - sqlite3
+      - supports-color
+      - ts-node
+      - typeorm-aurora-data-api-driver
 
   typeorm@0.3.20(pg@8.13.3)(ts-node@10.9.2(@types/node@20.17.19)(typescript@5.7.3)):
     dependencies:
