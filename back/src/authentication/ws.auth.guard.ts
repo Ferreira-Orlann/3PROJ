@@ -13,9 +13,9 @@ export class WebSocketAuthGuard implements CanActivate {
     constructor(private jwtService: JwtService) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
-        const socket = context.switchToWs().getClient()
+        const socket = context.switchToWs().getClient();
         const token = this.extractTokenFromHeader(socket);
-        console.log(token)
+        console.log(token);
         if (!token) {
             throw new UnauthorizedException();
         }
@@ -31,8 +31,9 @@ export class WebSocketAuthGuard implements CanActivate {
     }
 
     private extractTokenFromHeader(socket: Socket): string | undefined {
-        const [type, token] = socket.handshake.headers.authorization?.split(" ") ?? [];
-        console.log(socket.handshake.headers)
+        const [type, token] =
+            socket.handshake.headers.authorization?.split(" ") ?? [];
+        console.log(socket.handshake.headers);
         return type === "Bearer" ? token : undefined;
     }
 }

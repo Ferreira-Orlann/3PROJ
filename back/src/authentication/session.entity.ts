@@ -1,6 +1,15 @@
 import { UUID } from "crypto";
 import { User } from "src/users/users.entity";
-import { Entity, Column, PrimaryGeneratedColumn, Generated, ManyToOne, JoinColumn, CreateDateColumn, Index } from "typeorm";
+import {
+    Entity,
+    Column,
+    PrimaryGeneratedColumn,
+    Generated,
+    ManyToOne,
+    JoinColumn,
+    CreateDateColumn,
+    Index,
+} from "typeorm";
 
 @Entity()
 export class Session {
@@ -18,24 +27,23 @@ export class Session {
     owner: User;
 
     @CreateDateColumn()
-    created_time: Date
+    created_time: Date;
 
     @Column()
-    second_duration: number
+    second_duration: number;
 
     @Index()
     @Column({
-        type: "text"
+        type: "text",
     })
-    token: string
+    token: string;
 
     @Column({
-        default: false
+        default: false,
     })
-    revoked: boolean
+    revoked: boolean;
 
     validateToken(): boolean {
-        
-        return false
+        return false;
     }
 }

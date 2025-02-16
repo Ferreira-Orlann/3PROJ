@@ -1,4 +1,4 @@
-import { Entity, ManyToOne, OneToMany } from "typeorm";
+import { Entity, OneToMany } from "typeorm";
 import { UUID } from "crypto";
 import { Column, Generated, PrimaryGeneratedColumn } from "typeorm";
 import { UserStatus } from "./users.status.enum";
@@ -41,7 +41,7 @@ export class User {
     ownedWorkspaces: Workspace[];
 
     @OneToMany(() => WorkspaceMember, (member) => member.user)
-    workspace_members: WorkspaceMember[]
+    workspace_members: WorkspaceMember[];
 
     @OneToMany(() => Messaging, (Messaging) => Messaging.user)
     messaging: Messaging[];

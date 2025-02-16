@@ -1,5 +1,12 @@
 import { UUID } from "crypto";
-import { Entity, Column, PrimaryGeneratedColumn, Generated, ManyToOne, JoinColumn } from "typeorm";
+import {
+    Entity,
+    Column,
+    PrimaryGeneratedColumn,
+    Generated,
+    ManyToOne,
+    JoinColumn,
+} from "typeorm";
 import { User } from "../users/users.entity";
 
 @Entity()
@@ -14,7 +21,7 @@ export class Messaging {
     @Column()
     message: string;
 
-    @Column({default: false})
+    @Column({ default: false })
     isPublic: boolean;
 
     @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })

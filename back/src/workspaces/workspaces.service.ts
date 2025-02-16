@@ -2,7 +2,6 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Workspace } from "./workspaces.entity";
 import { Repository } from "typeorm";
-import { CreateWorkspaceDto } from "./workspaces.dto";
 
 @Injectable()
 export class WorkspacesService {
@@ -26,7 +25,7 @@ export class WorkspacesService {
     async add(name: string, owner_uuid: string): Promise<Workspace> {
         return this.workspacesRepo.save({
             name: name,
-            owner_uuid: owner_uuid
+            owner_uuid: owner_uuid,
         });
     }
 }

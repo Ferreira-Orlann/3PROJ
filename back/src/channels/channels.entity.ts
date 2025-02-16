@@ -13,9 +13,9 @@ export class Channel {
     @Column()
     name: string;
 
-    @Column({default: false})
+    @Column({ default: false })
     isPublic: boolean;
 
-    @Column({default: false})
-    workspacesUuid: UUID
+    @Column({ default: false })
+    workspacesUuid: UUID;
 }

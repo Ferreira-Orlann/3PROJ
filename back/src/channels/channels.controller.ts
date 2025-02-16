@@ -13,15 +13,13 @@ export class ChannelsController {
 
     @Post()
     async createChannel(@Body() dto: CreateChannelDto) {
-        let entity = await this.ChannelService.add(dto)
-        return entity
+        const entity = await this.ChannelService.add(dto);
+        return entity;
     }
 
     @Delete()
-    async deleteChannel(@Param('id') id: number) {
-        let entity = await this.ChannelService.remove(id)
-        return entity
+    async deleteChannel(@Param("id") id: number) {
+        const entity = await this.ChannelService.remove(id);
+        return entity;
     }
-
 }
-     

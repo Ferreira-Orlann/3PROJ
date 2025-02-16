@@ -1,5 +1,5 @@
 export class CreateMessagingDto {
-  message: string;
-  isPublic?: boolean;
-  userUuid: string;
+    message: string;
+    isPublic?: boolean;
+    userUuid: string;
 }

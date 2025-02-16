@@ -13,7 +13,7 @@ export class MessagingsController {
 
     @Post()
     async createChannel(@Body() dto: CreateMessagingDto) {
-        let entity = await this.MessagingService.add(dto)
-        return entity
+        const entity = await this.MessagingService.add(dto);
+        return entity;
     }
 }

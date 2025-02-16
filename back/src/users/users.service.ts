@@ -22,10 +22,10 @@ export class UsersService {
 
     findOneByUuid(uuid: UUID): Promise<User | null> {
         return this.usersRepo.findOneBy({
-            uuid: uuid
-        })
+            uuid: uuid,
+        });
     }
- 
+
     async remove(id: number): Promise<void> {
         this.usersRepo.delete(id);
     }

@@ -25,7 +25,7 @@ export class WorkspacesService {
     async add(name: string, owner_uuid: string): Promise<WorkspaceMember> {
         return this.workspacesRepo.save({
             name: name,
-            owner_uuid: owner_uuid
+            owner_uuid: owner_uuid,
         });
     }
 }

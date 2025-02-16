@@ -10,7 +10,7 @@ export class ChannelsService {
         @InjectRepository(Channel)
         private readonly channelsRepo: Repository<Channel>,
     ) {}
-    
+
     findAll(): Promise<Channel[]> {
         return this.channelsRepo.find();
     }
@@ -24,6 +24,6 @@ export class ChannelsService {
     }
 
     async add(dto: CreateChannelDto): Promise<Channel> {
-        return this.channelsRepo.save(dto)
+        return this.channelsRepo.save(dto);
     }
 }

@@ -20,7 +20,7 @@ import { AuthModule } from "./authentication/auth.module";
     imports: [
         EventEmitterModule.forRoot({
             wildcard: false,
-            delimiter: '.',
+            delimiter: ".",
             newListener: false,
             removeListener: false,
             maxListeners: 0,
@@ -34,7 +34,14 @@ import { AuthModule } from "./authentication/auth.module";
             username: "postgres",
             password: "postgres",
             database: "postgres",
-            entities: [Workspace, User, Channel, Messaging, WorkspaceMember, Session],
+            entities: [
+                Workspace,
+                User,
+                Channel,
+                Messaging,
+                WorkspaceMember,
+                Session,
+            ],
             // synchronize: configService.get<string>("ENV") == EnvType.DEV,
             synchronize: true,
         }),
@@ -43,7 +50,7 @@ import { AuthModule } from "./authentication/auth.module";
         ChannelsModule,
         MessagingsModule,
         WebSocketModule,
-        AuthModule
+        AuthModule,
     ],
     controllers: [AppController],
     providers: [AppService],

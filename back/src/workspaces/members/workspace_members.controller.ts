@@ -14,7 +14,10 @@ export class WorkspacesController {
 
     @Post()
     async create(@Req() request: Request, @Body() dto) {
-        const entity = await this.workspacesService.add(dto.name, request["user_id"]);
+        const entity = await this.workspacesService.add(
+            dto.name,
+            request["user_id"],
+        );
         return entity;
     }
 }

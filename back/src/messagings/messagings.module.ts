@@ -9,4 +9,4 @@ import { Messaging } from "./messagings.entity";
     controllers: [MessagingsController],
     providers: [MessagingsService],
 })
-export class MessagingsModule{}
+export class MessagingsModule {}

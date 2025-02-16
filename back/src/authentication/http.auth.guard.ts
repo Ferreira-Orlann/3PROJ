@@ -1,9 +1,4 @@
-import {
-    CanActivate,
-    ExecutionContext,
-    Injectable,
-    UnauthorizedException,
-} from "@nestjs/common";
+import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 
 type IAuthRequest = Request & {
@@ -17,13 +12,15 @@ export class HttpAuthGuard implements CanActivate {
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request = context.switchToHttp().getRequest();
         const token = this.extractTokenFromHeader(request);
-        const pSession = this.authService.getSession(token)
-        return new Promise((resolve, reject) => {
-            pSession.then((session) => {
-                resolve(true)
-            }).catch(() => {
-                resolve(false)
-            })
+        const pSession = this.authService.getSession(token);
+        return new Promise((resolve, _) => {
+            pSession
+                .then((_) => {
+                    resolve(true);
+                })
+                .catch(() => {
+                    resolve(false);
+                });
         });
     }
 
