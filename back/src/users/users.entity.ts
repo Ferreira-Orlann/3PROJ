@@ -4,6 +4,7 @@ import { Column, Generated, PrimaryGeneratedColumn } from "typeorm";
 import { UserStatus } from "./users.status.enum";
 import { Workspace } from "src/workspaces/workspaces.entity";
 import { WorkspaceMember } from "src/workspaces/members/workspace_members.entity";
+import { Channel } from "../channels/channels.entity";
 
 @Entity()
 export class User {
@@ -41,4 +42,8 @@ export class User {
 
     @OneToMany(() => WorkspaceMember, (member) => member.user)
     workspace_members: WorkspaceMember[];
+
+
+    @OneToMany(() => Channel, (channel) => channel.creator)
+    createdChannels: Channel[];
 }

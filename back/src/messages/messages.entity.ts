@@ -8,6 +8,7 @@ import {
     JoinColumn,
 } from "typeorm";
 import { User } from "../users/users.entity";
+import { Channel } from "../channels/channels.entity";
 
 @Entity()
 export class Message {
@@ -32,4 +33,10 @@ export class Message {
         name: "user_uuid",
     })
     user: User;
+
+    @ManyToOne(() => Channel)
+    @JoinColumn({
+        name: "channel_uuid",
+    })
+    channel: Channel;
 }

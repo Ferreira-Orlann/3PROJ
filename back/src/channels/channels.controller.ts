@@ -4,22 +4,22 @@ import { CreateChannelDto } from "./channels.dto";
 
 @Controller("channels")
 export class ChannelsController {
-    constructor(private readonly ChannelService: ChannelsService) {}
+    constructor(private readonly channelService: ChannelsService) {}
 
     @Get()
-    getHello() {
-        return this.ChannelService.findAll();
+    getAllChannels() {
+        return this.channelService.findAll();
     }
 
     @Post()
     async createChannel(@Body() dto: CreateChannelDto) {
-        const entity = await this.ChannelService.add(dto);
+        const entity = await this.channelService.add(dto);
         return entity;
     }
 
-    @Delete()
+    @Delete(":id")
     async deleteChannel(@Param("id") id: number) {
-        const entity = await this.ChannelService.remove(id);
-        return entity;
+        await this.channelService.remove(id);
+        return { message: `Channel with ID ${id} has been deleted` };
     }
 }
