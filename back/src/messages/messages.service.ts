@@ -3,12 +3,20 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Message } from "./messages.entity";
 import { CreateMessageDto } from "./messages.dto";
+import { User } from "../users/users.entity";
+import { Channel } from "../channels/channels.entity";
 
 @Injectable()
 export class MessagesService {
     constructor(
         @InjectRepository(Message)
         private readonly messagingsRepo: Repository<Message>,
+
+        @InjectRepository(User)
+        private readonly userRepository: Repository<User>,
+
+        @InjectRepository(Channel)
+        private readonly channelRepository: Repository<Channel>
     ) {}
     findAll(): Promise<Message[]> {
         return this.messagingsRepo.find();
@@ -23,10 +31,22 @@ export class MessagesService {
     }
 
     async add(dto: CreateMessageDto): Promise<Message> {
-        return this.messagingsRepo.save({
-            message: dto.message,
-            isPublic: dto.isPublic ?? false,
-            userUuid: { uuid: dto.userUuid },
+
+         const user = await this.userRepository.findOneBy( {
+             uuid: dto.user_uuid
+         });
+        if (!user) throw new Error("User not found");
+
+        const channel = await this.channelRepository.findOneBy({
+            uuid: dto.channel_uuid
         });
+        if (!channel) throw new Error("Channel not found");
+
+        const newMessage = this.messagingsRepo.create({
+            ...dto,
+            user,
+            channel
+        });
+        return this.messagingsRepo.save(newMessage);
     }
 }

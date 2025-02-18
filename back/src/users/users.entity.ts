@@ -6,6 +6,7 @@ import { Workspace } from "src/workspaces/workspaces.entity";
 import { WorkspaceMember } from "src/workspaces/members/workspace_members.entity";
 import { Channel } from "../channels/channels.entity";
 import { Session } from "src/authentication/session.entity";
+import { Message } from "src/messages/messages.entity";
 
 @Entity()
 export class User {

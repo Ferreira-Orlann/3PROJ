@@ -26,7 +26,7 @@ export class WorkspaceMember {
         name: "is_public",
         default: false,
     })
-    isPublic: boolean;
+    is_public: boolean;
 
     @ManyToOne(() => User, (user) => user.workspace_members, {})
     @JoinColumn({
