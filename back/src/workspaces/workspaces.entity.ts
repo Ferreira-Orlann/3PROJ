@@ -6,7 +6,8 @@ import {
     PrimaryGeneratedColumn,
     Generated,
     JoinColumn,
-    ManyToOne, OneToMany,
+    ManyToOne,
+    OneToMany,
 } from "typeorm";
 import { Channel } from "../channels/channels.entity";
 
@@ -28,7 +29,6 @@ export class Workspace {
     })
     isPublic: boolean;
 
-
     @OneToMany(() => Channel, (channel) => channel.workspace)
     channels: Channel[];
 
@@ -37,6 +37,4 @@ export class Workspace {
         name: "owner_uuid",
     })
     owner: User;
-
-
 }

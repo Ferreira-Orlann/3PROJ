@@ -1,5 +1,12 @@
 import { UUID } from "crypto";
-import { Entity, Column, PrimaryGeneratedColumn, Generated, JoinColumn, ManyToOne } from "typeorm";
+import {
+    Entity,
+    Column,
+    PrimaryGeneratedColumn,
+    Generated,
+    JoinColumn,
+    ManyToOne,
+} from "typeorm";
 import { Workspace } from "../workspaces/workspaces.entity";
 import { User } from "../users/users.entity";
 
@@ -18,9 +25,9 @@ export class Channel {
     @Column({ default: false })
     isPublic: boolean;
 
-    @ManyToOne(() => User, (user) => user.createdChannels,{nullable: false })
+    @ManyToOne(() => User, (user) => user.createdChannels, { nullable: false })
     @JoinColumn({
-        name: 'creator_id'
+        name: "creator_id",
     })
     creator: User;
 
@@ -29,5 +36,4 @@ export class Channel {
         name: "workspace_uuid",
     })
     workspace: Workspace;
-
 }

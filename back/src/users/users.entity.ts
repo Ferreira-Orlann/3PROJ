@@ -43,7 +43,6 @@ export class User {
     @OneToMany(() => WorkspaceMember, (member) => member.user)
     workspace_members: WorkspaceMember[];
 
-
     @OneToMany(() => Channel, (channel) => channel.creator)
     createdChannels: Channel[];
 }
