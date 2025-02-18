@@ -8,6 +8,7 @@ import {
     JoinColumn,
     ManyToOne,
 } from "typeorm";
+import { Workspace } from "../workspaces.entity";
 
 @Entity()
 export class WorkspaceMember {
@@ -32,4 +33,10 @@ export class WorkspaceMember {
         name: "user_uuid",
     })
     user: User;
+
+    @ManyToOne(() => Workspace)
+    @JoinColumn({
+        name: "workspace_uuid",
+    })
+    workspace: Workspace;
 }

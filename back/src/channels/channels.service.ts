@@ -26,7 +26,7 @@ export class ChannelsService {
     findOne(id: number): Promise<Channel | null> {
         return this.channelsRepo.findOne({
             where: { id },
-            relations: ['workspace', 'creator'],
+            relations: ["workspace", "creator"],
         });
     }
 
@@ -36,7 +36,7 @@ export class ChannelsService {
 
     async add(dto: CreateChannelDto): Promise<Channel> {
         const workspace = await this.workspacesRepo.findOneBy({
-             uuid: dto.workspace_uuid
+            uuid: dto.workspace_uuid,
         });
 
         if (!workspace) {
@@ -44,7 +44,7 @@ export class ChannelsService {
         }
 
         const creator = await this.usersRepo.findOneBy({
-             uuid: dto.creator_uuid
+            uuid: dto.creator_uuid,
         });
 
         if (!creator) {

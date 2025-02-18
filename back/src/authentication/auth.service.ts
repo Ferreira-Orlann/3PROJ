@@ -4,7 +4,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { User } from "src/users/users.entity";
 import { JwtService } from "@nestjs/jwt";
-import { randomUUID } from "crypto";
+import { randomUUID, UUID } from "crypto";
 
 @Injectable()
 export class AuthService {
@@ -13,6 +13,12 @@ export class AuthService {
         private readonly sessionRepo: Repository<Session>,
         private readonly jwtService: JwtService,
     ) {}
+
+    getSessionByToken(token: string): Promise<Session | null> {
+        return this.sessionRepo.findOneBy({
+            token: token
+        })
+    }
 
     createSession(user: User): Promise<Session> {
         const uuid = randomUUID();
@@ -24,33 +30,29 @@ export class AuthService {
         });
     }
 
-    getSession(token: string): Promise<Session | null> {
-        return new Promise((resolve, reject) => {
-            if (!token) {
-                reject();
+    isSessionValid(session: Session): boolean {
+        return !this.verifyDate(session.created_time, session.second_duration) && !session.revoked
+    }
+
+    isSessionValidByUuid(uuid: UUID): Promise<boolean> {
+        return new Promise(async (resolve, reject) => {
+            resolve(this.isSessionValid(await this.sessionRepo.findOneBy({uuid: uuid})))
+        })
+    }
+
+    isJwtTokenValid(token: string): Promise<boolean> {
+        return new Promise(async (resolve, reject) => {
+            const jwtTokenVerified = this.jwtService.verify(token)
+            if (!jwtTokenVerified) {
+                resolve(jwtTokenVerified)
             }
-            try {
-                this.jwtService
-                    .verifyAsync(token)
-                    .then((payload) => {
-                        this.sessionRepo
-                            .findOneBy({
-                                uuid: payload,
-                                revoked: false,
-                            })
-                            .then((session) => {
-                                resolve(session);
-                            })
-                            .catch(() => {
-                                reject();
-                            });
-                    })
-                    .catch(() => {
-                        reject();
-                    });
-            } catch {
-                reject();
-            }
-        });
+            resolve(await this.isSessionValidByUuid(this.jwtService.decode(token)))
+        })
+    }
+
+    private verifyDate(date: Date, duration: number) {
+        const expirationDate = new Date()
+        expirationDate.setSeconds(duration)
+        return expirationDate > new Date()
     }
 }
