@@ -2,6 +2,9 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { WorkspaceMember } from "./workspace_members.entity";
 import { Repository } from "typeorm";
+import { User } from "src/users/users.entity";
+import { randomUUID } from "crypto";
+import { Workspace } from "../workspaces.entity";
 
 @Injectable()
 export class WorkspacesService {
@@ -22,10 +25,11 @@ export class WorkspacesService {
         this.workspacesRepo.delete(id);
     }
 
-    async add(name: string, owner_uuid: string): Promise<WorkspaceMember> {
+    async add(workspace: Workspace, user: User): Promise<WorkspaceMember> {
         return this.workspacesRepo.save({
-            name: name,
-            owner_uuid: owner_uuid,
+            user: user,
+            uuid: randomUUID(),
+            workspace: workspace
         });
     }
 }
