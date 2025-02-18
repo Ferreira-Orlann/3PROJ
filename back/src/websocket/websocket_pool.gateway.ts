@@ -6,6 +6,8 @@ import {
 } from "@nestjs/websockets";
 import { UUID } from "crypto";
 import { Socket } from "socket.io";
+import { AuthService } from "src/authentication/auth.service";
+import { WebSocketAuthGuard } from "src/authentication/ws.auth.guard";
 import { User } from "src/users/users.entity";
 
 type UserPoolRecord = {
@@ -19,28 +21,19 @@ type AuthenticatedClient = Socket & {
 
 @WebSocketGateway()
 export class WebSocketPool implements OnGatewayConnection, OnGatewayDisconnect {
-    private readonly workspacesPool: Map<UUID, Socket[]>;
-    private readonly usersPool: Map<UUID, UserPoolRecord>;
+    private readonly workspacesPool: Map<UUID, Socket[]> = new Map();
+    private readonly usersPool: Map<UUID, UserPoolRecord> = new Map();
 
-    constructor() {
-        this.workspacesPool = new Map<UUID, Socket[]>();
-    }
+    constructor(private readonly authService: AuthService) {}
 
-    handleConnection(client: Socket, ...args: any[]) {}
-
-    handleDisconnect(client: Socket) {
-        if (this.isClientAuthenticated(client)) {
-            const authClient: AuthenticatedClient =
-                client as AuthenticatedClient;
-            this.usersPool.delete(authClient.user.uuid);
-            authClient.user.workspace_members.forEach((workspace_member) => {
-                this.workspacesPool.delete(workspace_member.workspace.uuid);
-            });
-        }
-    }
-
-    @OnEvent("websocket.auth.validated")
-    auth(client: Socket, user: User) {
+    async handleConnection(client: Socket, ...args: any[]) {
+        const token = WebSocketAuthGuard.extractTokenFromHeader(client)
+        if (token == undefined) { return }
+        const session = await this.authService.getSessionByToken(token)
+        if (session == null) { return }
+        const isValid = this.authService.isSessionValid(session)
+        if (!isValid) { return }
+        const user = session.owner
         const record = {
             socket: client,
             workspace: [],
@@ -58,6 +51,16 @@ export class WebSocketPool implements OnGatewayConnection, OnGatewayDisconnect {
         client["user"] = user;
     }
 
+    handleDisconnect(client: Socket) {
+        if (this.isClientAuthenticated(client)) {
+            const authClient: AuthenticatedClient =
+                client as AuthenticatedClient;
+            this.usersPool.delete(authClient.user.uuid);
+            authClient.user.workspace_members.forEach((workspace_member) => {
+                this.workspacesPool.delete(workspace_member.workspace.uuid);
+            });
+        }
+    }
     isClientAuthenticated(client) {
         return client["user"] != undefined && client["user"] != null;
     }

@@ -11,20 +11,11 @@ export class HttpAuthGuard implements CanActivate {
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request = context.switchToHttp().getRequest();
-        const token = this.extractTokenFromHeader(request);
-        const pSession = this.authService.getSession(token);
-        return new Promise((resolve, _) => {
-            pSession
-                .then((_) => {
-                    resolve(true);
-                })
-                .catch(() => {
-                    resolve(false);
-                });
-        });
+        const token = HttpAuthGuard.extractTokenFromHeader(request);
+        return this.authService.isJwtTokenValid(token)
     }
 
-    private extractTokenFromHeader(request: IAuthRequest): string | undefined {
+    static extractTokenFromHeader(request: IAuthRequest): string | undefined {
         const [type, token] = request.headers.authorization?.split(" ") ?? [];
         return type === "Bearer" ? token : undefined;
     }
