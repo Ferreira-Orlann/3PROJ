@@ -19,15 +19,6 @@ export class WorkspaceMember {
     @Generated("uuid")
     uuid: UUID;
 
-    @Column()
-    name: string;
-
-    @Column({
-        name: "is_public",
-        default: false,
-    })
-    is_public: boolean;
-
     @ManyToOne(() => User, (user) => user.workspace_members, {})
     @JoinColumn({
         name: "user_uuid",
