@@ -23,7 +23,7 @@ export class Message {
     message: string;
 
     @Column({ default: false })
-    isPublic: boolean;
+    is_public: boolean;
 
     @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
     date: Date;

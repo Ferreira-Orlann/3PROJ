@@ -26,7 +26,7 @@ export class Workspace {
         name: "is_public",
         default: false,
     })
-    isPublic: boolean;
+    is_public: boolean;
 
 
     @OneToMany(() => Channel, (channel) => channel.workspace)
