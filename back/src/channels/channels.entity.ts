@@ -20,7 +20,7 @@ export class Channel {
 
     @ManyToOne(() => User, (user) => user.createdChannels,{nullable: false })
     @JoinColumn({
-        name: 'creator_id'
+        name: 'creator_uuid'
     })
     creator: User;
 
