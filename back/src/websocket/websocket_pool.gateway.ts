@@ -1,4 +1,3 @@
-import { OnEvent } from "@nestjs/event-emitter";
 import {
     OnGatewayConnection,
     OnGatewayDisconnect,
@@ -7,6 +6,7 @@ import {
 import { UUID } from "crypto";
 import { Socket } from "socket.io";
 import { AuthService } from "src/authentication/auth.service";
+import { Session } from "src/authentication/session.entity";
 import { WebSocketAuthGuard } from "src/authentication/ws.auth.guard";
 import { User } from "src/users/users.entity";
 
@@ -26,42 +26,48 @@ export class WebSocketPool implements OnGatewayConnection, OnGatewayDisconnect {
 
     constructor(private readonly authService: AuthService) {}
 
-    async handleConnection(client: Socket, ...args: any[]) {
-        const token = WebSocketAuthGuard.extractTokenFromHeader(client)
-        if (token == undefined) { return }
-        const session = await this.authService.getSessionByToken(token)
-        if (session == null) { return }
-        const isValid = this.authService.isSessionValid(session)
-        if (!isValid) { return }
-        const user = session.owner
-        const record = {
-            socket: client,
-            workspace: [],
-        } as UserPoolRecord;
-        user.workspace_members.forEach((workspace_member) => {
-            const workspaceUuid = workspace_member.workspace.uuid;
-            let pool = this.workspacesPool.get(workspaceUuid);
-            if (pool == undefined) {
-                pool = [client];
-                this.workspacesPool.set(workspaceUuid, pool);
-            }
-            record.workspace.push(workspaceUuid);
-        });
-        this.usersPool.set(user.uuid, record);
-        client["user"] = user;
+    handleConnection(client: Socket, ...args: any[]) {
+        this.isClientAuthenticated(client).then(([isValid, session]) => {
+            if (!isValid) { return }
+            const user = session.owner
+            const record = {
+                socket: client,
+                workspace: [],
+            } as UserPoolRecord;
+            user.workspace_members.forEach((workspace_member) => {
+                const workspaceUuid = workspace_member.workspace.uuid;
+                let pool = this.workspacesPool.get(workspaceUuid);
+                if (pool == undefined) {
+                    pool = [client];
+                    this.workspacesPool.set(workspaceUuid, pool);
+                }
+                record.workspace.push(workspaceUuid);
+            });
+            this.usersPool.set(user.uuid, record);
+            client["user"] = user;
+        })
     }
 
     handleDisconnect(client: Socket) {
-        if (this.isClientAuthenticated(client)) {
-            const authClient: AuthenticatedClient =
-                client as AuthenticatedClient;
-            this.usersPool.delete(authClient.user.uuid);
-            authClient.user.workspace_members.forEach((workspace_member) => {
-                this.workspacesPool.delete(workspace_member.workspace.uuid);
-            });
-        }
+        this.isClientAuthenticated(client).then(([isValid, session]) => {
+            if (isValid) {
+                const authClient: AuthenticatedClient =
+                    client as AuthenticatedClient;
+                this.usersPool.delete(authClient.user.uuid);
+                authClient.user.workspace_members.forEach((workspace_member) => {
+                    this.workspacesPool.delete(workspace_member.workspace.uuid);
+                });
+            }
+        })
+        
     }
-    isClientAuthenticated(client) {
-        return client["user"] != undefined && client["user"] != null;
+
+    private async isClientAuthenticated(client): Promise<[boolean, Session|null]> {
+        const token = WebSocketAuthGuard.extractTokenFromHeader(client)
+        if (token == undefined) { return [false, null] }
+        const session = await this.authService.getSessionByToken(token)
+        if (session == null) { return [false, null] }
+        const isValid = this.authService.isSessionValid(session)
+        return [isValid, session]
     }
 }
