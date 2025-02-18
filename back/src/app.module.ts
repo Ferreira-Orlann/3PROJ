@@ -15,9 +15,11 @@ import { WebSocketModule } from "./websocket/websocket.module";
 import { AuthModule } from "./authentication/auth.module";
 import { MessagesModule } from "./messages/messages.module";
 import { Message } from "./messages/messages.entity";
+import { ConsoleLoggerInjector, ControllerInjector, OpenTelemetryModule } from "@amplication/opentelemetry-nestjs";
 
 @Module({
     imports: [
+        OpenTelemetryModule.forRoot([ControllerInjector, ConsoleLoggerInjector]),
         EventEmitterModule.forRoot({
             wildcard: false,
             delimiter: ".",

@@ -67,7 +67,6 @@ export class WebSocketPool implements OnGatewayConnection, OnGatewayDisconnect {
             console.log(this.workspacesPool)
             console.log(this.usersPool)
         })
-        
     }
 
     private async isClientAuthenticated(client): Promise<[boolean, Session|null]> {

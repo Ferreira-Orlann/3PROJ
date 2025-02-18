@@ -1,0 +1,19 @@
+services:
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - "./config/prometheus.yml:/etc/prometheus/prometheus.yml"
+      - "prometheus:/prometheus"
+    networks:
+      - localprom
+    ports:
+      - 9090:9090
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+networks:
+  localprom:
+    driver: bridge
+volumes:
+  prometheus:
+
+# docker run -d -p 9091:3000 --name=grafana --add-host=host.docker.internal:host-gateway --volume grafana-storage:/var/lib/grafana grafana/grafana 
