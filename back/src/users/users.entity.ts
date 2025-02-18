@@ -5,6 +5,7 @@ import { UserStatus } from "./users.status.enum";
 import { Workspace } from "src/workspaces/workspaces.entity";
 import { WorkspaceMember } from "src/workspaces/members/workspace_members.entity";
 import { Channel } from "../channels/channels.entity";
+import { Session } from "src/authentication/session.entity";
 
 @Entity()
 export class User {
@@ -38,11 +39,14 @@ export class User {
     status: UserStatus;
 
     @OneToMany(() => Workspace, (workspace) => workspace.owner)
-    ownedWorkspaces: Workspace[];
+    ownedWorkspaces: Promise<Workspace[]>;
 
     @OneToMany(() => WorkspaceMember, (member) => member.user)
-    workspace_members: WorkspaceMember[];
+    workspace_members: Promise<WorkspaceMember[]>;
 
     @OneToMany(() => Channel, (channel) => channel.creator)
-    createdChannels: Channel[];
+    createdChannels: Promise<Channel[]>;
+
+    @OneToMany(() => Session, (session) => session.owner)
+    sessions: Promise<Session[]>;
 }

@@ -15,15 +15,16 @@ export class AuthService {
     ) {}
 
     getSessionByToken(token: string): Promise<Session | null> {
-        return this.sessionRepo.findOneBy({
-            token: token
+        return this.sessionRepo.findOne({
+            where: {token: token}
         })
     }
 
     createSession(user: User): Promise<Session> {
         const uuid = randomUUID();
+        console.log(user)
         return this.sessionRepo.save({
-            user: user,
+            owner: user,
             uuid: uuid,
             second_duration: 600,
             token: this.jwtService.sign(uuid),
@@ -51,7 +52,7 @@ export class AuthService {
     }
 
     private verifyDate(date: Date, duration: number) {
-        const expirationDate = new Date()
+        const expirationDate = new Date(date)
         expirationDate.setSeconds(duration)
         return expirationDate > new Date()
     }

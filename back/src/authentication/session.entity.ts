@@ -20,7 +20,7 @@ export class Session {
     @Generated("uuid")
     uuid: UUID;
 
-    @ManyToOne(() => User)
+    @ManyToOne(() => User, (user) => user.sessions, {eager: true})
     @JoinColumn({
         name: "owner_uuid",
     })
@@ -42,8 +42,4 @@ export class Session {
         default: false,
     })
     revoked: boolean;
-
-    validateToken(): boolean {
-        return false;
-    }
 }

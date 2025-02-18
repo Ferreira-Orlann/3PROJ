@@ -27,14 +27,17 @@ export class WebSocketPool implements OnGatewayConnection, OnGatewayDisconnect {
     constructor(private readonly authService: AuthService) {}
 
     handleConnection(client: Socket, ...args: any[]) {
-        this.isClientAuthenticated(client).then(([isValid, session]) => {
+        this.isClientAuthenticated(client).then(async ([isValid, session]) => {
+            console.log("Is Valid", isValid)
             if (!isValid) { return }
-            const user = session.owner
+            const user = await session.owner
             const record = {
                 socket: client,
                 workspace: [],
             } as UserPoolRecord;
-            user.workspace_members.forEach((workspace_member) => {
+            console.log(session, user)
+            const workspace_members = await user.workspace_members
+            workspace_members.forEach((workspace_member) => {
                 const workspaceUuid = workspace_member.workspace.uuid;
                 let pool = this.workspacesPool.get(workspaceUuid);
                 if (pool == undefined) {
@@ -45,19 +48,24 @@ export class WebSocketPool implements OnGatewayConnection, OnGatewayDisconnect {
             });
             this.usersPool.set(user.uuid, record);
             client["user"] = user;
+            console.log(this.workspacesPool)
+            console.log(this.usersPool)
         })
     }
 
     handleDisconnect(client: Socket) {
-        this.isClientAuthenticated(client).then(([isValid, session]) => {
+        this.isClientAuthenticated(client).then(async ([isValid, session]) => {
             if (isValid) {
                 const authClient: AuthenticatedClient =
                     client as AuthenticatedClient;
                 this.usersPool.delete(authClient.user.uuid);
-                authClient.user.workspace_members.forEach((workspace_member) => {
+                const workspace_members = await authClient.user.workspace_members
+                workspace_members.forEach((workspace_member) => {
                     this.workspacesPool.delete(workspace_member.workspace.uuid);
                 });
             }
+            console.log(this.workspacesPool)
+            console.log(this.usersPool)
         })
         
     }
