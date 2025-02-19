@@ -1,20 +1,23 @@
 import { Module } from "@nestjs/common";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
-import { WorkspacesModule } from "./workspaces/workspaces.module";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { EventEmitterModule } from "@nestjs/event-emitter";
 import { Workspace } from "./workspaces/workspaces.entity";
+import { WorkspacesModule } from "./workspaces/workspaces.module";
 import { UsersModule } from "./users/users.module";
 import { User } from "./users/users.entity";
 import { Channel } from "./channels/channels.entity";
 import { ChannelsModule } from "./channels/channels.module";
-import { EventEmitterModule } from "@nestjs/event-emitter";
 import { WorkspaceMember } from "./workspaces/members/workspace_members.entity";
+import { WorkspaceMembersModule } from "./workspaces/members/workspace_members.module";
+import { MessagesModule } from "./messages/messages.module";
+import { Message } from "./messages/messages.entity";
 import { Session } from "./authentication/session.entity";
 import { WebSocketModule } from "./websocket/websocket.module";
 import { AuthModule } from "./authentication/auth.module";
-import { MessagesModule } from "./messages/messages.module";
-import { Message } from "./messages/messages.entity";
+
+
 import { ConsoleLoggerInjector, ControllerInjector, OpenTelemetryModule } from "@amplication/opentelemetry-nestjs";
 
 @Module({
@@ -48,6 +51,7 @@ import { ConsoleLoggerInjector, ControllerInjector, OpenTelemetryModule } from "
             synchronize: true,
         }),
         WorkspacesModule,
+        WorkspaceMembersModule,
         UsersModule,
         ChannelsModule,
         MessagesModule,
