@@ -18,9 +18,9 @@ export class Channel {
     @Column({ default: false })
     isPublic: boolean;
 
-    @ManyToOne(() => User, (user) => user.createdChannels,{nullable: false })
+    @ManyToOne(() => User, (user) => user.createdChannels)
     @JoinColumn({
-        name: 'creator_uuid'
+        name: "creator_uuid"
     })
     creator: User;
 

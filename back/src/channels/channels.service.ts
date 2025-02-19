@@ -1,10 +1,12 @@
-import { Injectable } from "@nestjs/common";
+import { ForbiddenException, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Channel } from "./channels.entity";
 import { Repository } from "typeorm";
 import { CreateChannelDto } from "./channels.dto";
 import { Workspace } from "../workspaces/workspaces.entity";
 import { User } from "src/users/users.entity";
+import { WorkspaceMember } from "src/workspaces/members/workspace_members.entity";
+import { randomUUID } from "crypto";
 
 @Injectable()
 export class ChannelsService {
@@ -17,6 +19,9 @@ export class ChannelsService {
 
         @InjectRepository(User)
         private readonly usersRepo: Repository<User>,
+
+        @InjectRepository(WorkspaceMember)
+        private readonly workspaceMembersRepo: Repository<WorkspaceMember>,
     ) {}
 
     findAll(): Promise<Channel[]> {
@@ -49,6 +54,17 @@ export class ChannelsService {
 
         if (!creator) {
             throw new Error("User (creator) not found");
+        }
+
+        const isMember = await this.workspaceMembersRepo.findOne({
+            where: {
+                user: { uuid: dto.creator_uuid },
+                workspace: { uuid: dto.workspace_uuid },
+            },
+        });
+
+        if (!isMember) {
+            throw new ForbiddenException("Only workspace members can create channels" );
         }
 
         const newChannel = this.channelsRepo.create({
