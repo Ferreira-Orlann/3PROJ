@@ -5,12 +5,13 @@ import {
     PrimaryGeneratedColumn,
     Generated,
     ManyToOne,
-    JoinColumn,
+    JoinColumn, Check,
 } from "typeorm";
 import { User } from "../users/users.entity";
 import { Channel } from "../channels/channels.entity";
 
 @Entity()
+
 export class Message {
     @PrimaryGeneratedColumn()
     id: number;
@@ -28,15 +29,17 @@ export class Message {
     @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
     date: Date;
 
-    @ManyToOne(() => User)
-    @JoinColumn({
-        name: "user_uuid",
-    })
-    user: User;
+    @ManyToOne(() => User, { nullable: false })
+    @JoinColumn({ name: "source_uuid" })
+    source: User;
 
-    @ManyToOne(() => Channel)
+    @ManyToOne(() => User,(user) =>user.createdMessage, { nullable: true })
+    @JoinColumn({ name: "destination_user_uuid" })
+    destination_user: User | null;
+
+    @ManyToOne(() => Channel, (channel) => channel.createdMessage, { nullable: true })
     @JoinColumn({
-        name: "channel_uuid",
+        name: "destination_channel_uuid"
     })
-    channel: Channel;
+    destination_channel: Channel | null;
 }

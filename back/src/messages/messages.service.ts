@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Message } from "./messages.entity";
@@ -10,43 +10,64 @@ import { Channel } from "../channels/channels.entity";
 export class MessagesService {
     constructor(
         @InjectRepository(Message)
-        private readonly messagingsRepo: Repository<Message>,
+        private readonly messageRepo: Repository<Message>,
 
         @InjectRepository(User)
-        private readonly userRepository: Repository<User>,
+        private readonly userRepo: Repository<User>,
 
         @InjectRepository(Channel)
-        private readonly channelRepository: Repository<Channel>
+        private readonly channelRepo: Repository<Channel>
     ) {}
     findAll(): Promise<Message[]> {
-        return this.messagingsRepo.find();
+        return this.messageRepo.find({
+            relations: ["source", "destinationUser", "destinationChannel"]
+        });
     }
 
     findOne(id: number): Promise<Message | null> {
-        return this.messagingsRepo.findOneBy({ id });
+        return this.messageRepo.findOne({
+            where: { id },
+            relations: ["source", "destinationUser", "destinationChannel"]
+        });
     }
 
     async remove(id: number): Promise<void> {
-        this.messagingsRepo.delete(id);
+        this.messageRepo.delete(id);
     }
 
     async add(dto: CreateMessageDto): Promise<Message> {
 
-         const user = await this.userRepository.findOneBy( {
-             uuid: dto.user_uuid
+         const source  = await this.userRepo.findOneBy( {
+             uuid: dto.source_uuid
          });
-        if (!user) throw new Error("User not found");
+        if (!source) {
+            throw new NotFoundException(`User with UUID ${dto.source_uuid} not found`);
+        }
 
-        const channel = await this.channelRepository.findOneBy({
-            uuid: dto.channel_uuid
-        });
-        if (!channel) throw new Error("Channel not found");
+        let destination_user = null;
+        let destination_channel = null;
 
-        const newMessage = this.messagingsRepo.create({
+        if (dto.is_public) {
+            destination_channel = await this.channelRepo.findOneBy({ uuid: dto.destination_uuid });
+
+            if (!destination_channel) {
+                throw new NotFoundException(`Channel with UUID ${dto.destination_uuid} not found`);
+            }
+        } else {
+            destination_user = await this.userRepo.findOneBy({ uuid: dto.destination_uuid });
+
+            if (!destination_user) {
+                throw new NotFoundException(`User with UUID ${dto.destination_uuid} not found`);
+            }
+        }
+
+        const newMessage = this.messageRepo.create({
             ...dto,
-            user,
-            channel
+            source,
+            destination_channel,
+            destination_user
+
         });
-        return this.messagingsRepo.save(newMessage);
+        return this.messageRepo.save(newMessage);
     }
 }

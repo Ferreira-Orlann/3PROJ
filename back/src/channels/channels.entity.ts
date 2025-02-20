@@ -1,7 +1,8 @@
 import { UUID } from "crypto";
-import { Entity, Column, PrimaryGeneratedColumn, Generated, JoinColumn, ManyToOne } from "typeorm";
+import { Entity, Column, PrimaryGeneratedColumn, Generated, JoinColumn, ManyToOne, OneToMany } from "typeorm";
 import { Workspace } from "../workspaces/workspaces.entity";
 import { User } from "../users/users.entity";
+import { Message } from "../messages/messages.entity";
 
 @Entity()
 export class Channel {
@@ -29,5 +30,8 @@ export class Channel {
         name: "workspace_uuid",
     })
     workspace: Workspace;
+
+    @OneToMany(() => Message, (message) => message.destination_channel)
+    createdMessage: Promise<Message[]>;
 
 }

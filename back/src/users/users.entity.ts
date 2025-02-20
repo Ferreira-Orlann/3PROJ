@@ -50,4 +50,7 @@ export class User {
 
     @OneToMany(() => Session, (session) => session.owner)
     sessions: Promise<Session[]>;
+
+    @OneToMany(() => Message, (message) => message.source)
+    createdMessage: Promise<Message[]>;
 }
