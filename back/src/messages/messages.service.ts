@@ -5,6 +5,8 @@ import { Message } from "./messages.entity";
 import { CreateMessageDto } from "./messages.dto";
 import { User } from "../users/users.entity";
 import { Channel } from "../channels/channels.entity";
+import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
+import { WebSocketPool } from "src/websocket/websocket_pool.gateway";
 
 @Injectable()
 export class MessagesService {
@@ -16,7 +18,11 @@ export class MessagesService {
         private readonly userRepo: Repository<User>,
 
         @InjectRepository(Channel)
-        private readonly channelRepo: Repository<Channel>
+        private readonly channelRepo: Repository<Channel>,
+
+        private readonly eventEmitter: EventEmitter2,
+
+        private readonly websocketPool: WebSocketPool
     ) {}
     findAll(): Promise<Message[]> {
         return this.messageRepo.find({
@@ -66,8 +72,14 @@ export class MessagesService {
             source,
             destination_channel,
             destination_user
-
         });
+
+        this.eventEmitter.emit("message.create", newMessage)
         return this.messageRepo.save(newMessage);
+    }
+
+    @OnEvent("message.create")
+    messageCreated(message: Message) {
+        
     }
 }

@@ -77,4 +77,8 @@ export class WebSocketPool implements OnGatewayConnection, OnGatewayDisconnect {
         const isValid = this.authService.isSessionValid(session)
         return [isValid, session]
     }
+
+    getWorkspaceWebsockets(uuid: UUID): Socket[]|undefined {
+        return this.workspacesPool.get(uuid)
+    }
 }
