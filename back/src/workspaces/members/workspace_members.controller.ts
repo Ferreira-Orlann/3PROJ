@@ -14,7 +14,7 @@ export class WorkspacesMembersController {
     }
 
     @Get(":memberId")
-    getOne(@Param("memberId") memberId: number) {
+    getOne(@Param("memberId") memberId: UUID) {
         return this.workspacesMembersService.findOne(memberId);
     }
     @Post()
@@ -30,7 +30,7 @@ export class WorkspacesMembersController {
     }
 
     @Delete(":memberId")
-    async remove(@Param("memberId") memberId: number) {
+    async remove(@Param("memberId") memberId: UUID) {
         await this.workspacesMembersService.remove(memberId);
         return { message: "Workspace member removed successfully" };
     }

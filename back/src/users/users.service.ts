@@ -16,18 +16,13 @@ export class UsersService {
         return this.usersRepo.find();
     }
 
-    findOneById(id: number): Promise<User | null> {
-        return this.usersRepo.findOneBy({ id });
-    }
-
     findOneByUuid(uuid: UUID): Promise<User | null> {
-        return this.usersRepo.findOneBy({
-            uuid: uuid,
-        });
+        return this.usersRepo.findOneBy({ uuid });
     }
 
-    async remove(id: number): Promise<void> {
-        this.usersRepo.delete(id);
+
+    async remove(uuid: UUID): Promise<void> {
+        this.usersRepo.delete(uuid);
     }
 
     async add(dto: CreateUserDto): Promise<User> {

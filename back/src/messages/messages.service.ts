@@ -3,10 +3,9 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Message } from "./messages.entity";
 import { CreateMessageDto } from "./messages.dto";
-import { User } from "../users/users.entity";
-import { Channel } from "../channels/channels.entity";
-import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
-import { WebSocketPool } from "src/websocket/websocket_pool.gateway";
+import { UUID } from "crypto";
+import { ChannelsService } from "../channels/channels.service";
+import { UsersService } from "../users/users.service";
 
 @Injectable()
 export class MessagesService {
@@ -14,38 +13,29 @@ export class MessagesService {
         @InjectRepository(Message)
         private readonly messageRepo: Repository<Message>,
 
-        @InjectRepository(User)
-        private readonly userRepo: Repository<User>,
-
-        @InjectRepository(Channel)
-        private readonly channelRepo: Repository<Channel>,
-
-        private readonly eventEmitter: EventEmitter2,
-
-        private readonly websocketPool: WebSocketPool
+        private readonly usersService: UsersService,
+        private readonly channelsService: ChannelsService
     ) {}
     findAll(): Promise<Message[]> {
         return this.messageRepo.find({
-            relations: ["source", "destinationUser", "destinationChannel"]
+            relations: ["source", "destination_user", "destination_channel"]
         });
     }
 
-    findOne(id: number): Promise<Message | null> {
+    findOneBy(uuid: UUID): Promise<Message | null> {
         return this.messageRepo.findOne({
-            where: { id },
-            relations: ["source", "destinationUser", "destinationChannel"]
+            where: { uuid },
+            relations: ["source", "destination_user", "destination_channel"]
         });
     }
 
-    async remove(id: number): Promise<void> {
-        this.messageRepo.delete(id);
+    async remove(uuid: UUID): Promise<void> {
+        this.messageRepo.delete(uuid);
     }
 
     async add(dto: CreateMessageDto): Promise<Message> {
 
-         const source  = await this.userRepo.findOneBy( {
-             uuid: dto.source_uuid
-         });
+         const source  = await this.usersService.findOneByUuid(dto.source_uuid);
         if (!source) {
             throw new NotFoundException(`User with UUID ${dto.source_uuid} not found`);
         }
@@ -54,13 +44,13 @@ export class MessagesService {
         let destination_channel = null;
 
         if (dto.is_public) {
-            destination_channel = await this.channelRepo.findOneBy({ uuid: dto.destination_uuid });
+            destination_channel = await this.channelsService.findOneByUuid(dto.destination_uuid );
 
             if (!destination_channel) {
                 throw new NotFoundException(`Channel with UUID ${dto.destination_uuid} not found`);
             }
         } else {
-            destination_user = await this.userRepo.findOneBy({ uuid: dto.destination_uuid });
+            destination_user = await this.usersService.findOneByUuid(dto.destination_uuid);
 
             if (!destination_user) {
                 throw new NotFoundException(`User with UUID ${dto.destination_uuid} not found`);
@@ -72,14 +62,8 @@ export class MessagesService {
             source,
             destination_channel,
             destination_user
+
         });
-
-        this.eventEmitter.emit("message.create", newMessage)
         return this.messageRepo.save(newMessage);
-    }
-
-    @OnEvent("message.create")
-    messageCreated(message: Message) {
-        
     }
 }

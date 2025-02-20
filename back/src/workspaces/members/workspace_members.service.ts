@@ -23,19 +23,19 @@ export class WorkspacesMembersService  {
         });
     }
 
-    async findOne(id: number): Promise<WorkspaceMember> {
+    async findOne(uuid: UUID): Promise<WorkspaceMember> {
         const member = await this.workspaceMembersRepo.findOne({
-            where: { id },
+            where: { uuid },
             relations: ["user", "workspace"],
         });
         if (!member) {
-            throw new NotFoundException(`Workspace Member with ID ${id} not found`);
+            throw new NotFoundException(`Workspace Member with ID ${uuid} not found`);
         }
         return member;
     }
 
-    async remove(id: number): Promise<void> {
-        this.workspaceMembersRepo.delete(id);
+    async remove(uuid: UUID): Promise<void> {
+        this.workspaceMembersRepo.delete(uuid);
     }
 
     async add(user_uuid: UUID, workspace_uuid: UUID): Promise<WorkspaceMember> {

@@ -17,12 +17,12 @@ export class WorkspacesService {
         return this.workspacesRepo.find();
     }
 
-    findOne(id: number): Promise<Workspace | null> {
-        return this.workspacesRepo.findOneBy({ id });
+    findOne(uuid: UUID): Promise<Workspace | null> {
+        return this.workspacesRepo.findOneBy({ uuid });
     }
 
-    async remove(id: number): Promise<void> {
-        this.workspacesRepo.delete(id);
+    async remove(uuid: UUID): Promise<void> {
+        this.workspacesRepo.delete(uuid);
     }
 
     async add(name: string, owner_uuid: UUID): Promise<Workspace> {
@@ -36,10 +36,10 @@ export class WorkspacesService {
 
     }
 
-    async update(id: number, name?: string, is_public?: boolean): Promise<Workspace | null> {
-        const workspace = await this.workspacesRepo.findOneBy({ id });
+    async update(uuid: UUID, name?: string, is_public?: boolean): Promise<Workspace | null> {
+        const workspace = await this.workspacesRepo.findOneBy({ uuid });
         if (!workspace) {
-           throw new NotFoundException(`Workspace with ID ${id} not found`);
+           throw new NotFoundException(`Workspace with ID ${uuid} not found`);
         }
 
         if (name !== undefined) {

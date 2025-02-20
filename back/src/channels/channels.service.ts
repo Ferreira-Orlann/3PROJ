@@ -6,7 +6,7 @@ import { CreateChannelDto } from "./channels.dto";
 import { Workspace } from "../workspaces/workspaces.entity";
 import { User } from "src/users/users.entity";
 import { WorkspaceMember } from "src/workspaces/members/workspace_members.entity";
-import { randomUUID } from "crypto";
+import { randomUUID, UUID } from "crypto";
 
 @Injectable()
 export class ChannelsService {
@@ -28,15 +28,15 @@ export class ChannelsService {
         return this.channelsRepo.find();
     }
 
-    findOne(id: number): Promise<Channel | null> {
+    findOneByUuid(uuid: UUID): Promise<Channel | null> {
         return this.channelsRepo.findOne({
-            where: { id },
+            where: { uuid },
             relations: ["workspace", "creator"],
         });
     }
 
-    async remove(id: number): Promise<void> {
-        this.channelsRepo.delete(id);
+    async remove(uuid: UUID): Promise<void> {
+        this.channelsRepo.delete(uuid);
     }
 
     async add(dto: CreateChannelDto): Promise<Channel> {

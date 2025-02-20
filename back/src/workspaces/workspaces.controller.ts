@@ -3,6 +3,7 @@ import { WorkspacesService } from "./workspaces.service";
 import { CreateWorkspaceDto } from "./workspaces.dto";
 import { HttpAuthGuard } from "src/authentication/http.auth.guard";
 import { Workspace } from "./workspaces.entity";
+import { UUID } from "crypto";
 
 @UseGuards(HttpAuthGuard)
 @Controller("workspaces")
@@ -15,7 +16,7 @@ export class WorkspacesController {
     }
 
     @Get(":id")
-    async findOne(@Param("id") id: number): Promise<Workspace> {
+    async findOne(@Param("id") id: UUID): Promise<Workspace> {
         const workspace = await this.workspacesService.findOne(id);
         if (!workspace) {
             throw new NotFoundException(`Workspace with ID ${id} not found`);
@@ -34,7 +35,7 @@ export class WorkspacesController {
 
     @Put(":id")
     async update(
-        @Param("id") id: number,
+        @Param("id") id: UUID,
         @Body("name") name?: string,
         @Body("is_public") is_public?: boolean
     ): Promise<Workspace> {
@@ -46,14 +47,12 @@ export class WorkspacesController {
     }
 
     @Delete(":id")
-    async remove(@Param("id") id: number): Promise<void> {
+    async remove(@Param("id") id: UUID): Promise<void> {
         const workspace = await this.workspacesService.findOne(id);
         if (!workspace) {
             throw new NotFoundException(`Workspace with ID ${id} not found`);
         }
         return this.workspacesService.remove(id);
     }
-
-
 
 }
