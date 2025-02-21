@@ -6,6 +6,8 @@ import { CreateMessageDto } from "./messages.dto";
 import { UUID } from "crypto";
 import { ChannelsService } from "../channels/channels.service";
 import { UsersService } from "../users/users.service";
+import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
+import { Events } from "src/events.enum";
 
 @Injectable()
 export class MessagesService {
@@ -14,7 +16,9 @@ export class MessagesService {
         private readonly messageRepo: Repository<Message>,
 
         private readonly usersService: UsersService,
-        private readonly channelsService: ChannelsService
+        private readonly channelsService: ChannelsService,
+
+        private readonly eventEmitter: EventEmitter2
     ) {}
     findAll(): Promise<Message[]> {
         return this.messageRepo.find({
@@ -64,6 +68,11 @@ export class MessagesService {
             destination_user
 
         });
-        return this.messageRepo.save(newMessage);
+
+        return new Promise(async(resolve, reject) => {
+            const savedMsg = await this.messageRepo.save(newMessage)
+            this.eventEmitter.emit(Events.MESSAGE_CREATED, savedMsg)
+            resolve(savedMsg)
+        });
     }
 }

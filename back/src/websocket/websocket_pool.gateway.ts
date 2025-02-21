@@ -81,4 +81,8 @@ export class WebSocketPool implements OnGatewayConnection, OnGatewayDisconnect {
     getWorkspaceWebsockets(uuid: UUID): Socket[]|undefined {
         return this.workspacesPool.get(uuid)
     }
+
+    getUserPoolRecord(uuid: UUID): UserPoolRecord|undefined {
+        return this.usersPool.get(uuid)
+    }
 }
