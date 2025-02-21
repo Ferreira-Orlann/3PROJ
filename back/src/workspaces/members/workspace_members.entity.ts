@@ -15,7 +15,7 @@ import { Workspace } from "../workspaces.entity";
 })
 export class WorkspaceMember {
     @PrimaryGeneratedColumn("uuid")
-    uuid: number;
+    uuid: UUID;
 
     @ManyToOne(() => User, (user) => user.workspace_members, {})
     @JoinColumn({

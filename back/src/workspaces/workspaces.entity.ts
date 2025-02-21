@@ -17,7 +17,7 @@ import { WorkspaceMember } from "./members/workspace_members.entity";
 })
 export class Workspace {
     @PrimaryGeneratedColumn("uuid")
-    uuid: number;
+    uuid: UUID;
 
     @Column()
     name: string;

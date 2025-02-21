@@ -16,7 +16,7 @@ import { Channel } from "../channels/channels.entity";
 
 export class Message {
     @PrimaryGeneratedColumn("uuid")
-    uuid: number;
+    uuid: UUID;
 
     @Column()
     message: string;

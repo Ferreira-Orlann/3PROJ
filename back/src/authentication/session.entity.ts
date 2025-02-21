@@ -16,7 +16,7 @@ import {
 })
 export class Session {
     @PrimaryGeneratedColumn("uuid")
-    uuid: number;
+    uuid: UUID;
 
     @ManyToOne(() => User, (user) => user.sessions, {eager: true})
     @JoinColumn({
