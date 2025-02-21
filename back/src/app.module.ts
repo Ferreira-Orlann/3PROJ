@@ -16,9 +16,11 @@ import { Message } from "./messages/messages.entity";
 import { Session } from "./authentication/session.entity";
 import { WebSocketModule } from "./websocket/websocket.module";
 import { AuthModule } from "./authentication/auth.module";
+import { Reaction } from './reactions/reaction.entity';
 
 
 import { ConsoleLoggerInjector, ControllerInjector, OpenTelemetryModule } from "@amplication/opentelemetry-nestjs";
+import { ReactionsModule } from "./reactions/reactions.module";
 
 @Module({
     imports: [
@@ -46,6 +48,7 @@ import { ConsoleLoggerInjector, ControllerInjector, OpenTelemetryModule } from "
                 Message,
                 WorkspaceMember,
                 Session,
+                Reaction,
             ],
             // synchronize: configService.get<string>("ENV") == EnvType.DEV,
             synchronize: true,
@@ -57,6 +60,7 @@ import { ConsoleLoggerInjector, ControllerInjector, OpenTelemetryModule } from "
         MessagesModule,
         WebSocketModule,
         AuthModule,
+        ReactionsModule
     ],
     controllers: [AppController],
     providers: [AppService],
