@@ -77,5 +77,6 @@ const typeormConf: TypeOrmModuleOptions = {
     ],
     controllers: [AppController],
     providers: [AppService],
+    
 })
 export class AppModule {}
