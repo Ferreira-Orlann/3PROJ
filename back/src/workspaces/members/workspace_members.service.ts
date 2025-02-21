@@ -7,7 +7,7 @@ import { randomUUID, UUID } from "crypto";
 import { Workspace } from "../workspaces.entity";
 
 @Injectable()
-export class WorkspacesMembersService  {
+export class WorkspacesMembersService {
     constructor(
         @InjectRepository(WorkspaceMember)
         private readonly workspaceMembersRepo: Repository<WorkspaceMember>,
@@ -29,7 +29,9 @@ export class WorkspacesMembersService  {
             relations: ["user", "workspace"],
         });
         if (!member) {
-            throw new NotFoundException(`Workspace Member with ID ${uuid} not found`);
+            throw new NotFoundException(
+                `Workspace Member with ID ${uuid} not found`,
+            );
         }
         return member;
     }
@@ -39,17 +41,22 @@ export class WorkspacesMembersService  {
     }
 
     async add(user_uuid: UUID, workspace_uuid: UUID): Promise<WorkspaceMember> {
-        const user = await this.usersRepo.findOneBy( {
-            uuid: user_uuid
+        const user = await this.usersRepo.findOneBy({
+            uuid: user_uuid,
         });
         if (!user) {
-            throw new NotFoundException(`User with UUID ${user_uuid} not found`);
+            throw new NotFoundException(
+                `User with UUID ${user_uuid} not found`,
+            );
         }
 
-        const workspace = await this.workspacesRepo.findOneBy( {
-            uuid: workspace_uuid });
+        const workspace = await this.workspacesRepo.findOneBy({
+            uuid: workspace_uuid,
+        });
         if (!workspace) {
-            throw new NotFoundException(`Workspace with UUID ${workspace_uuid} not found`);
+            throw new NotFoundException(
+                `Workspace with UUID ${workspace_uuid} not found`,
+            );
         }
 
         const workspaceMember = this.workspaceMembersRepo.create({

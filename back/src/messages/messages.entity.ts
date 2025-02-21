@@ -5,19 +5,17 @@ import {
     PrimaryGeneratedColumn,
     Generated,
     ManyToOne,
-    JoinColumn, Check,
+    JoinColumn,
+    Check,
 } from "typeorm";
 import { User } from "../users/users.entity";
 import { Channel } from "../channels/channels.entity";
 
-@Entity()
-
+@Entity({
+    name: "messages",
+})
 export class Message {
-    @PrimaryGeneratedColumn()
-    id: number;
-
-    @Column()
-    @Generated("uuid")
+    @PrimaryGeneratedColumn("uuid")
     uuid: UUID;
 
     @Column()
@@ -30,16 +28,25 @@ export class Message {
     date: Date;
 
     @ManyToOne(() => User, { nullable: false })
-    @JoinColumn({ name: "source_uuid" })
+    @JoinColumn({
+        name: "source_uuid",
+        referencedColumnName: "uuid",
+    })
     source: User;
 
-    @ManyToOne(() => User,(user) =>user.createdMessage, { nullable: true })
-    @JoinColumn({ name: "destination_user_uuid" })
+    @ManyToOne(() => User, (user) => user.createdMessage, { nullable: true })
+    @JoinColumn({
+        name: "destination_user_uuid",
+        referencedColumnName: "uuid",
+    })
     destination_user: User | null;
 
-    @ManyToOne(() => Channel, (channel) => channel.createdMessage, { nullable: true })
+    @ManyToOne(() => Channel, (channel) => channel.createdMessage, {
+        nullable: true,
+    })
     @JoinColumn({
-        name: "destination_channel_uuid"
+        name: "destination_channel_uuid",
+        referencedColumnName: "uuid",
     })
     destination_channel: Channel | null;
 }

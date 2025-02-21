@@ -13,7 +13,7 @@ export class MessagesController {
     }
 
     @Get(":id")
-    getMessageBy(@Param("id") id: UUID){
+    getMessageBy(@Param("id") id: UUID) {
         return this.messagesService.findOneBy(id);
     }
 

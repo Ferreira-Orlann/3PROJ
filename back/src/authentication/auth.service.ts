@@ -16,13 +16,13 @@ export class AuthService {
 
     getSessionByToken(token: string): Promise<Session | null> {
         return this.sessionRepo.findOne({
-            where: {token: token}
-        })
+            where: { token: token },
+        });
     }
 
     createSession(user: User): Promise<Session> {
         const uuid = randomUUID();
-        console.log(user)
+        console.log(user);
         return this.sessionRepo.save({
             owner: user,
             uuid: uuid,
@@ -32,28 +32,37 @@ export class AuthService {
     }
 
     isSessionValid(session: Session): boolean {
-        return !this.verifyDate(session.created_time, session.second_duration) && !session.revoked
+        return (
+            !this.verifyDate(session.created_time, session.second_duration) &&
+            !session.revoked
+        );
     }
 
     isSessionValidByUuid(uuid: UUID): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
-            resolve(this.isSessionValid(await this.sessionRepo.findOneBy({uuid: uuid})))
-        })
+            resolve(
+                this.isSessionValid(
+                    await this.sessionRepo.findOneBy({ uuid: uuid }),
+                ),
+            );
+        });
     }
 
     isJwtTokenValid(token: string): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
-            const jwtTokenVerified = this.jwtService.verify(token)
+            const jwtTokenVerified = this.jwtService.verify(token);
             if (!jwtTokenVerified) {
-                resolve(jwtTokenVerified)
+                resolve(jwtTokenVerified);
             }
-            resolve(await this.isSessionValidByUuid(this.jwtService.decode(token)))
-        })
+            resolve(
+                await this.isSessionValidByUuid(this.jwtService.decode(token)),
+            );
+        });
     }
 
     private verifyDate(date: Date, duration: number) {
-        const expirationDate = new Date(date)
-        expirationDate.setSeconds(duration)
-        return expirationDate > new Date()
+        const expirationDate = new Date(date);
+        expirationDate.setSeconds(duration);
+        return expirationDate > new Date();
     }
 }

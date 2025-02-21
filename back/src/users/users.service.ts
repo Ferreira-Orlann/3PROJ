@@ -20,7 +20,6 @@ export class UsersService {
         return this.usersRepo.findOneBy({ uuid });
     }
 
-
     async remove(uuid: UUID): Promise<void> {
         this.usersRepo.delete(uuid);
     }

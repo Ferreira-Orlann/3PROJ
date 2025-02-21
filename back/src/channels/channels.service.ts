@@ -64,7 +64,9 @@ export class ChannelsService {
         });
 
         if (!isMember) {
-            throw new ForbiddenException("Only workspace members can create channels" );
+            throw new ForbiddenException(
+                "Only workspace members can create channels",
+            );
         }
 
         const newChannel = this.channelsRepo.create({

@@ -1,4 +1,15 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Put, Req, UseGuards } from "@nestjs/common";
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    NotFoundException,
+    Param,
+    Post,
+    Put,
+    Req,
+    UseGuards,
+} from "@nestjs/common";
 import { WorkspacesService } from "./workspaces.service";
 import { CreateWorkspaceDto } from "./workspaces.dto";
 import { HttpAuthGuard } from "src/authentication/http.auth.guard";
@@ -37,9 +48,13 @@ export class WorkspacesController {
     async update(
         @Param("id") id: UUID,
         @Body("name") name?: string,
-        @Body("is_public") is_public?: boolean
+        @Body("is_public") is_public?: boolean,
     ): Promise<Workspace> {
-        const updatedWorkspace = await this.workspacesService.update(id, name, is_public);
+        const updatedWorkspace = await this.workspacesService.update(
+            id,
+            name,
+            is_public,
+        );
         if (!updatedWorkspace) {
             throw new NotFoundException(`Workspace with ID ${id} not found`);
         }
@@ -54,5 +69,4 @@ export class WorkspacesController {
         }
         return this.workspacesService.remove(id);
     }
-
 }

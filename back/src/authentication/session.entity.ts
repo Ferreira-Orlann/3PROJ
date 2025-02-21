@@ -11,18 +11,17 @@ import {
     Index,
 } from "typeorm";
 
-@Entity()
+@Entity({
+    name: "sessions",
+})
 export class Session {
-    @PrimaryGeneratedColumn()
-    id: number;
-
-    @Column()
-    @Generated("uuid")
+    @PrimaryGeneratedColumn("uuid")
     uuid: UUID;
 
-    @ManyToOne(() => User, (user) => user.sessions, {eager: true})
+    @ManyToOne(() => User, (user) => user.sessions, { eager: true })
     @JoinColumn({
         name: "owner_uuid",
+        referencedColumnName: "uuid",
     })
     owner: User;
 

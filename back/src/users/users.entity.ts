@@ -8,13 +8,11 @@ import { Channel } from "../channels/channels.entity";
 import { Session } from "src/authentication/session.entity";
 import { Message } from "src/messages/messages.entity";
 
-@Entity()
+@Entity({
+    name: "users",
+})
 export class User {
-    @PrimaryGeneratedColumn()
-    id: number;
-
-    @Column()
-    @Generated("uuid")
+    @PrimaryGeneratedColumn("uuid")
     uuid: UUID;
 
     @Column()
