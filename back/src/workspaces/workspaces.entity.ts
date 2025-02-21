@@ -35,6 +35,7 @@ export class Workspace {
     @ManyToOne(() => User, (user) => user.ownedWorkspaces, {})
     @JoinColumn({
         name: "owner_uuid",
+        referencedColumnName: "uuid"
     })
     owner: User;
 }

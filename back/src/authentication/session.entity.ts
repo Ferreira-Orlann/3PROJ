@@ -23,6 +23,7 @@ export class Session {
     @ManyToOne(() => User, (user) => user.sessions, {eager: true})
     @JoinColumn({
         name: "owner_uuid",
+        referencedColumnName: "uuid"
     })
     owner: User;
 

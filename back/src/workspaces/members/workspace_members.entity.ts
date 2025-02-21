@@ -22,12 +22,14 @@ export class WorkspaceMember {
     @ManyToOne(() => User, (user) => user.workspace_members, {})
     @JoinColumn({
         name: "user_uuid",
+        referencedColumnName: "uuid"
     })
     user: User;
 
     @ManyToOne(() => Workspace)
     @JoinColumn({
         name: "workspace_uuid",
+        referencedColumnName: "uuid"
     })
     workspace: Workspace;
 }

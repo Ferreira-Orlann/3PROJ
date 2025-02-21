@@ -21,13 +21,15 @@ export class Channel {
 
     @ManyToOne(() => User, (user) => user.createdChannels)
     @JoinColumn({
-        name: "creator_uuid"
+        name: "creator_uuid",
+        referencedColumnName: "uuid"
     })
     creator: User;
 
     @ManyToOne(() => Workspace, (workspace) => workspace.channels)
     @JoinColumn({
         name: "workspace_uuid",
+        referencedColumnName: "uuid"
     })
     workspace: Workspace;
 

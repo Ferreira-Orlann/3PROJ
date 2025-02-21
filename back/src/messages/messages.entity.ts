@@ -30,16 +30,23 @@ export class Message {
     date: Date;
 
     @ManyToOne(() => User, { nullable: false })
-    @JoinColumn({ name: "source_uuid" })
+    @JoinColumn({ 
+        name: "source_uuid", 
+        referencedColumnName: "uuid"
+    })
     source: User;
 
     @ManyToOne(() => User,(user) =>user.createdMessage, { nullable: true })
-    @JoinColumn({ name: "destination_user_uuid" })
+    @JoinColumn({ 
+        name: "destination_user_uuid", 
+        referencedColumnName: "uuid"
+    })
     destination_user: User | null;
 
     @ManyToOne(() => Channel, (channel) => channel.createdMessage, { nullable: true })
     @JoinColumn({
-        name: "destination_channel_uuid"
+        name: "destination_channel_uuid",
+        referencedColumnName: "uuid"
     })
     destination_channel: Channel | null;
 }
