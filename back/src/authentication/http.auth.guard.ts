@@ -12,6 +12,9 @@ export class HttpAuthGuard implements CanActivate {
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request = context.switchToHttp().getRequest();
         const token = HttpAuthGuard.extractTokenFromHeader(request);
+        if (!token) {
+            return false
+        }
         return this.authService.isJwtTokenValid(token)
     }
 

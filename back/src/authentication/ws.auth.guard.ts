@@ -16,6 +16,9 @@ export class WebSocketAuthGuard implements CanActivate {
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const socket = context.switchToWs().getClient();
         const token = WebSocketAuthGuard.extractTokenFromHeader(socket);
+        if (!token) {
+            return false
+        }
         return this.authService.isJwtTokenValid(token)
     }
 
