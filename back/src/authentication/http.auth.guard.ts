@@ -13,9 +13,9 @@ export class HttpAuthGuard implements CanActivate {
         const request = context.switchToHttp().getRequest();
         const token = HttpAuthGuard.extractTokenFromHeader(request);
         if (!token) {
-            return false
+            return false;
         }
-        return this.authService.isJwtTokenValid(token)
+        return this.authService.isJwtTokenValid(token);
     }
 
     static extractTokenFromHeader(request: IAuthRequest): string | undefined {

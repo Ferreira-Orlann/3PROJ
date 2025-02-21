@@ -13,7 +13,5 @@ export class WebSocketAuth {
 
     @SubscribeMessage("auth")
     @UseGuards(WebSocketAuthGuard)
-    auth(@MessageBody() data) {
-        
-    }
+    auth(@MessageBody() data) {}
 }

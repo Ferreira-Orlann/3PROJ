@@ -6,11 +6,12 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { Workspace } from "./workspaces.entity";
 import { AuthModule } from "src/authentication/auth.module";
 
-
 @Module({
-    imports: [AuthModule,
+    imports: [
+        AuthModule,
         TypeOrmModule.forFeature([Workspace]),
-        WorkspaceMembersModule],
+        WorkspaceMembersModule,
+    ],
     controllers: [WorkspacesController],
     providers: [WorkspacesService],
 })

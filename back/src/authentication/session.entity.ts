@@ -12,16 +12,16 @@ import {
 } from "typeorm";
 
 @Entity({
-    name: "sessions"
+    name: "sessions",
 })
 export class Session {
     @PrimaryGeneratedColumn("uuid")
     uuid: UUID;
 
-    @ManyToOne(() => User, (user) => user.sessions, {eager: true})
+    @ManyToOne(() => User, (user) => user.sessions, { eager: true })
     @JoinColumn({
         name: "owner_uuid",
-        referencedColumnName: "uuid"
+        referencedColumnName: "uuid",
     })
     owner: User;
 

@@ -11,7 +11,7 @@ import {
 import { Workspace } from "../workspaces.entity";
 
 @Entity({
-    name: "workspace_members"
+    name: "workspace_members",
 })
 export class WorkspaceMember {
     @PrimaryGeneratedColumn("uuid")
@@ -20,14 +20,14 @@ export class WorkspaceMember {
     @ManyToOne(() => User, (user) => user.workspace_members, {})
     @JoinColumn({
         name: "user_uuid",
-        referencedColumnName: "uuid"
+        referencedColumnName: "uuid",
     })
     user: User;
 
     @ManyToOne(() => Workspace, (workspace) => workspace.members)
     @JoinColumn({
         name: "workspace_uuid",
-        referencedColumnName: "uuid"
+        referencedColumnName: "uuid",
     })
     workspace: Workspace;
 }

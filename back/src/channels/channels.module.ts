@@ -8,7 +8,9 @@ import { User } from "../users/users.entity";
 import { WorkspaceMember } from "../workspaces/members/workspace_members.entity";
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Channel, Workspace, User, WorkspaceMember])],
+    imports: [
+        TypeOrmModule.forFeature([Channel, Workspace, User, WorkspaceMember]),
+    ],
     controllers: [ChannelsController],
     providers: [ChannelsService],
     exports: [ChannelsService],

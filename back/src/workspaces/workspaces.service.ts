@@ -10,7 +10,7 @@ export class WorkspacesService {
     constructor(
         @InjectRepository(Workspace)
         private readonly workspacesRepo: Repository<Workspace>,
-        private readonly workspaceMembersService: WorkspacesMembersService
+        private readonly workspaceMembersService: WorkspacesMembersService,
     ) {}
 
     findAll(): Promise<Workspace[]> {
@@ -33,13 +33,16 @@ export class WorkspacesService {
         await this.workspaceMembersService.add(owner_uuid, workspace.uuid);
 
         return workspace;
-
     }
 
-    async update(uuid: UUID, name?: string, is_public?: boolean): Promise<Workspace | null> {
+    async update(
+        uuid: UUID,
+        name?: string,
+        is_public?: boolean,
+    ): Promise<Workspace | null> {
         const workspace = await this.workspacesRepo.findOneBy({ uuid });
         if (!workspace) {
-           throw new NotFoundException(`Workspace with ID ${uuid} not found`);
+            throw new NotFoundException(`Workspace with ID ${uuid} not found`);
         }
 
         if (name !== undefined) {

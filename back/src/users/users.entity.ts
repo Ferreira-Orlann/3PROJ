@@ -9,7 +9,7 @@ import { Session } from "src/authentication/session.entity";
 import { Message } from "src/messages/messages.entity";
 
 @Entity({
-    name: "users"
+    name: "users",
 })
 export class User {
     @PrimaryGeneratedColumn("uuid")
