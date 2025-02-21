@@ -10,14 +10,12 @@ import {
 } from "typeorm";
 import { Workspace } from "../workspaces.entity";
 
-@Entity()
+@Entity({
+    name: "workspace_members"
+})
 export class WorkspaceMember {
-    @PrimaryGeneratedColumn()
-    id: number;
-
-    @Column()
-    @Generated("uuid")
-    uuid: UUID;
+    @PrimaryGeneratedColumn("uuid")
+    uuid: number;
 
     @ManyToOne(() => User, (user) => user.workspace_members, {})
     @JoinColumn({
@@ -26,7 +24,7 @@ export class WorkspaceMember {
     })
     user: User;
 
-    @ManyToOne(() => Workspace)
+    @ManyToOne(() => Workspace, (workspace) => workspace.members)
     @JoinColumn({
         name: "workspace_uuid",
         referencedColumnName: "uuid"

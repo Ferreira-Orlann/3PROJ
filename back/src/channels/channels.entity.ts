@@ -4,14 +4,12 @@ import { Workspace } from "../workspaces/workspaces.entity";
 import { User } from "../users/users.entity";
 import { Message } from "../messages/messages.entity";
 
-@Entity()
+@Entity({
+    name: "channels"
+})
 export class Channel {
-    @PrimaryGeneratedColumn()
-    id: number;
-
-    @Column()
-    @Generated("uuid")
-    uuid: UUID;
+    @PrimaryGeneratedColumn("uuid")
+    uuid: number;
 
     @Column()
     name: string;

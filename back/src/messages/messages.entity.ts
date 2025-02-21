@@ -10,15 +10,13 @@ import {
 import { User } from "../users/users.entity";
 import { Channel } from "../channels/channels.entity";
 
-@Entity()
+@Entity({
+    name: "messages"
+})
 
 export class Message {
-    @PrimaryGeneratedColumn()
-    id: number;
-
-    @Column()
-    @Generated("uuid")
-    uuid: UUID;
+    @PrimaryGeneratedColumn("uuid")
+    uuid: number;
 
     @Column()
     message: string;

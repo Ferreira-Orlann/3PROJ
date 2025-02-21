@@ -10,15 +10,14 @@ import {
     OneToMany,
 } from "typeorm";
 import { Channel } from "../channels/channels.entity";
+import { WorkspaceMember } from "./members/workspace_members.entity";
 
-@Entity()
+@Entity({
+    name: "workspaces"
+})
 export class Workspace {
-    @PrimaryGeneratedColumn()
-    id: number;
-
-    @Column()
-    @Generated("uuid")
-    uuid: UUID;
+    @PrimaryGeneratedColumn("uuid")
+    uuid: number;
 
     @Column()
     name: string;
@@ -38,4 +37,7 @@ export class Workspace {
         referencedColumnName: "uuid"
     })
     owner: User;
+
+    @OneToMany(() => WorkspaceMember, (member) => member.workspace)
+    members: Promise<WorkspaceMember[]>
 }
