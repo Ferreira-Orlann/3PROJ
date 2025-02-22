@@ -10,7 +10,7 @@ import {
     UseGuards,
 } from "@nestjs/common";
 import { WorkspacesMembersService } from "./workspace_members.service";
-import { HttpAuthGuard } from "src/authentication/http.auth.guard";
+import { HttpAuthGuard } from "src/authentication/http.authentication.guard";
 import { UUID } from "crypto";
 
 @UseGuards(HttpAuthGuard)

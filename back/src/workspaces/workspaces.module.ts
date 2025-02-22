@@ -4,7 +4,7 @@ import { WorkspacesService } from "./workspaces.service";
 import { WorkspaceMembersModule } from "./members/workspace_members.module";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { Workspace } from "./workspaces.entity";
-import { AuthModule } from "src/authentication/auth.module";
+import { AuthModule } from "src/authentication/authentication.module";
 
 @Module({
     imports: [

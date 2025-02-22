@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { AuthModule } from "src/authentication/auth.module";
+import { AuthModule } from "src/authentication/authentication.module";
 import { WorkspaceMember } from "./workspace_members.entity";
 import { Workspace } from "../workspaces.entity";
 import { User } from "../../users/users.entity";

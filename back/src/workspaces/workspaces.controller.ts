@@ -12,7 +12,7 @@ import {
 } from "@nestjs/common";
 import { WorkspacesService } from "./workspaces.service";
 import { CreateWorkspaceDto } from "./workspaces.dto";
-import { HttpAuthGuard } from "src/authentication/http.auth.guard";
+import { HttpAuthGuard } from "src/authentication/http.authentication.guard";
 import { Workspace } from "./workspaces.entity";
 import { UUID } from "crypto";
 

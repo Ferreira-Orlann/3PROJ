@@ -5,9 +5,9 @@ import {
 } from "@nestjs/websockets";
 import { UUID } from "crypto";
 import { Socket } from "socket.io";
-import { AuthService } from "src/authentication/auth.service";
+import { AuthService } from "src/authentication/authentication.service";
 import { Session } from "src/authentication/session.entity";
-import { WebSocketAuthGuard } from "src/authentication/ws.auth.guard";
+import { WebSocketAuthGuard } from "src/authentication/ws.authentication.guard";
 import { User } from "src/users/users.entity";
 
 type UserPoolRecord = {

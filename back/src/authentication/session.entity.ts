@@ -4,11 +4,11 @@ import {
     Entity,
     Column,
     PrimaryGeneratedColumn,
-    Generated,
     ManyToOne,
     JoinColumn,
     CreateDateColumn,
     Index,
+    RelationId,
 } from "typeorm";
 
 @Entity({

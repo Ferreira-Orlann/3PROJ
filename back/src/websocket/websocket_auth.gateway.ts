@@ -4,8 +4,8 @@ import {
     SubscribeMessage,
     WebSocketGateway,
 } from "@nestjs/websockets";
-import { AuthService } from "src/authentication/auth.service";
-import { WebSocketAuthGuard } from "src/authentication/ws.auth.guard";
+import { AuthService } from "src/authentication/authentication.service";
+import { WebSocketAuthGuard } from "src/authentication/ws.authentication.guard";
 
 @WebSocketGateway()
 export class WebSocketAuth {

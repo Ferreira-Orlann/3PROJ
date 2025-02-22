@@ -1,8 +1,10 @@
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
-import { AuthService } from "./auth.service";
+import { AuthService } from "./authentication.service";
+import { User } from "src/users/users.entity";
 
-type IAuthRequest = Request & {
+export type IAuthRequest = Request & {
     headers: { authorization: string };
+    user: User|undefined
 };
 
 @Injectable()
@@ -15,7 +17,16 @@ export class HttpAuthGuard implements CanActivate {
         if (!token) {
             return false;
         }
-        return this.authService.isJwtTokenValid(token);
+        const session = await this.authService.getSessionByToken(token);
+        if (!session) {
+            return false
+        }
+        const can = this.authService.isSessionValid(session);
+        if (!can) {
+            return can
+        }
+        request["user"] = session.owner
+        return can
     }
 
     static extractTokenFromHeader(request: IAuthRequest): string | undefined {

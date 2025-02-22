@@ -4,10 +4,19 @@ import {
     Injectable,
     UnauthorizedException,
 } from "@nestjs/common";
-import { jwtConstants } from "./const";
 import { JwtService } from "@nestjs/jwt";
 import { Socket } from "socket.io";
-import { AuthService } from "./auth.service";
+import { AuthService } from "./authentication.service";
+import { User } from "src/users/users.entity";
+
+export type IAuthSocket = Socket & {
+    handshake: { 
+        headers: {
+            authorization: string 
+        }
+    };
+    user: User|undefined
+};
 
 @Injectable()
 export class WebSocketAuthGuard implements CanActivate {
@@ -22,10 +31,19 @@ export class WebSocketAuthGuard implements CanActivate {
         if (!token) {
             return false;
         }
-        return this.authService.isJwtTokenValid(token);
+        const session = await this.authService.getSessionByToken(token);
+        if (!session) {
+            return false
+        }
+        const can = this.authService.isSessionValid(session);
+        if (!can) {
+            return can
+        }
+        socket["user"] = session.owner
+        return can
     }
 
-    static extractTokenFromHeader(socket: Socket): string | undefined {
+    static extractTokenFromHeader(socket: IAuthSocket): string | undefined {
         const [type, token] =
             socket.handshake.headers.authorization?.split(" ") ?? [];
         console.log(socket.handshake.headers);

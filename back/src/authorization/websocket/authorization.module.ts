@@ -16,6 +16,7 @@ import TypeORMAdapter from "typeorm-adapter";
             }),
             userFromContext: (ctx) => {
                 const request = ctx.switchToHttp().getRequest();
+                ctx.getType()
                 return request.user && request.user.uuid;
             },
             resourceFromContext: (ctx, perm) => {

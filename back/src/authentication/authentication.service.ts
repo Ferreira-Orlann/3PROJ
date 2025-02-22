@@ -33,6 +33,7 @@ export class AuthService {
 
     isSessionValid(session: Session): boolean {
         return (
+            session &&
             !this.verifyDate(session.created_time, session.second_duration) &&
             !session.revoked
         );

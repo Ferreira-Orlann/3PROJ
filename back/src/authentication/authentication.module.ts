@@ -1,13 +1,13 @@
-import { Module } from "@nestjs/common";
-import { AuthController } from "./auth.controller";
+import { forwardRef, Module } from "@nestjs/common";
+import { AuthController } from "./authentication.controller";
 import { JwtModule } from "@nestjs/jwt";
-import { HttpAuthGuard } from "./http.auth.guard";
+import { HttpAuthGuard } from "./http.authentication.guard";
 import { jwtConstants } from "./const";
-import { AuthService } from "./auth.service";
+import { AuthService } from "./authentication.service";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { UsersModule } from "src/users/users.module";
 import { Session } from "./session.entity";
-import { WebSocketAuthGuard } from "./ws.auth.guard";
+import { WebSocketAuthGuard } from "./ws.authentication.guard";
 
 @Module({
     imports: [
@@ -16,10 +16,10 @@ import { WebSocketAuthGuard } from "./ws.auth.guard";
             global: true,
         }),
         TypeOrmModule.forFeature([Session]),
-        UsersModule,
+        forwardRef(() => UsersModule),
     ],
     controllers: [AuthController],
-    providers: [HttpAuthGuard, WebSocketAuthGuard, AuthService],
-    exports: [HttpAuthGuard, WebSocketAuthGuard, AuthService],
+    providers: [AuthService, HttpAuthGuard, WebSocketAuthGuard],
+    exports: [AuthService, HttpAuthGuard, WebSocketAuthGuard],
 })
 export class AuthModule {}

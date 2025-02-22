@@ -15,7 +15,7 @@ import { MessagesModule } from "./messages/messages.module";
 import { Message } from "./messages/messages.entity";
 import { Session } from "./authentication/session.entity";
 import { WebSocketModule } from "./websocket/websocket.module";
-import { AuthModule } from "./authentication/auth.module";
+import { AuthModule } from "./authentication/authentication.module";
 
 import {
     ConsoleLoggerInjector,
@@ -47,20 +47,6 @@ const typeormConf: TypeOrmModuleOptions = {
             ControllerInjector,
             ConsoleLoggerInjector,
         ]),
-        AuthZModule.register({
-            model: "./config/casbin.model.conf",
-            policy: TypeORMAdapter.newAdapter(
-                typeormConf as TypeORMAdapterOptions,
-            ),
-            userFromContext: (ctx) => {
-                const request = ctx.switchToHttp().getRequest();
-                return request.user && request.user.uuid;
-            },
-            resourceFromContext: (ctx, perm) => {
-                const request = ctx.switchToHttp().getRequest();
-                return { type: perm.resource, id: request.id };
-            },
-        }),
         EventEmitterModule.forRoot({
             wildcard: false,
             delimiter: ".",
@@ -71,13 +57,13 @@ const typeormConf: TypeOrmModuleOptions = {
             ignoreErrors: false,
         }),
         TypeOrmModule.forRoot(typeormConf),
+        AuthModule,
         WorkspacesModule,
         WorkspaceMembersModule,
         UsersModule,
         ChannelsModule,
         MessagesModule,
         WebSocketModule,
-        AuthModule,
     ],
     controllers: [AppController],
 
