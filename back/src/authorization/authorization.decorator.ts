@@ -16,7 +16,7 @@ export const Authorize = (use: UsePermission) => {
     return SetMetadata(PERMISSIONS_METADATA, use);
 };
 
-export function HttpWorkspaceResource(action: string, resourceParam: string = "", workspaceParam: string = ""): UsePermission {
+export function HttpWorkspaceResource(action: string, resourceParam: string, workspaceParam: string = "workspaceUuid"): UsePermission {
     return (context: ExecutionContext) => {
         const request: Request = context.switchToHttp().getRequest() as Request
         return {
