@@ -16,6 +16,7 @@ import { Message } from "./messages/messages.entity";
 import { Session } from "./authentication/session.entity";
 import { WebSocketModule } from "./websocket/websocket.module";
 import { AuthModule } from "./authentication/authentication.module";
+import { Reaction } from './reactions/reaction.entity';
 
 import {
     ConsoleLoggerInjector,
@@ -36,11 +37,12 @@ const typeormConf: TypeOrmModuleOptions = {
     username: "postgres",
     password: "postgres",
     database: "postgres",
-    entities: [Workspace, User, Channel, Message, WorkspaceMember, Session],
+    entities: [Workspace, User, Channel, Message, WorkspaceMember, Session, Reaction],
     // synchronize: configService.get<string>("ENV") == EnvType.DEV,
     synchronize: true,
     logging: true,
-};
+};import { ReactionsModule } from "./reactions/reactions.module";
+
 @Module({
     imports: [
         OpenTelemetryModule.forRoot([
@@ -64,6 +66,7 @@ const typeormConf: TypeOrmModuleOptions = {
         ChannelsModule,
         MessagesModule,
         WebSocketModule,
+        ReactionsModule
     ],
     controllers: [AppController],
 
