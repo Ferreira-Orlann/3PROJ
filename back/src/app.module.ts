@@ -17,31 +17,14 @@ import { Session } from "./authentication/session.entity";
 import { WebSocketModule } from "./websocket/websocket.module";
 import { AuthModule } from "./authentication/authentication.module";
 import { Reaction } from './reactions/reaction.entity';
-
 import {
     ConsoleLoggerInjector,
     ControllerInjector,
     OpenTelemetryModule,
 } from "@amplication/opentelemetry-nestjs";
-import { AuthZModule } from "nest-authz";
-import TypeORMAdapter from "typeorm-adapter";
-import {
-    TypeORMAdapterConfig,
-    TypeORMAdapterOptions,
-} from "typeorm-adapter/lib/adapter";
-
-const typeormConf: TypeOrmModuleOptions = {
-    type: "postgres",
-    host: "localhost",
-    port: 5432,
-    username: "postgres",
-    password: "postgres",
-    database: "postgres",
-    entities: [Workspace, User, Channel, Message, WorkspaceMember, Session, Reaction],
-    // synchronize: configService.get<string>("ENV") == EnvType.DEV,
-    synchronize: true,
-    logging: true,
-};import { ReactionsModule } from "./reactions/reactions.module";
+import { ReactionsModule } from "./reactions/reactions.module";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { FilesModule } from "./file/files.module";
 
 @Module({
     imports: [
@@ -49,6 +32,9 @@ const typeormConf: TypeOrmModuleOptions = {
             ControllerInjector,
             ConsoleLoggerInjector,
         ]),
+        ConfigModule.forRoot({
+            isGlobal: true
+        }),
         EventEmitterModule.forRoot({
             wildcard: false,
             delimiter: ".",
@@ -58,7 +44,22 @@ const typeormConf: TypeOrmModuleOptions = {
             verboseMemoryLeak: false,
             ignoreErrors: false,
         }),
-        TypeOrmModule.forRoot(typeormConf),
+        TypeOrmModule.forRootAsync({
+            inject: [ConfigService],
+            useFactory: (config: ConfigService) => {
+                return {
+                    type: config.get<string>("DATABASE_TYPEORM_DRIVER"),
+                    host: config.get<string>("DATABASE_HOST"),
+                    port: config.get<number>("DATABASE_PORT"),
+                    username: config.get<string>("DATABSE_USER"),
+                    password: config.get<string>("DATABASE_PASSWORD"),
+                    database: config.get<string>("DATABSE_DB"),
+                    entities: [Workspace, User, Channel, Message, WorkspaceMember, Session, Reaction],
+                    synchronize: config.get<boolean>("DATABASE_TYPEORM_SYNCHRONISE"),
+                    logging: true,
+                } as TypeOrmModuleOptions;
+            },
+        }),
         AuthModule,
         WorkspacesModule,
         WorkspaceMembersModule,
@@ -66,7 +67,8 @@ const typeormConf: TypeOrmModuleOptions = {
         ChannelsModule,
         MessagesModule,
         WebSocketModule,
-        ReactionsModule
+        ReactionsModule,
+        FilesModule,
     ],
     controllers: [AppController],
 
