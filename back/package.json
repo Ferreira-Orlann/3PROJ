@@ -36,13 +36,15 @@
     "@opentelemetry/instrumentation-nestjs-core": "^0.44.0",
     "@opentelemetry/sdk-node": "0.57.2",
     "casbin": "^5.38.0",
+    "minio": "^8.0.4",
     "nest-authz": "^2.14.0",
     "pg": "^8.13.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "socket.io": "^4.8.1",
     "typeorm": "^0.3.20",
-    "typeorm-adapter": "^1.7.0"
+    "typeorm-adapter": "^1.7.0",
+    "typeorm-polymorphic": "^1.0.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.4.9",

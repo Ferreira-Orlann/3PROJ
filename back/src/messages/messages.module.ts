@@ -7,9 +7,11 @@ import { Channel } from "../channels/channels.entity";
 import { User } from "../users/users.entity";
 import { UsersModule } from "../users/users.module";
 import { ChannelsModule } from "../channels/channels.module";
+import { AuthModule } from "src/authentication/authentication.module";
 @Module({
     imports: [
         TypeOrmModule.forFeature([Message, Channel, User]),
+        AuthModule,
         UsersModule,
         ChannelsModule,
     ],
