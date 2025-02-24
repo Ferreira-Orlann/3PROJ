@@ -19,14 +19,16 @@ export class MessagesController {
     // @Authorize(HttpWorkspaceResource("VIEW ALL", "channelUuid"))
     @Authorize((context) => {
         return {
-            domain: context.switchToHttp().getRequest().params.workspaceUuid as UUID,
+            domain: context.switchToHttp().getRequest().params.workspaceUuid as UUID ||
+                context.switchToHttp().getRequest().params.userUuid,
             resource: context.switchToHttp().getRequest().params.channelUuid as UUID,
             action: "VIEW ALL"
         }
     })
-    async getMessage(@Param("workspaceUuid") workspaceUuid: UUID, @Param("userUuid") userUuid: UUID, @Param("channelUuid") channelUuid) {
+    async getMessage(@Param("workspaceUuid") workspaceUuid: UUID, @Param("userUuid") userUuid: UUID, @Param("channelUuid") channelUuid: UUID) {
+
+        console.log("data")
         const data = await this.messagesService.findAll();
-        console.log(data)
         return data;
     }
 
