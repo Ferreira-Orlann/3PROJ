@@ -14,7 +14,7 @@ import { WorkspaceMembersModule } from "./workspaces/members/workspace_members.m
 import { MessagesModule } from "./messages/messages.module";
 import { Message } from "./messages/messages.entity";
 import { Session } from "./authentication/session.entity";
-import { WebSocketModule } from "./websocket/websocket.module";
+import { WebSocketModule } from "./websockets/websocket.module";
 import { AuthModule } from "./authentication/authentication.module";
 import { Reaction } from './reactions/reaction.entity';
 import {
