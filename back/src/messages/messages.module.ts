@@ -17,6 +17,6 @@ import { AuthModule } from "src/authentication/authentication.module";
     ],
     controllers: [MessagesController],
     providers: [MessagesService],
-    exports: [MessagesService]
+    exports: [MessagesService, TypeOrmModule]
 })
 export class MessagesModule {}

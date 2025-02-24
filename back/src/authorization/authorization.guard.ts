@@ -7,13 +7,17 @@ import { User } from "src/users/users.entity";
 
 @Injectable()
 export class AuthorizationGuard implements CanActivate {
-    constructor(private reflector: Reflector, private readonly authzService: AuthZService) {}
+    constructor(private readonly reflector: Reflector, private readonly authzService: AuthZService) {}
 
     canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-        const permission: Permission = this.reflector.get<UsePermission>(
+        const authorize = this.reflector.get<UsePermission>(
             PERMISSIONS_METADATA,
             context.getHandler()
-        )(context);
+        )
+        if(!authorize) {
+            return true
+        }
+        const permission = authorize(context);
         let user: User
         switch(context.getType()) {
             case "http":
@@ -21,6 +25,7 @@ export class AuthorizationGuard implements CanActivate {
                 break
             case "ws":
                 user = context.switchToWs().getClient().user
+                break
             default:
                 throw new NotAcceptableException("Can't handle RPC context")
         }

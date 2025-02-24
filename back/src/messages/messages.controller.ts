@@ -24,8 +24,10 @@ export class MessagesController {
             action: "VIEW ALL"
         }
     })
-    getMessage(@Param("workspaceUuid") workspaceUuid: UUID, @Param("userUuid") userUuid: UUID, @Param("channelUuid") channelUuid) {
-        return this.messagesService.findAll();
+    async getMessage(@Param("workspaceUuid") workspaceUuid: UUID, @Param("userUuid") userUuid: UUID, @Param("channelUuid") channelUuid) {
+        const data = await this.messagesService.findAll();
+        console.log(data)
+        return data;
     }
 
     @Get(":id")
