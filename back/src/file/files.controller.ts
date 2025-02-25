@@ -10,7 +10,9 @@ export class FilesController {
     @Post("upload")
     @UseInterceptors(FileInterceptor('file'))
     upload(@UploadedFile() file: Express.Multer.File) {
-        this.filesService.getMinioClient().putObject(this.filesService.getBucketName(), randomUUID(), file.buffer, file.size)
+        const uuid = randomUUID()
+        this.filesService.getMinioClient().putObject(this.filesService.getBucketName(), uuid, file.buffer, file.size)
+        return uuid
     }
 
     @Get(":fileUuid")
