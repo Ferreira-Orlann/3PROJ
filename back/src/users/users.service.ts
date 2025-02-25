@@ -17,7 +17,10 @@ export class UsersService {
     }
 
     findOneByUuid(uuid: UUID): Promise<User | null> {
-        return this.usersRepo.findOneBy({ uuid });
+        return this.usersRepo.findOne({
+            where: { uuid },
+            relations: ["workspace_members", "workspace_members.workspace"]
+        });
     }
 
     async remove(uuid: UUID): Promise<void> {

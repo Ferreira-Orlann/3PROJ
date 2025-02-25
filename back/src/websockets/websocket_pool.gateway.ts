@@ -39,8 +39,9 @@ export class WebSocketPool implements OnGatewayConnection, OnGatewayDisconnect {
             } as UserPoolRecord;
             console.log(session, user);
             const workspace_members = await user.workspace_members;
-            workspace_members.forEach((workspace_member) => {
-                const workspaceUuid = workspace_member.workspace.uuid;
+            console.log("workspace_members",workspace_members )
+            workspace_members.forEach(async (workspace_member) => {
+                const workspaceUuid = (await workspace_member.workspace).uuid;
                 let pool = this.workspacesPool.get(workspaceUuid);
                 if (pool == undefined) {
                     pool = [client];

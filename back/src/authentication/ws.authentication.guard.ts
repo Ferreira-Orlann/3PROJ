@@ -12,7 +12,8 @@ import { User } from "src/users/users.entity";
 export type IAuthSocket = Socket & {
     handshake: { 
         headers: {
-            authorization: string 
+            authorization?: string;
+            authorize?: string;
         }
     };
     user: User|undefined
@@ -26,27 +27,39 @@ export class WebSocketAuthGuard implements CanActivate {
     ) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
-        const socket = context.switchToWs().getClient();
+        const socket = context.switchToWs().getClient<IAuthSocket>();
         const token = WebSocketAuthGuard.extractTokenFromHeader(socket);
         if (!token) {
+            console.log("❌ Aucun token trouvé, accès refusé.");
             return false;
         }
+        console.log("🔑 Token extrait :", token);
         const session = await this.authService.getSessionByToken(token);
         if (!session) {
+            console.log("❌ Session introuvable ou invalide.");
             return false
         }
         const can = this.authService.isSessionValid(session);
         if (!can) {
+            console.log("❌ Session expirée ou invalide.");
             return can
         }
         socket["user"] = session.owner
+        console.log("✅ Utilisateur authentifié :", session.owner.uuid);
         return can
     }
 
     static extractTokenFromHeader(socket: IAuthSocket): string | undefined {
-        const [type, token] =
-            socket.handshake.headers.authorization?.split(" ") ?? [];
-        console.log(socket.handshake.headers);
-        return type === "Bearer" ? token : undefined;
+        console.log("📡 Headers reçus :", socket.handshake.headers);
+
+        const authHeader = socket.handshake.headers.authorization || socket.handshake.headers.authorize;
+
+        if (!authHeader) {
+            console.log("❌ Aucun header d'autorisation trouvé");
+            return undefined;
+        }
+
+        const [type, token] = authHeader.split(" ");
+        return type === "Bearer" ? token : authHeader;
     }
 }
