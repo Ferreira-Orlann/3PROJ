@@ -14,4 +14,12 @@ export class FilesService {
             }
         })
     }
+
+    getMinioClient(): Minio.Client {
+        return this.minioClient
+    }
+
+    getBucketName(): string {
+        return this.bukketName
+    }
 }
