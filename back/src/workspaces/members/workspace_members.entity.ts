@@ -17,14 +17,18 @@ export class WorkspaceMember {
     @PrimaryGeneratedColumn("uuid")
     uuid: UUID;
 
-    @ManyToOne(() => User, (user) => user.workspace_members, {})
+    @ManyToOne(() => User, (user) => user.workspace_members, {
+        eager: true
+    })
     @JoinColumn({
         name: "user_uuid",
         referencedColumnName: "uuid",
     })
     user: User;
 
-    @ManyToOne(() => Workspace, (workspace) => workspace.members)
+    @ManyToOne(() => Workspace, (workspace) => workspace.members, {
+        eager: true
+    })
     @JoinColumn({
         name: "workspace_uuid",
         referencedColumnName: "uuid",
