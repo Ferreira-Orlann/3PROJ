@@ -11,12 +11,14 @@ export class FilesController {
     @UseInterceptors(FileInterceptor('file'))
     upload(@UploadedFile() file: Express.Multer.File) {
         const uuid = randomUUID()
-        this.filesService.getMinioClient().putObject(this.filesService.getBucketName(), uuid, file.buffer, file.size)
+        this.filesService.getMinioClient().putObject(this.filesService.getBucketName(), uuid, file.buffer, file.size, {})
         return uuid
     }
 
     @Get(":fileUuid")
     async download(@Param("fileUuid") fileUuid: UUID) {
+        const tags = this.filesService.getMinioClient().getObjectTagging(this.filesService.getBucketName(), fileUuid)
+        console.log(tags)
         return new StreamableFile(await this.filesService.getMinioClient().getObject(this.filesService.getBucketName(), fileUuid));
     }
 }
