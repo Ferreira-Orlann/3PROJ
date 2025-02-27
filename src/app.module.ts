@@ -16,7 +16,7 @@ import { Message } from "./messages/messages.entity";
 import { Session } from "./authentication/session.entity";
 import { WebSocketModule } from "./websockets/websocket.module";
 import { AuthModule } from "./authentication/authentication.module";
-import { Reaction } from './reactions/reaction.entity';
+import { Reaction } from './reactions/reactions.entity';
 import {
     ConsoleLoggerInjector,
     ControllerInjector,
@@ -24,7 +24,7 @@ import {
 } from "@amplication/opentelemetry-nestjs";
 import { ReactionsModule } from "./reactions/reactions.module";
 import { ConfigModule, ConfigService } from "@nestjs/config";
-import { FilesModule } from "./file/files.module";
+import { FilesModule } from "./files/files.module";
 
 @Module({
     imports: [
