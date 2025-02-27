@@ -1,30 +1,19 @@
+import { ConsoleLoggerInjector, ControllerInjector, OpenTelemetryModule } from "@amplication/opentelemetry-nestjs";
 import { Module } from "@nestjs/common";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { EventEmitterModule } from "@nestjs/event-emitter";
+import { TypeOrmModule, TypeOrmModuleOptions } from "@nestjs/typeorm";
+import { Workspace, WorkspacesModule } from "./workspaces";
+import { User, UsersModule } from "./users";
+import { Message, MessagesModule } from "./messages";
+import { WorkspaceMember, WorkspaceMembersModule } from "./workspaces/members";
+import { Reaction, ReactionsModule } from "./reactions";
+import { AuthModule, Session } from "./authentication";
+import { Channel, ChannelsModule } from "./channels";
+import { WebSocketModule } from "./websockets";
+import { FilesModule } from "./files";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
-import { TypeOrmModule, TypeOrmModuleOptions } from "@nestjs/typeorm";
-import { EventEmitterModule } from "@nestjs/event-emitter";
-import { Workspace } from "./workspaces/workspaces.entity";
-import { WorkspacesModule } from "./workspaces/workspaces.module";
-import { UsersModule } from "./users/users.module";
-import { User } from "./users/users.entity";
-import { Channel } from "./channels/channels.entity";
-import { ChannelsModule } from "./channels/channels.module";
-import { WorkspaceMember } from "./workspaces/members/workspace_members.entity";
-import { WorkspaceMembersModule } from "./workspaces/members/workspace_members.module";
-import { MessagesModule } from "./messages/messages.module";
-import { Message } from "./messages/messages.entity";
-import { Session } from "./authentication/session.entity";
-import { WebSocketModule } from "./websockets/websocket.module";
-import { AuthModule } from "./authentication/authentication.module";
-import { Reaction } from './reactions/reactions.entity';
-import {
-    ConsoleLoggerInjector,
-    ControllerInjector,
-    OpenTelemetryModule,
-} from "@amplication/opentelemetry-nestjs";
-import { ReactionsModule } from "./reactions/reactions.module";
-import { ConfigModule, ConfigService } from "@nestjs/config";
-import { FilesModule } from "./files/files.module";
 
 @Module({
     imports: [
@@ -71,7 +60,6 @@ import { FilesModule } from "./files/files.module";
         FilesModule,
     ],
     controllers: [AppController],
-
     providers: [AppService],
 })
 export class AppModule {}
