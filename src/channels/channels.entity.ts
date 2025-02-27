@@ -32,7 +32,7 @@ export class Channel {
     })
     creator: User;
 
-    @ManyToOne(() => Workspace, (workspace) => workspace.channels)
+    @ManyToOne(() => Workspace, (workspace) => workspace.channels, {eager: true})
     @JoinColumn({
         name: "workspace_uuid",
         referencedColumnName: "uuid",

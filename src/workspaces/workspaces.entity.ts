@@ -29,7 +29,7 @@ export class Workspace {
     is_public: boolean;
 
     @OneToMany(() => Channel, (channel) => channel.workspace)
-    channels: Channel[];
+    channels: Promise<Channel[]>;
 
     @ManyToOne(() => User, (user) => user.ownedWorkspaces, {})
     @JoinColumn({

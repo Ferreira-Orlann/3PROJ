@@ -7,6 +7,7 @@ import { WorkspaceMember } from "src/workspaces/members/workspace_members.entity
 import { Channel } from "../channels/channels.entity";
 import { Session } from "src/authentication/session.entity";
 import { Message } from "src/messages/messages.entity";
+import { Reaction } from "../reactions/reaction.entity";
 
 @Entity({
     name: "users",
@@ -51,4 +52,7 @@ export class User {
 
     @OneToMany(() => Message, (message) => message.source)
     createdMessage: Promise<Message[]>;
+
+    @OneToMany(() => Reaction, (reaction) => reaction.user)
+    createdReaction: Promise<Reaction[]>;
 }

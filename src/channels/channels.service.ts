@@ -25,13 +25,15 @@ export class ChannelsService {
     ) {}
 
     findAll(): Promise<Channel[]> {
-        return this.channelsRepo.find();
+        return this.channelsRepo.find({
+            relations: ["creator", "workspace"],
+        });
     }
 
     findOneByUuid(uuid: UUID): Promise<Channel | null> {
         return this.channelsRepo.findOne({
             where: { uuid },
-            relations: ["workspace", "creator"],
+            relations: ["creator", "workspace"],
         });
     }
 

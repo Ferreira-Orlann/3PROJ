@@ -6,6 +6,8 @@ import { CreateReactionDto } from "./reactions.dto";
 import { UsersService } from "../users/users.service";
 import { MessagesService } from "../messages/messages.service";
 import { UUID } from "crypto";
+import { Events } from "../events.enum";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 
 @Injectable()
 export class ReactionsService {
@@ -15,6 +17,8 @@ export class ReactionsService {
 
         private readonly usersService: UsersService,
         private readonly messagesService: MessagesService,
+
+        private readonly eventEmitter: EventEmitter2,
     ) {}
     
     findAll(): Promise<Reaction[]> {
@@ -50,6 +54,10 @@ export class ReactionsService {
             user,
             message,
         });
-        return this.reactionRepo.save(newReaction);
+        return new Promise(async (resolve, reject) => {
+            const savedReact = await this.reactionRepo.save(newReaction);
+            this.eventEmitter.emit(Events.REACTION_CREATED, savedReact);
+            resolve(savedReact);
+        });
     }
 }
