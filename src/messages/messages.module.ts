@@ -3,10 +3,10 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { Message } from "./messages.entity";
 import { MessagesController } from "./messages.controller";
 import { MessagesService } from "./messages.service";
-import { Channel } from "../channels/channels.entity";
-import { User } from "../users/users.entity";
-import { UsersModule } from "../users/users.module";
-import { ChannelsModule } from "../channels/channels.module";
+import { Channel } from "../channels";
+import { User } from "../users";
+import { UsersModule } from "../users";
+import { ChannelsModule } from "../channels";
 import { AuthModule } from "src/authentication/authentication.module";
 @Module({
     imports: [

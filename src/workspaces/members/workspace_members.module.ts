@@ -3,7 +3,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { AuthModule } from "src/authentication/authentication.module";
 import { WorkspaceMember } from "./workspace_members.entity";
 import { Workspace } from "../workspaces.entity";
-import { User } from "../../users/users.entity";
+import { User } from "../../users";
 import { WorkspacesMembersService } from "./workspace_members.service";
 import { WorkspacesMembersController } from "./workspace_members.controller";
 

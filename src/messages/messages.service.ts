@@ -4,8 +4,8 @@ import { Repository } from "typeorm";
 import { Message } from "./messages.entity";
 import { CreateMessageDto } from "./messages.dto";
 import { UUID } from "crypto";
-import { ChannelsService } from "../channels/channels.service";
-import { UsersService } from "../users/users.service";
+import { ChannelsService } from "../channels";
+import { UsersService } from "../users";
 import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
 import { Events } from "src/events.enum";
 

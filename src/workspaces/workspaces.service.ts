@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Workspace } from "./workspaces.entity";
 import { Repository } from "typeorm";
-import { WorkspacesMembersService } from "./members/workspace_members.service";
+import { WorkspacesMembersService } from "./members";
 import { UUID } from "crypto";
 
 @Injectable()

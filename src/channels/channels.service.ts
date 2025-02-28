@@ -3,7 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Channel } from "./channels.entity";
 import { Repository } from "typeorm";
 import { CreateChannelDto } from "./channels.dto";
-import { Workspace } from "../workspaces/workspaces.entity";
+import { Workspace } from "../workspaces";
 import { User } from "src/users/users.entity";
 import { WorkspaceMember } from "src/workspaces/members/workspace_members.entity";
 import { randomUUID, UUID } from "crypto";

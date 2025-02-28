@@ -4,10 +4,11 @@ import { Column, Generated, PrimaryGeneratedColumn } from "typeorm";
 import { UserStatus } from "./users.status.enum";
 import { Workspace } from "src/workspaces/workspaces.entity";
 import { WorkspaceMember } from "src/workspaces/members/workspace_members.entity";
-import { Channel } from "../channels/channels.entity";
+import { Channel } from "../channels";
 import { Session } from "src/authentication/session.entity";
-import { Message } from "src/messages/messages.entity";
-import { Reaction } from "../reactions/reaction.entity";
+import { Message } from "../messages";
+import { Reaction } from "../reactions";
+
 
 @Entity({
     name: "users",

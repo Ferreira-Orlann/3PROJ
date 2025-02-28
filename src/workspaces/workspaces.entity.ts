@@ -9,8 +9,8 @@ import {
     ManyToOne,
     OneToMany,
 } from "typeorm";
-import { Channel } from "../channels/channels.entity";
-import { WorkspaceMember } from "./members/workspace_members.entity";
+import { Channel } from "../channels";
+import { WorkspaceMember } from "./members";
 
 @Entity({
     name: "workspaces",
