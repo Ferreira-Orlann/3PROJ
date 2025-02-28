@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { OnEvent } from "@nestjs/event-emitter";
 import { Events } from "src/events.enum";
-import { Reaction } from "../../reactions/reaction.entity";
+import { Reaction } from "src/reactions/reactions.entity";
 import { WebSocketPool } from "../websocket_pool.gateway";
 
 @Injectable()
