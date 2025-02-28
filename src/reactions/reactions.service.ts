@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { Reaction } from "./reaction.entity";
+import { Reaction } from "./reactions.entity";
 import { CreateReactionDto } from "./reactions.dto";
 import { UsersService } from "../users/users.service";
 import { MessagesService } from "../messages/messages.service";
