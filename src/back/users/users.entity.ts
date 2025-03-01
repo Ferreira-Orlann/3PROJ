@@ -1,12 +1,13 @@
 import { Entity, OneToMany } from "typeorm";
 import { UUID } from "crypto";
-import { Column, Generated, PrimaryGeneratedColumn } from "typeorm";
+import { Column, PrimaryGeneratedColumn } from "typeorm";
 import { UserStatus } from "./users.status.enum";
 import { Workspace } from "../workspaces/workspaces.entity";
 import { WorkspaceMember } from "../workspaces/members/workspace_members.entity";
 import { Channel } from "../channels/channels.entity";
 import { Session } from "../authentication/session.entity";
 import { Message } from "../messages/messages.entity";
+import { Reaction } from "../reactions";
 
 @Entity({
     name: "users",
@@ -51,4 +52,7 @@ export class User {
 
     @OneToMany(() => Message, (message) => message.source)
     createdMessage: Promise<Message[]>;
+
+    @OneToMany(() => Reaction, (reaction) => reaction.user)
+    createdReaction: Promise<Reaction[]>;
 }

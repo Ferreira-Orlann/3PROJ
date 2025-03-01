@@ -8,8 +8,8 @@ import {
     ManyToOne,
     OneToMany,
 } from "typeorm";
-import { Channel } from "../channels/channels.entity";
-import { WorkspaceMember } from "./members/workspace_members.entity";
+import { Channel } from "../channels";
+import { WorkspaceMember } from "./members";
 import { User } from "../users";
 
 @Entity({
@@ -29,7 +29,7 @@ export class Workspace {
     is_public: boolean;
 
     @OneToMany(() => Channel, (channel) => channel.workspace)
-    channels: Channel[];
+    channels: Promise<Channel[]>;
 
     @ManyToOne(() => User, (user) => user.ownedWorkspaces, {})
     @JoinColumn({

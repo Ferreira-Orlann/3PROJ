@@ -3,7 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Channel } from "./channels.entity";
 import { Repository } from "typeorm";
 import { CreateChannelDto } from "./channels.dto";
-import { Workspace } from "../workspaces/workspaces.entity";
+import { Workspace } from "../workspaces";
 import { randomUUID, UUID } from "crypto";
 import { User } from "../users";
 import { WorkspaceMember } from "../workspaces/members/workspace_members.entity";
@@ -25,13 +25,15 @@ export class ChannelsService {
     ) {}
 
     findAll(): Promise<Channel[]> {
-        return this.channelsRepo.find();
+        return this.channelsRepo.find({
+            relations: ["creator", "workspace"],
+        });
     }
 
     findOneByUuid(uuid: UUID): Promise<Channel | null> {
         return this.channelsRepo.findOne({
             where: { uuid },
-            relations: ["workspace", "creator"],
+            relations: ["creator", "workspace"],
         });
     }
 

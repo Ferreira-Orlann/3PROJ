@@ -6,8 +6,9 @@ import { Test } from "./test";
 import { SupGatewayService } from "./supgateway.service";
 import { MessagesModule } from "../messages";
 import { AuthModule } from "../authentication";
+import { ReactionsModule } from "../reactions";
 @Module({
-    imports: [AuthModule, MessagesModule],
+    imports: [AuthModule, MessagesModule, ReactionsModule],
     controllers: [],
     providers: [
         SupGatewayService,

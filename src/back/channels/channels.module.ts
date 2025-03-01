@@ -3,9 +3,9 @@ import { ChannelsController } from "./channels.controller";
 import { ChannelsService } from "./channels.service";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { Channel } from "./channels.entity";
-import { Workspace } from "../workspaces/workspaces.entity";
-import { User } from "../users/users.entity";
-import { WorkspaceMember } from "../workspaces/members/workspace_members.entity";
+import { Workspace } from "../workspaces";
+import { User } from "../users";
+import { WorkspaceMember } from "../workspaces/members";
 
 @Module({
     imports: [

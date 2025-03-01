@@ -6,10 +6,11 @@ import {
     Generated,
     ManyToOne,
     JoinColumn,
-    Check,
+    Check, OneToMany,
 } from "typeorm";
-import { User } from "../users/users.entity";
-import { Channel } from "../channels/channels.entity";
+import { User } from "../users";
+import { Channel } from "../channels";
+import { Reaction } from "../reactions";
 
 @Entity({
     name: "messages",
@@ -49,4 +50,7 @@ export class Message {
         referencedColumnName: "uuid",
     })
     destination_channel: Channel | null;
+
+     @OneToMany(() => Reaction, (reaction) => reaction.message)
+    createdReaction: Promise<Reaction[]>;
 }

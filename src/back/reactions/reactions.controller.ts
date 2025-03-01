@@ -3,7 +3,10 @@ import { ReactionsService } from "./reactions.service";
 import { CreateReactionDto } from "./reactions.dto";
 import { UUID } from "crypto";
 
-@Controller("reactions")
+@Controller([
+    "workspaces/:workspaceUuid/channels/:channelUuid/messages/:messageUuid/reactions",
+    "users/:userUuid/channels/:channelUuid/messages/:messageUuid/reactions"
+])
 export class ReactionsController {
     constructor(private readonly reactionsService: ReactionsService) {}
 
