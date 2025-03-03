@@ -7,17 +7,26 @@ import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { EventEmitterModule } from "@nestjs/event-emitter";
 import { TypeOrmModule, TypeOrmModuleOptions } from "@nestjs/typeorm";
-import { Workspace, WorkspacesModule } from "./workspaces";
-import { User, UsersModule } from "./users";
-import { Message, MessagesModule } from "./messages";
-import { WorkspaceMember, WorkspaceMembersModule } from "./workspaces/members";
-import { Reaction, ReactionsModule } from "./reactions";
-import { AuthModule, Session } from "./authentication";
-import { Channel, ChannelsModule } from "./channels";
-import { WebSocketModule } from "./websockets";
-import { FilesModule } from "./files";
+
+import { WebSocketModule } from "./websockets/websocket.module";
+import { FilesModule } from "./files/files.module";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
+import { WorkspacesModule } from "./workspaces/workspaces.module";
+import { WorkspaceMembersModule } from "./workspaces/members/workspace_members.module";
+import { UsersModule } from "./users/users.module";
+import { MessagesModule } from "./messages/messages.module";
+import { ChannelsModule } from "./channels/channels.module";
+import { ReactionsModule } from "./reactions/reactions.module";
+import { AuthModule } from "./authentication/authentication.module";
+import {User} from "./users/users.entity";
+import {Workspace} from "./workspaces/workspaces.entity";
+import {Channel} from "./channels/channels.entity";
+import {Message} from "./messages/messages.entity";
+import {Session} from "./authentication/session.entity";
+import {Reaction} from "./reactions/reactions.entity";
+import {WorkspaceMember} from "./workspaces/members/workspace_members.entity";
+
 
 @Module({
     imports: [

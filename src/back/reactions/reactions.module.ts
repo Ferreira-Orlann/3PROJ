@@ -3,8 +3,8 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { Reaction } from "./reactions.entity";
 import { ReactionsController } from "./reactions.controller";
 import { ReactionsService } from "./reactions.service";
-import { UsersModule } from "../users";
-import { MessagesModule } from "../messages";
+import { UsersModule } from "../users/users.module";
+import { MessagesModule } from "../messages/messages.module";
 
 @Module({
     imports: [

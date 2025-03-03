@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 import { AuthService } from "./authentication.service";
-import { User } from "../users";
+import { User } from "../users/users.entity";
 
 export type IAuthRequest = Request & {
     headers: { authorization: string };

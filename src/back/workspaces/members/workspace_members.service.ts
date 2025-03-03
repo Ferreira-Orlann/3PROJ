@@ -4,7 +4,7 @@ import { WorkspaceMember } from "./workspace_members.entity";
 import { Repository } from "typeorm";
 import { randomUUID, UUID } from "crypto";
 import { Workspace } from "../workspaces.entity";
-import { User } from "../../users";
+import { User } from "../../users/users.entity";
 
 @Injectable()
 export class WorkspacesMembersService {

@@ -7,7 +7,8 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { Session } from "./session.entity";
 import { WebSocketAuthGuard } from "./ws.authentication.guard";
 import { ConfigService } from "@nestjs/config";
-import { UsersModule } from "../users";
+import { UsersModule } from "../users/users.module";
+
 
 @Module({
     imports: [

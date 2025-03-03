@@ -6,6 +6,7 @@ import { AuthorizationGuard } from "../authorization/authorization.guard";
 import { HttpAuthGuard } from "../authentication/http.authentication.guard";
 import { Authorize } from "../authorization/authorization.decorator";
 
+
 @Controller([
     "workspaces/:workspaceUuid/channels/:channelUuid/messages",
     "users/:userUuid/channels/:channelUuid/messages",

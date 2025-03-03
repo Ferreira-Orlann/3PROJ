@@ -7,7 +7,7 @@ import { WorkspaceMember } from "../workspaces/members/workspace_members.entity"
 import { Channel } from "../channels/channels.entity";
 import { Session } from "../authentication/session.entity";
 import { Message } from "../messages/messages.entity";
-import { Reaction } from "../reactions";
+import { Reaction } from "../reactions/reactions.entity";
 
 @Entity({
     name: "users",

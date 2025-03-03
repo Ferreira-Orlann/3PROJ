@@ -4,7 +4,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { JwtService } from "@nestjs/jwt";
 import { randomUUID, UUID } from "crypto";
-import { User } from "../users";
+import { User } from "../users/users.entity";
 
 @Injectable()
 export class AuthService {

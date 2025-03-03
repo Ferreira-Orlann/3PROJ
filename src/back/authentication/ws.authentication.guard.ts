@@ -7,7 +7,7 @@ import {
 import { JwtService } from "@nestjs/jwt";
 import { Socket } from "socket.io";
 import { AuthService } from "./authentication.service";
-import { User } from "../users";
+import { User } from "../users/users.entity";
 
 export type IAuthSocket = Socket & {
     handshake: {

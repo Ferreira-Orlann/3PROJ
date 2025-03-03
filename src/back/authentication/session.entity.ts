@@ -9,7 +9,7 @@ import {
     Index,
     RelationId,
 } from "typeorm";
-import { User } from "../users";
+import { User } from "../users/users.entity";
 
 @Entity({
     name: "sessions",

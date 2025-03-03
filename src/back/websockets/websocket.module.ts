@@ -4,9 +4,9 @@ import { WebSocketAuth } from "./forwarder.gateway";
 import { MessagesListener } from "./listeners/messages";
 import { Test } from "./test";
 import { SupGatewayService } from "./supgateway.service";
-import { MessagesModule } from "../messages";
-import { AuthModule } from "../authentication";
-import { ReactionsModule } from "../reactions";
+import { MessagesModule } from "../messages/messages.module";
+import { AuthModule } from "../authentication/authentication.module";
+import { ReactionsModule } from "../reactions/reactions.module";
 @Module({
     imports: [AuthModule, MessagesModule, ReactionsModule],
     controllers: [],

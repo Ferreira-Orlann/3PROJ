@@ -1,7 +1,8 @@
 import { Controller, forwardRef, Get, Inject, Query } from "@nestjs/common";
 import { UUID } from "crypto";
 import { AuthService } from "./authentication.service";
-import { UsersService } from "../users";
+import { UsersService } from "../users/users.service";
+
 
 @Controller("auth")
 export class AuthController {

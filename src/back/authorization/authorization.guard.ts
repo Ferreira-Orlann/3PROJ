@@ -12,7 +12,7 @@ import {
 } from "./authorization.decorator";
 import { Reflector } from "@nestjs/core";
 import { AuthZService } from "nest-authz";
-import { User } from "../users";
+import { User } from "../users/users.entity";
 
 @Injectable()
 export class AuthorizationGuard implements CanActivate {

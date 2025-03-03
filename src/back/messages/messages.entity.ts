@@ -8,9 +8,9 @@ import {
     JoinColumn,
     Check, OneToMany,
 } from "typeorm";
-import { User } from "../users";
-import { Channel } from "../channels";
-import { Reaction } from "../reactions";
+import { User } from "../users/users.entity";
+import { Channel } from "../channels/channels.entity";
+import { Reaction } from "../reactions/reactions.entity";
 
 @Entity({
     name: "messages",

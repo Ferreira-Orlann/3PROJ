@@ -8,7 +8,7 @@ import {
     ManyToOne,
 } from "typeorm";
 import { Workspace } from "../workspaces.entity";
-import { User } from "../../users";
+import { User } from "../../users/users.entity";
 
 @Entity({
     name: "workspace_members",

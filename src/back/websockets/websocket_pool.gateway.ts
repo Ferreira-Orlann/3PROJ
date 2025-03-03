@@ -5,7 +5,7 @@ import {
 } from "@nestjs/websockets";
 import { UUID } from "crypto";
 import { Socket } from "socket.io";
-import { User } from "../users";
+import { User } from "../users/users.entity";
 import { AuthService } from "../authentication/authentication.service";
 import { Session } from "../authentication/session.entity";
 import { WebSocketAuthGuard } from "../authentication/ws.authentication.guard";
