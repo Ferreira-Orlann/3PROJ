@@ -7,6 +7,7 @@ import { SupGatewayService } from "./supgateway.service";
 import { MessagesModule } from "../messages/messages.module";
 import { AuthModule } from "../authentication/authentication.module";
 import { ReactionsModule } from "../reactions/reactions.module";
+import { ReactionsListener } from "./listeners/reactions";
 @Module({
     imports: [AuthModule, MessagesModule, ReactionsModule],
     controllers: [],
@@ -15,6 +16,7 @@ import { ReactionsModule } from "../reactions/reactions.module";
         WebSocketPool,
         WebSocketAuth,
         MessagesListener,
+        ReactionsListener,
         Test,
     ],
 })

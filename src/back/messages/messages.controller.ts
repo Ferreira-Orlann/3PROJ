@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from "@nestjs/common";
 import { MessagesService } from "./messages.service";
 import { CreateMessageDto } from "./messages.dto";
 import { UUID } from "crypto";
@@ -38,9 +38,21 @@ export class MessagesController {
         return data;
     }
 
-    @Get(":id")
-    getMessageBy(@Param("id") id: UUID) {
-        return this.messagesService.findOneBy(id);
+    @Get(":messageUuid")
+    getMessageBy(@Param("messageUuid") messageUuid: UUID) {
+        return this.messagesService.findOneBy(messageUuid);
+    }
+    @Put(":messageUuid")
+    async updateMessage(
+        @Param("messageUuid") messageUuid: UUID,
+        @Body() dto: CreateMessageDto,
+    ){
+        return this.messagesService.update(messageUuid, dto);
+    }
+
+    @Delete(":messageUuid")
+    async deleteMessage(@Param("messageUuid") messageUuid: UUID) {
+        await this.messagesService.remove(messageUuid);
     }
 
     @Post()

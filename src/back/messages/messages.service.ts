@@ -33,8 +33,28 @@ export class MessagesService {
         });
     }
 
+    async update(uuid: UUID, dto: Partial<CreateMessageDto>): Promise<Message> {
+        const message = await this.findOneBy(uuid);
+        if (!message) {
+            throw new NotFoundException(`Message with UUID ${uuid} not found`);
+        }
+
+        Object.assign(message, dto);
+
+        const updatedMessage = await this.messageRepo.save(message);
+        this.eventEmitter.emit(Events.MESSAGE_UPDATED, updatedMessage);
+
+        return updatedMessage;
+    }
+
     async remove(uuid: UUID): Promise<void> {
-        this.messageRepo.delete(uuid);
+        const message = await this.findOneBy(uuid);
+        if (!message) {
+            throw new NotFoundException(`Message with UUID ${uuid} not found`);
+        }
+
+        await this.messageRepo.delete(uuid);
+        this.eventEmitter.emit(Events.MESSAGE_REMOVED, message);
     }
 
     async add(dto: CreateMessageDto): Promise<Message> {

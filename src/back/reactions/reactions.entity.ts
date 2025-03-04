@@ -12,11 +12,7 @@ import { Message } from "../messages/messages.entity";
 
 @Entity()
 export class Reaction {
-    @PrimaryGeneratedColumn()
-    id: number;
-
-    @Column()
-    @Generated("uuid")
+    @PrimaryGeneratedColumn("uuid")
     uuid: UUID;
 
     @Column()

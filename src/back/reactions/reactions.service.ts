@@ -8,6 +8,8 @@ import { MessagesService } from "../messages/messages.service";
 import { UUID } from "crypto";
 import { Events } from "../events.enum";
 import { EventEmitter2 } from "@nestjs/event-emitter";
+import { CreateMessageDto } from "../messages/messages.dto";
+import { Message } from "../messages/messages.entity";
 
 @Injectable()
 export class ReactionsService {
@@ -30,13 +32,33 @@ export class ReactionsService {
     findOneBy(uuid: UUID): Promise<Reaction | null> {
         return this.reactionRepo.findOne({
             where: { uuid },
-            relations: ["user", "message"],
+            relations: ["user", "message", "message.source", "message.destination_user", "message.destination_channel"],
         });
     }
 
-    async remove(uuid: UUID): Promise<void> {
-        this.reactionRepo.delete(uuid);
+    async update(uuid: UUID, dto: Partial<CreateReactionDto>): Promise<Reaction> {
+        const reaction = await this.findOneBy(uuid);
+        if (!reaction) {
+            throw new NotFoundException(`Reaction with UUID ${uuid} not found`);
+        }
+        Object.assign(reaction, dto);
+
+        const updatedReaction = await this.reactionRepo.save(reaction);
+        this.eventEmitter.emit(Events.REACTION_UPDATED, updatedReaction);
+        return updatedReaction;
     }
+
+    async remove(uuid: UUID): Promise<void> {
+        const reaction = await this.findOneBy(uuid);
+        if (!reaction) {
+            throw new NotFoundException(`Reaction with UUID ${uuid} not found`);
+        }
+
+        await this.reactionRepo.delete(uuid);
+        this.eventEmitter.emit(Events.REACTION_REMOVED, reaction);
+    }
+
+
 
     async add(dto: CreateReactionDto): Promise<Reaction> {
         const user = await this.usersService.findOneByUuid(dto.user_uuid);
