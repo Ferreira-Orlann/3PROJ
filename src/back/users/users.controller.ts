@@ -11,10 +11,7 @@ import { UsersService } from "./users.service";
 import { CreateUserDto } from "./users.dto";
 import { UUID } from "crypto";
 import {
-    AuthActionVerb,
-    AuthZGuard,
-    AuthZService,
-    UsePermissions,
+    AuthZService
 } from "nest-authz";
 import { HttpAuthGuard, IAuthRequest } from "../authentication/http.authentication.guard";
 
