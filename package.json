@@ -53,7 +53,8 @@
     "socket.io": "^4.8.1",
     "typeorm": "^0.3.20",
     "typeorm-adapter": "^1.7.0",
-    "typeorm-polymorphic": "^1.0.0"
+    "typeorm-polymorphic": "^1.0.0",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",
