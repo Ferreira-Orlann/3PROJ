@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { FiMessageCircle, FiUsers, FiSettings, FiBell, FiSearch, FiFileText, FiPlus, FiUpload } from "react-icons/fi";
 import Card from "../components/ui/card";
-import  Button  from "../../src/components/ui/button";
+import Button  from "../components/ui/button";
 import CardContent from "../components/ui/card";
 
 export default function SupChat() {
