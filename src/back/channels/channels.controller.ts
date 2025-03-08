@@ -1,29 +1,40 @@
-import { Body, Controller, Get, Param, Post, Delete } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Delete, UseGuards } from "@nestjs/common";
 import { ChannelsService } from "./channels.service";
 import { CreateChannelDto } from "./channels.dto";
 import { UUID } from "crypto";
+import { HttpAuthGuard } from "../authentication/http.authentication.guard";
+import { AuthorizationGuard } from "../authorization/authorization.guard";
 
-@Controller("channels")
+@Controller([
+    
+])
+@UseGuards(HttpAuthGuard, AuthorizationGuard)
 export class ChannelsController {
     constructor(private readonly channelService: ChannelsService) {}
 
-    @Get()
+    @Get("channels")
     getAllChannels() {
         return this.channelService.findAll();
     }
 
-    @Get(":id")
+    @Get("channels/:id")
     getChannelById(@Param("id") id: UUID) {
         return this.channelService.findOneByUuid(id);
     }
 
-    @Post()
-    async createChannel(@Body() dto: CreateChannelDto) {
+    @Post("users/:userUuid/channels/")
+    async createUserChannel(@Body() dto: CreateChannelDto) {
         const entity = await this.channelService.add(dto);
         return entity;
     }
 
-    @Delete(":id")
+    @Post("workspaces/:workspaceUuid/channels",)
+    async createWorkspaceChannel(@Body() dto: CreateChannelDto) {
+        const entity = await this.channelService.add(dto);
+        return entity;
+    }
+
+    @Delete("channels/:id")
     async deleteChannel(@Param("id") id: UUID) {
         await this.channelService.remove(id);
         return { message: `Channel with ID ${id} has been deleted` };
