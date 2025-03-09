@@ -9,6 +9,7 @@ import { User } from "../users/users.entity";
 import { AuthService } from "../authentication/authentication.service";
 import { Session } from "../authentication/session.entity";
 import { WebSocketAuthGuard } from "../authentication/ws.authentication.guard";
+import { Events } from "../events.enum";
 
 type UserPoolRecord = {
     socket: Socket;
@@ -30,7 +31,7 @@ export class WebSocketPool implements OnGatewayConnection, OnGatewayDisconnect {
         this.isClientAuthenticated(client).then(async ([isValid, session]) => {
             console.log("Is Valid", isValid);
             if (!isValid) {
-                return;
+                client.disconnect(true);
             }
             const user = await session.owner;
             const record = {
@@ -55,6 +56,8 @@ export class WebSocketPool implements OnGatewayConnection, OnGatewayDisconnect {
             client["user"] = user;
             console.log(this.workspacesPool);
             console.log(this.usersPool);
+        }).catch((reason) => {
+            client.disconnect(true)
         });
     }
 
@@ -96,5 +99,13 @@ export class WebSocketPool implements OnGatewayConnection, OnGatewayDisconnect {
 
     getUserPoolRecord(uuid: UUID): UserPoolRecord | undefined {
         return this.usersPool.get(uuid);
+    }
+
+    sendEvent(socket: Socket, event: Events, payload: any) {
+        socket.emit("message_sent", {
+            "timestamp": Math.floor(Date.now() / 1000),
+            "event": event,
+            "payload":  payload
+        });
     }
 }

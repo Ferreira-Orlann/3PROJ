@@ -13,17 +13,23 @@ import {
 import { Reflector } from "@nestjs/core";
 import { AuthZService } from "nest-authz";
 import { User } from "../users/users.entity";
+import { Config } from "casbin";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class AuthorizationGuard implements CanActivate {
     constructor(
         private readonly reflector: Reflector,
         private readonly authzService: AuthZService,
+        private readonly configService: ConfigService
     ) {}
 
     canActivate(
         context: ExecutionContext,
     ): boolean | Promise<boolean> | Observable<boolean> {
+        if (this.configService.get("AUTHORIZATION_ON") == "false") {
+            return true
+        }
         const authorize = this.reflector.get<UsePermission>(
             PERMISSIONS_METADATA,
             context.getHandler(),

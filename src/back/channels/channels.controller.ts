@@ -5,12 +5,12 @@ import { UUID } from "crypto";
 import { HttpAuthGuard } from "../authentication/http.authentication.guard";
 import { AuthorizationGuard } from "../authorization/authorization.guard";
 
-@Controller([
-    
-])
+@Controller()
 @UseGuards(HttpAuthGuard, AuthorizationGuard)
 export class ChannelsController {
-    constructor(private readonly channelService: ChannelsService) {}
+    constructor(private readonly channelService: ChannelsService) {
+        console.log("Channels Controller")
+    }
 
     @Get("channels")
     getAllChannels() {
@@ -22,7 +22,7 @@ export class ChannelsController {
         return this.channelService.findOneByUuid(id);
     }
 
-    @Post("users/:userUuid/channels/")
+    @Post("users/:userUuid/channels")
     async createUserChannel(@Body() dto: CreateChannelDto) {
         const entity = await this.channelService.add(dto);
         return entity;

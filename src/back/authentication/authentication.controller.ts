@@ -12,7 +12,7 @@ export class AuthController {
         private usersService: UsersService,
     ) {}
 
-    @Get("signin")
+    @Get("login")
     async signin(@Query("uuid") uuid: UUID) {
         return await this.authService.createSession(
             await this.usersService.findOneByUuid(uuid),
