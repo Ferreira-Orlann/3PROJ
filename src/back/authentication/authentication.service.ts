@@ -22,7 +22,6 @@ export class AuthService {
 
     createSession(user: User): Promise<Session> {
         const uuid = randomUUID();
-        console.log(user);
         return this.sessionRepo.save({
             owner: user,
             uuid: uuid,

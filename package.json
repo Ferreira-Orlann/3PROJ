@@ -42,6 +42,7 @@
     "@opentelemetry/instrumentation-nestjs-core": "^0.44.0",
     "@opentelemetry/sdk-node": "0.57.2",
     "casbin": "^5.38.0",
+    "class-transformer": "^0.5.1",
     "minio": "^8.0.4",
     "nest-authz": "^2.14.0",
     "pg": "^8.13.3",

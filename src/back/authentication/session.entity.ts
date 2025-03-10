@@ -10,6 +10,7 @@ import {
     RelationId,
 } from "typeorm";
 import { User } from "../users/users.entity";
+import { Exclude, Transform } from "class-transformer";
 
 @Entity({
     name: "sessions",
@@ -23,6 +24,7 @@ export class Session {
         name: "owner_uuid",
         referencedColumnName: "uuid",
     })
+    @Transform(({value}: {value: User}) => value.uuid)
     owner: User;
 
     @CreateDateColumn()
@@ -30,7 +32,7 @@ export class Session {
 
     @Column()
     second_duration: number;
-
+    @Exclude()
     @Index()
     @Column({
         type: "text",
