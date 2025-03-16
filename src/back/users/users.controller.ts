@@ -5,6 +5,7 @@ import {
     Get,
     Param,
     Post,
+    Query,
     Request,
     UseGuards,
     UseInterceptors,
@@ -16,31 +17,43 @@ import {
     AuthZService
 } from "nest-authz";
 import { HttpAuthGuard, IAuthRequest } from "../authentication/http.authentication.guard";
+import { number } from "zod";
+import { ConfigService } from "@nestjs/config";
+import { ApiResponse } from "@nestjs/swagger";
+import { User } from "./users.entity";
 
 @Controller("users")
 export class UsersController {
     constructor(
         private readonly usersService: UsersService,
         private readonly authzService: AuthZService,
+        private readonly configService: ConfigService
     ) {}
 
     @Get()
     @UseGuards(HttpAuthGuard)
-    async get(@Request() req: IAuthRequest) {
+    @ApiResponse({
+        type: [User]
+    })
+    async get(@Request() req: IAuthRequest, @Query("page") page: number = 1, @Query("pageSize") pageSize: number = 10): Promise<User[]> {
         console.log(req.user);
-        const en = await this.authzService.enforce(
-            req.user?.uuid,
-            "test",
-            "message",
-            "CREATE",
-        );
-        console.log("Bool:", en);
-        console.log(await this.authzService.getAllSubjects());
-        console.log(await this.authzService.getAllRoles());
-        console.log(await this.authzService.getAllObjects());
-        console.log(await this.authzService.getAllActions());
-        console.log(await this.authzService.getUsersForRole("admin", "test"));
-        return this.usersService.findAll();
+        // const en = await this.authzService.enforce(
+        //     req.user?.uuid,
+        //     "test",
+        //     "message",
+        //     "CREATE",
+        // );
+        // console.log("Bool:", en);
+        // console.log(await this.authzService.getAllSubjects());
+        // console.log(await this.authzService.getAllRoles());
+        // console.log(await this.authzService.getAllObjects());
+        // console.log(await this.authzService.getAllActions());
+        // console.log(await this.authzService.getUsersForRole("admin", "test"));
+        console.log("Page", page)
+        console.log("PageSize", pageSize)
+        console.log("Conf", this.configService.get<number>("API_PAGE_SIZE_LIMIT"))
+        pageSize = Math.min(pageSize, this.configService.get<number>("API_PAGE_SIZE_LIMIT"))
+        return await this.usersService.findPaging(page, pageSize)
     }
 
     @Get(":id")

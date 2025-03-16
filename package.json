@@ -34,6 +34,7 @@
     "@nestjs/microservices": "^11.0.10",
     "@nestjs/platform-express": "^11.0.10",
     "@nestjs/platform-socket.io": "^11.0.10",
+    "@nestjs/swagger": "^11.0.6",
     "@nestjs/typeorm": "^11.0.0",
     "@nestjs/websockets": "^11.0.10",
     "@opentelemetry/exporter-prometheus": "^0.57.2",
@@ -111,9 +112,13 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "@nestjs/core",
+      "@scarf/scarf",
       "@swc/core",
       "esbuild",
       "protobufjs"
+    ],
+    "ignoredBuiltDependencies": [
+      "@scarf/scarf"
     ]
   }
 }

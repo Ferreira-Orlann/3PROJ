@@ -16,6 +16,13 @@ export class UsersService {
         return this.usersRepo.find();
     }
 
+    findPaging(page: number, pageSize: number): Promise<User[]> {
+        return this.usersRepo.find({
+            skip: (page - 1) * pageSize,
+            take: pageSize  
+        });
+    }
+
     findOneByUuid(uuid: UUID): Promise<User | null> {
         return this.usersRepo.findOne({
             where: { uuid },
@@ -30,4 +37,6 @@ export class UsersService {
     async add(dto: CreateUserDto): Promise<User> {
         return this.usersRepo.save(dto);
     }
+
+
 }
