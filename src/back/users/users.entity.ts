@@ -8,81 +8,76 @@ import { Channel } from "../channels/channels.entity";
 import { Session } from "../authentication/session.entity";
 import { Message } from "../messages/messages.entity";
 import { Reaction } from "../reactions/reactions.entity";
-import { Exclude } from "class-transformer";
-import { ApiHideProperty, ApiProperty, ApiPropertyOptional, ApiSchema } from "@nestjs/swagger";
+import { Expose } from "class-transformer";
+import { ApiProperty, ApiSchema, OmitType } from "@nestjs/swagger";
 
 @Entity({
     name: "users",
 })
 @ApiSchema({
-    description: "Represent and User"
+    description: "Represent and User",
+    name: "ExposedUser"
 })
 export class User {
+    @PrimaryGeneratedColumn("uuid")
+    @Expose()
     @ApiProperty({
         examples: ["4f8dc026-a1f2-4cd5-a394-ec8c403569c5"]
     })
-    @PrimaryGeneratedColumn("uuid")
     uuid: UUID;
 
+    @Expose()
     @ApiProperty()
-    @Column()
     username: string;
-
-    @ApiPropertyOptional()
-    @Column()
-    firstname: string;
-
-    @ApiPropertyOptional()
-    @Column()
-    lastname: string;
-
-    @ApiPropertyOptional()
-    @Column()
-    email: string;
-
-    @ApiPropertyOptional()
-    @Column({ nullable: true })
-    mdp: string;
-
-    @ApiPropertyOptional()
-    @Column()
-    address: string;
-
-    @ApiProperty()
+    
     @Column({
-        type: "enum",
-        enum: UserStatus,
         default: UserStatus.OFFLINE,
+        enum: UserStatus
     })
+    @Expose()
+    @ApiProperty()
     status: UserStatus;
 
-    @ApiHideProperty()
-    @Exclude()
+    @Column()
+    @Expose()
+    @ApiProperty()
+    firstname: string;
+
+    @Column()
+    @Expose()
+    @ApiProperty()
+    lastname: string;
+
+    @Column()
+    @Expose()
+    @ApiProperty()
+    email: string;
+
+    @Column()
+    @Expose()
+    @ApiProperty()
+    address: string;
+
     @OneToMany(() => Workspace, (workspace) => workspace.owner)
     ownedWorkspaces: Promise<Workspace[]>;
 
-    @ApiHideProperty()
-    @Exclude()
     @OneToMany(() => WorkspaceMember, (member) => member.user)
     workspace_members: Promise<WorkspaceMember[]>;
     
-    @ApiHideProperty()
-    @Exclude()
     @OneToMany(() => Channel, (channel) => channel.creator)
     createdChannels: Promise<Channel[]>;
     
-    @ApiHideProperty()
-    @Exclude()
     @OneToMany(() => Session, (session) => session.owner)
     sessions: Promise<Session[]>;
     
-    @ApiHideProperty()
-    @Exclude()
     @OneToMany(() => Message, (message) => message.source)
         createdMessage: Promise<Message[]>;
     
-    @ApiHideProperty()
-    @Exclude()
     @OneToMany(() => Reaction, (reaction) => reaction.user)
     createdReaction: Promise<Reaction[]>;
 }
+
+@ApiSchema({
+    name: "User"
+})
+export class BasicUser extends OmitType(User, ["email", "firstname", "lastname", "address"]) {}

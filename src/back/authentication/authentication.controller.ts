@@ -3,8 +3,12 @@ import { UUID } from "crypto";
 import { AuthService } from "./authentication.service";
 import { UsersService } from "../users/users.service";
 import { Session } from "./session.entity";
+import { ApiSchema } from "@nestjs/swagger";
 
 
+@ApiSchema({
+    description: "Authentification",
+})
 @Controller("auth")
 export class AuthController {
     constructor(

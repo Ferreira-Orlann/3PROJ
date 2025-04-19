@@ -1,8 +1,3 @@
-import {
-    ConsoleLoggerInjector,
-    ControllerInjector,
-    OpenTelemetryModule,
-} from "@amplication/opentelemetry-nestjs";
 import { ClassSerializerInterceptor, Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { EventEmitterModule } from "@nestjs/event-emitter";
@@ -26,15 +21,9 @@ import {Message} from "./messages/messages.entity";
 import {Session} from "./authentication/session.entity";
 import {Reaction} from "./reactions/reactions.entity";
 import {WorkspaceMember} from "./workspaces/members/workspace_members.entity";
-import { APP_INTERCEPTOR } from "@nestjs/core";
-
 
 @Module({
     imports: [
-        OpenTelemetryModule.forRoot([
-            ControllerInjector,
-            ConsoleLoggerInjector,
-        ]),
         ConfigModule.forRoot({
             isGlobal: true,
         }),
@@ -82,11 +71,6 @@ import { APP_INTERCEPTOR } from "@nestjs/core";
         FilesModule,
     ],
     controllers: [AppController],
-    providers: [AppService, 
-        {
-            provide: APP_INTERCEPTOR,
-            useClass: ClassSerializerInterceptor
-        }
-    ],
+    providers: [AppService],
 })
 export class AppModule {}

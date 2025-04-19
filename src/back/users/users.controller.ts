@@ -1,6 +1,5 @@
 import {
     Body,
-    ClassSerializerInterceptor,
     Controller,
     Get,
     Param,
@@ -8,36 +7,49 @@ import {
     Put,
     Query,
     Request,
-    UseGuards,
-    UseInterceptors,
+    UseGuards
 } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { CreateUserDto } from "./users.dto";
 import { UUID } from "crypto";
-import {
-    AuthZService
-} from "nest-authz";
 import { HttpAuthGuard, IAuthRequest } from "../authentication/http.authentication.guard";
-import { number } from "zod";
 import { ConfigService } from "@nestjs/config";
-import { ApiResponse } from "@nestjs/swagger";
-import { User } from "./users.entity";
+import { ApiParam, ApiQuery, ApiResponse } from "@nestjs/swagger";
+import { User, BasicUser } from "./users.entity";
 
 @Controller("users")
 export class UsersController {
     constructor(
         private readonly usersService: UsersService,
-        private readonly authzService: AuthZService,
         private readonly configService: ConfigService
     ) {}
 
     @Get()
-    @UseGuards(HttpAuthGuard)
     @ApiResponse({
-        type: [User]
+        type: BasicUser
     })
-    async get(@Request() req: IAuthRequest, @Query("page") page: number = 1, @Query("pageSize") pageSize: number = 10): Promise<User[]> {
-        console.log(req.user);
+    @ApiQuery({
+        name: "page",
+        required: false,
+        type: Number
+    })
+    @ApiQuery({
+        name: "pageSize",
+        required: false,
+        type: Number
+    })
+    @ApiQuery({
+        name: "basic",
+        required: false,
+        type: Boolean
+    })
+    async getBasic(
+        @Request() req: IAuthRequest, 
+        @Query("page") page: number = 1, 
+        @Query("pageSize") pageSize: number = 10,
+        @Query("basic") basic: boolean = true,
+        
+    ): Promise<User[]> {
         // const en = await this.authzService.enforce(
         //     req.user?.uuid,
         //     "test",
@@ -50,11 +62,21 @@ export class UsersController {
         // console.log(await this.authzService.getAllObjects());
         // console.log(await this.authzService.getAllActions());
         // console.log(await this.authzService.getUsersForRole("admin", "test"));
-        console.log("Page", page)
-        console.log("PageSize", pageSize)
-        console.log("Conf", this.configService.get<number>("API_PAGE_SIZE_LIMIT"))
-        pageSize = Math.min(pageSize, this.configService.get<number>("API_PAGE_SIZE_LIMIT"))
-        return await this.usersService.findPaging(page, pageSize)
+        if (basic) {
+            pageSize = Math.min(pageSize, this.configService.get<number>("API_PAGE_SIZE_LIMIT"))
+            const pageData = await this.usersService.findPaging(page, pageSize)
+            pageData.map((user) => {
+                Object.setPrototypeOf(user, BasicUser)
+            })
+        }
+        // pageData.map((user) => {
+        //     Object.setPrototypeOf(user, User)
+        // })
+        else {
+            pageSize = Math.min(pageSize, this.configService.get<number>("API_PAGE_SIZE_LIMIT"))
+            const pageData = await this.usersService.findPaging(page, pageSize)
+            return pageData
+        }
     }
 
     @Get(":mail")
