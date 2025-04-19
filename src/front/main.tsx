@@ -1,10 +1,9 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './styles/index.css'
-import SupChat from './Pages/index'
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from '../front/App';
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <SupChat />
-  </StrictMode>,
-)
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);

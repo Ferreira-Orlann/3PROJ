@@ -1,0 +1,19 @@
+.notifications-container {
+    display: flex;
+    height: 100vh;
+    background-color: #1e1e2f;
+    color: white;
+  }
+  
+  .notifications-main {
+    flex: 1;
+    padding: 30px;
+    background-color: #2f2f48;
+    overflow-y: auto;
+  }
+  
+  .notifications-main h2 {
+    margin-bottom: 20px;
+    color: #00bfa6;
+  }
+  
