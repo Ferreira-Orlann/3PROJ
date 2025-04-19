@@ -41,6 +41,10 @@ export class User {
     email: string;
 
     @ApiPropertyOptional()
+    @Column({ nullable: true })
+    mdp: string;
+
+    @ApiPropertyOptional()
     @Column()
     address: string;
 

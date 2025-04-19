@@ -33,7 +33,10 @@ export class Workspace {
     @OneToMany(() => Channel, (channel) => channel.workspace)
     channels: Promise<Channel[]>;
 
-    @Transform(({value}) => value.uuid)
+    @Column({ name: "owner_uuid", nullable: true })
+    owner_uuid: UUID;
+    
+    @Transform(({value}) => value?.uuid)
     @ManyToOne(() => User, (user) => user.ownedWorkspaces, {})
     @JoinColumn({
         name: "owner_uuid",

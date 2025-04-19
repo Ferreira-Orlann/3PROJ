@@ -13,12 +13,31 @@ export class WorkspacesService {
         private readonly workspaceMembersService: WorkspacesMembersService,
     ) {}
 
-    findAll(): Promise<Workspace[]> {
-        return this.workspacesRepo.find();
+    async findAll(): Promise<Workspace[]> {
+        try {
+            console.log('Finding all workspaces');
+            // Include relations to properly load related entities
+            const workspaces = await this.workspacesRepo.find({
+                relations: ['owner']
+            });
+            console.log('Found workspaces:', workspaces);
+            return workspaces || [];
+        } catch (error) {
+            console.error('Error finding workspaces:', error);
+            return [];
+        }
     }
 
-    findOne(uuid: UUID): Promise<Workspace | null> {
-        return this.workspacesRepo.findOneBy({ uuid });
+    async findOne(uuid: UUID): Promise<Workspace | null> {
+        try {
+            return await this.workspacesRepo.findOne({
+                where: { uuid },
+                relations: ['owner']
+            });
+        } catch (error) {
+            console.error(`Error finding workspace with UUID ${uuid}:`, error);
+            return null;
+        }
     }
 
     async remove(uuid: UUID): Promise<void> {

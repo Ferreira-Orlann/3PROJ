@@ -38,5 +38,7 @@ export class UsersService {
         return this.usersRepo.save(dto);
     }
 
-
+    async update(uuid: UUID, dto: CreateUserDto): Promise<User> {
+        return this.usersRepo.save({ ...dto, uuid });
+    }
 }

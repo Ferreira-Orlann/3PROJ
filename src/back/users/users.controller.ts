@@ -5,6 +5,7 @@ import {
     Get,
     Param,
     Post,
+    Put,
     Query,
     Request,
     UseGuards,
@@ -56,6 +57,12 @@ export class UsersController {
         return await this.usersService.findPaging(page, pageSize)
     }
 
+    @Get(":mail")
+    findAll() {
+        return this.usersService.findAll();
+    }
+
+
     @Get(":id")
     getById(@Param("id") id: UUID) {
         return this.usersService.findOneByUuid(id);
@@ -64,5 +71,10 @@ export class UsersController {
     @Post()
     async create(@Body() dto: CreateUserDto) {
         return await this.usersService.add(dto);
+    }
+
+    @Put(":uuid")
+    async update(@Param("uuid") uuid: UUID, @Body() dto: CreateUserDto) {
+        return await this.usersService.update(uuid, dto);
     }
 }
