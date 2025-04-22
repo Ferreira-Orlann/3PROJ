@@ -26,6 +26,7 @@ export class User {
     })
     uuid: UUID;
 
+    @Column()
     @Expose()
     @ApiProperty()
     username: string;
