@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   root: "./src/front",
   build: {
-    outDir: "./dist/src/front"
+    outDir: "../../dist/src/front/dist"
   },
 
 })
