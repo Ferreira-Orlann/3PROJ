@@ -30,6 +30,7 @@
     "@nestjs/core": "^11.0.20",
     "@nestjs/event-emitter": "^3.0.1",
     "@nestjs/jwt": "^11.0.0",
+    "@nestjs/mapped-types": "^2.1.0",
     "@nestjs/microservices": "^11.0.20",
     "@nestjs/platform-express": "^11.0.20",
     "@nestjs/platform-socket.io": "^11.0.20",

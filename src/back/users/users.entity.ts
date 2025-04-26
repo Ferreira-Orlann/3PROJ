@@ -9,7 +9,8 @@ import { Session } from "../authentication/session.entity";
 import { Message } from "../messages/messages.entity";
 import { Reaction } from "../reactions/reactions.entity";
 import { Expose } from "class-transformer";
-import { ApiProperty, ApiSchema, OmitType } from "@nestjs/swagger";
+import { ApiProperty, ApiSchema } from "@nestjs/swagger";
+import { OmitType } from "@nestjs/mapped-types";
 
 @Entity({
     name: "users",

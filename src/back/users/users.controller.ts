@@ -16,6 +16,8 @@ import { HttpAuthGuard, IAuthRequest } from "../authentication/http.authenticati
 import { ConfigService } from "@nestjs/config";
 import { ApiParam, ApiQuery, ApiResponse } from "@nestjs/swagger";
 import { User, BasicUser } from "./users.entity";
+import { data } from "react-router-dom";
+import { plainToInstance } from "class-transformer";
 
 @Controller("users")
 export class UsersController {
@@ -47,9 +49,10 @@ export class UsersController {
         @Request() req: IAuthRequest, 
         @Query("page") page: number = 1, 
         @Query("pageSize") pageSize: number = 10,
-        @Query("basic") basic: boolean = true,
+        @Query("basic") basic: boolean = false,
         
-    ): Promise<User[]> {
+    ): Promise<User[]|BasicUser[]> {
+        console.log("Get Users")
         // const en = await this.authzService.enforce(
         //     req.user?.uuid,
         //     "test",
@@ -65,13 +68,12 @@ export class UsersController {
         if (basic) {
             pageSize = Math.min(pageSize, this.configService.get<number>("API_PAGE_SIZE_LIMIT"))
             const pageData = await this.usersService.findPaging(page, pageSize)
-            pageData.map((user) => {
-                Object.setPrototypeOf(user, BasicUser)
-            })
+            const transformed = pageData.map((val) => plainToInstance(BasicUser, val, {
+                strategy: "excludeAll",
+                excludeExtraneousValues: true,
+            }))
+            return transformed
         }
-        // pageData.map((user) => {
-        //     Object.setPrototypeOf(user, User)
-        // })
         else {
             pageSize = Math.min(pageSize, this.configService.get<number>("API_PAGE_SIZE_LIMIT"))
             const pageData = await this.usersService.findPaging(page, pageSize)
@@ -79,14 +81,8 @@ export class UsersController {
         }
     }
 
-    @Get(":mail")
-    findAll() {
-        return this.usersService.findAll();
-    }
-
-
     @Get(":id")
-    getById(@Param("id") id: UUID) {
+    getById(@Param("id") id: UUID): Promise<User> {
         return this.usersService.findOneByUuid(id);
     }
 
