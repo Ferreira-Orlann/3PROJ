@@ -33,6 +33,7 @@ export const useHomeScreen = () => {
     try {
       setState(prev => ({ ...prev, isLoading: true }));
       const apiWorkspaces = await workspaceService.getWorkspaces();
+      console.log('API workspaces:', apiWorkspaces);
       
       // Convert API workspaces to UI workspaces with the correct type
       const uiWorkspaces: Workspace[] = apiWorkspaces.map(workspace => ({

@@ -11,6 +11,8 @@ async function bootstrap() {
         origin: '*', // Ou tu peux spécifier une liste d'origines, ex : ['http://192.168.1.102', 'http://tonAppMobile']
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
         allowedHeaders: ['Content-Type', 'Authorization'],
+        exposedHeaders: ['Content-Type', 'Authorization'],
+
     });
 
     const config = new DocumentBuilder()

@@ -46,10 +46,13 @@ export interface AuthResponse {
  * Service d'authentification
  */
 const authService = {
-  login: async (uuid: UUID): Promise<AuthResponse> => {
+  login: async (email: string, password: string): Promise<AuthResponse> => {
     try {
-      console.log('Tentative de connexion avec UUID:', uuid);
-      const response = await apiClient.get<AuthResponse>(`/auth/login?uuid=${uuid}`);
+      console.log('Tentative de connexion avec email:', email);
+      const response = await apiClient.post<AuthResponse>('/auth/login', {
+        email,
+        password
+      });
       console.log('Réponse de connexion réussie:', response.data);
       return response.data;
     } catch (error: any) {

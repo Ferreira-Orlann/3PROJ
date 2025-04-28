@@ -19,61 +19,6 @@ import { Colors } from '../../theme/colors';
 import useHomeScreen from '../../hooks/home';
 import { UUID } from 'crypto';
 
-
-// Exemples d'espaces de travail avec leurs canaux - dans une vraie application, ces données viendraient d'une API
-const SAMPLE_WORKSPACES = {
-  '1': {
-    id: '1',
-    name: 'Marketing',
-    isPublic: true,
-    channels: [
-      { id: '101', name: 'général', isPublic: true },
-      { id: '102', name: 'campagnes', isPublic: true },
-      { id: '103', name: 'réseaux-sociaux', isPublic: true },
-      { id: '104', name: 'stratégie', isPublic: false },
-    ]
-  },
-  '2': {
-    id: '2',
-    name: 'Développement',
-    isPublic: true,
-    channels: [
-      { id: '201', name: 'général', isPublic: true },
-      { id: '202', name: 'frontend', isPublic: true },
-      { id: '203', name: 'backend', isPublic: true },
-      { id: '204', name: 'bugs', isPublic: true },
-      { id: '205', name: 'architecture', isPublic: false },
-    ]
-  },
-  '3': {
-    id: '3',
-    name: 'RH',
-    isPublic: false,
-    channels: [
-      { id: '301', name: 'général', isPublic: true },
-      { id: '302', name: 'recrutement', isPublic: false },
-      { id: '303', name: 'formation', isPublic: true },
-    ]
-  },
-  '4': {
-    id: '4',
-    name: 'Direction',
-    isPublic: false,
-    channels: [
-      { id: '401', name: 'général', isPublic: false },
-      { id: '402', name: 'stratégie', isPublic: false },
-      { id: '403', name: 'finances', isPublic: false },
-    ]
-  },
-};
-
-// Exemples de messages directs - dans une vraie application, ces données viendraient d'une API
-const SAMPLE_DMS = [
-  { id: '1', name: 'Jean Dupont', status: 'en ligne' },
-  { id: '2', name: 'Marie Martin', status: 'absent' },
-  { id: '3', name: 'Thomas Bernard', status: 'hors ligne' },
-];
-
 export default function Sidebar() {
   const insets = useSafeAreaInsets();
   const pathname = usePathname();
@@ -137,11 +82,25 @@ export default function Sidebar() {
       filteredWorkspaces.forEach(workspace => {
         // Vérifier que workspace est défini
         if (workspace) {
-          // Utiliser une méthode sûre pour obtenir l'ID
-          const id = workspace.uuid?.toString() || workspace.workspaceId?.toString() || workspace.id?.toString();
-          // Vérifier que l'ID est défini avant de l'utiliser
-          if (id && !channelHeights[id]) {
-            channelHeights[id] = new Animated.Value(0);
+          console.log('Workspacessss:', workspace);
+          try {
+            // Utiliser une méthode sûre pour obtenir l'ID avec vérification complète des valeurs null/undefined
+            let id = null;
+            
+            if (workspace.uuid) {
+              id = String(workspace.uuid);
+            } else if (workspace.workspaceId) {
+              id = String(workspace.workspaceId);
+            } else if (workspace.id) {
+              id = String(workspace.id);
+            }
+            
+            // Vérifier que l'ID est défini avant de l'utiliser
+            if (id && !channelHeights[id]) {
+              channelHeights[id] = new Animated.Value(0);
+            }
+          } catch (error) {
+            console.error('Error processing workspace ID:', error);
           }
         }
       });
@@ -187,7 +146,7 @@ export default function Sidebar() {
   }, [pathname]);
   
   // Handle workspace selection
-  const handleWorkspaceSelect = (workspaceId: string) => {
+  const handleWorkspaceSelect = (workspaceId: UUID) => {
     // Rediriger vers la page dédiée du workspace
     router.push({ pathname: '/screens/workspaces/[id]', params: { id: workspaceId } });
     // Optionally collapse sidebar after selection on mobile
@@ -229,7 +188,7 @@ export default function Sidebar() {
                   <TouchableOpacity
                     style={[
                       styles.workspaceItem,
-                      pathWorkspaceId === workspaceId.toString() && styles.selectedItem
+                      pathWorkspaceId === workspaceId && styles.selectedItem
                     ]}
                     onPress={() => handleWorkspaceSelect(workspaceId)}
                   >
@@ -273,35 +232,9 @@ export default function Sidebar() {
           <Text style={styles.sectionTitle}>Messages directs</Text>
         </View>
         <ScrollView style={styles.scrollSection}>
-          {SAMPLE_DMS.map((user) => (
-            <TouchableOpacity
-              key={user.id}
-              style={[styles.dmItem, pathname === `/private_messages/${user.id}` && styles.selectedItem]}
-              onPress={() => router.push({ pathname: '/screens/private_messages/[userId]', params: { userId: user.id } })}
-            >
-              <View style={[styles.avatar, { borderColor: user.status === 'en ligne' ? '#43b581' : user.status === 'absent' ? '#faa61a' : '#747f8d' }]}>
-                <Text style={styles.avatarText}>{user.name[0]}</Text>
-              </View>
-              {isExpanded ? (
-                <View style={styles.userInfo}>
-                  <Text style={styles.userName}>{user.name}</Text>
-                  <View style={styles.userStatus}>
-                    <View 
-                      style={[
-                        styles.statusDot, 
-                        { 
-                          backgroundColor: 
-                            user.status === 'en ligne' ? '#43b581' : 
-                            user.status === 'absent' ? '#faa61a' : '#747f8d' 
-                        }
-                      ]} 
-                    />
-                    <Text style={styles.statusText}>{user.status}</Text>
-                  </View>
-                </View>
-              ) : null}
-            </TouchableOpacity>
-          ))}
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>Fonctionnalité à venir</Text>
+          </View>
         </ScrollView>
       </View>
 

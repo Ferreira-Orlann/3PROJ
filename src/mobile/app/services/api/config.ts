@@ -1,6 +1,6 @@
 import { Platform } from 'react-native';
 
-let HOST = '192.168.1.129';
+let HOST = '192.168.1.73';
 const PORT = '3000';
 
 if (__DEV__) { 
@@ -10,7 +10,7 @@ if (__DEV__) {
     HOST = 'localhost';
   }
 
-  HOST = '192.168.1.129'; 
+  HOST = '192.168.1.73'; 
 }
 
 export const API_BASE_URL = `http://${HOST}:${PORT}`;

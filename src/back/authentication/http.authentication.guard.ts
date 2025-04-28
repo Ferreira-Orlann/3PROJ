@@ -14,17 +14,22 @@ export class HttpAuthGuard implements CanActivate {
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request = context.switchToHttp().getRequest();
         const token = HttpAuthGuard.extractTokenFromHeader(request);
+        console.log("Token:", token) 
         if (!token) {
             return false;
         }
+        console.log("1")
         const session = await this.authService.getSessionByToken(token);
+        console.log("Session:", session )
         if (!session) {
             return false;
         }
+        console.log("2")
         const can = this.authService.isSessionValid(session);
         if (!can) {
             return can;
         }
+        console.log("3")
         request["user"] = session.owner;
         return can;
     }

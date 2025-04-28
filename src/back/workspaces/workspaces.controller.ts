@@ -24,6 +24,7 @@ export class WorkspacesController {
     @Get()
     async findAll() {
         const result = await this.workspacesService.findAll();
+        console.log("apiWorkspaces", result);
         return result;
     }
 
@@ -43,7 +44,7 @@ export class WorkspacesController {
         if (!user || !user.uuid) {
             throw new Error("User not authenticated or missing UUID");
         }
-
+        
         const entity = await this.workspacesService.add({
             name: dto.name,
             description: dto.description,

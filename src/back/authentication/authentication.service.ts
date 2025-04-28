@@ -20,14 +20,16 @@ export class AuthService {
         });
     }
 
-    createSession(user: User): Promise<Session> {
+    async createSession(user: User): Promise<Session> {
         const uuid = randomUUID();
-        return this.sessionRepo.save({
+        const result = await this.sessionRepo.save({
             owner: user,
             uuid: uuid,
             second_duration: 600,
             token: this.jwtService.sign(uuid),
         });
+        console.log("Result:", result);
+        return result;
     }
 
     isSessionValid(session: Session): boolean {

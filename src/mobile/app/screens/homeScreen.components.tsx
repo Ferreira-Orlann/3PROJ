@@ -87,7 +87,7 @@ export const WorkspaceItem = ({ workspace, onSelect }: WorkspaceItemProps) => {
     <View style={styles.workspaceHeader}>
       <View style={styles.workspaceAvatarContainer}>
         <View style={styles.workspaceAvatar}>
-          <Text style={styles.workspaceAvatarText}>{workspace.name[0]}</Text>
+          <Text style={styles.workspaceAvatarText}>{workspace.name && workspace.name.length > 0 ? workspace.name[0] : '?'}</Text>
         </View>
         <View 
           style={[styles.statusBadge, { backgroundColor: workspace.is_public ? '#43b581' : '#faa61a' }]}
