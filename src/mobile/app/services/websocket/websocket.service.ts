@@ -1,0 +1,309 @@
+import { io, Socket } from 'socket.io-client';
+import { API_BASE_URL } from '../api/config';
+import { UUID } from 'crypto';
+import { Message } from '../api/endpoints/messages';
+import { Reaction } from '../api/endpoints/reactions';
+
+// Import Events enum to match backend events
+enum Events {
+  MESSAGE_CREATED = 'message.created',
+  MESSAGE_UPDATED = 'message.updated',
+  MESSAGE_REMOVED = 'message.removed',
+  REACTION_CREATED = 'reaction.created',
+  REACTION_UPDATED = 'reaction.updated',
+  REACTION_REMOVED = 'reaction.removed'
+}
+
+// Mapping des événements backend vers les événements mobile
+const EVENT_MAPPING: { [key: string]: string } = {
+  // Backend events -> Mobile events
+  [Events.MESSAGE_CREATED]: 'message_sent',
+  [Events.MESSAGE_UPDATED]: 'message_updated',
+  [Events.MESSAGE_REMOVED]: 'message_removed',
+  [Events.REACTION_CREATED]: 'reaction_added',
+  [Events.REACTION_UPDATED]: 'reaction_updated',
+  [Events.REACTION_REMOVED]: 'reaction_removed',
+  
+  // Mobile events -> Backend events (inverse mapping)
+  'message_sent': Events.MESSAGE_CREATED,
+  'message_updated': Events.MESSAGE_UPDATED,
+  'message_removed': Events.MESSAGE_REMOVED,
+  'reaction_added': Events.REACTION_CREATED,
+  'reaction_updated': Events.REACTION_UPDATED,
+  'reaction_removed': Events.REACTION_REMOVED
+};
+
+type EventCallback = (data: any) => void;
+
+/**
+ * Service pour gérer les connexions WebSocket
+ */
+class WebSocketService {
+  private socket: Socket | null = null;
+  private token: string | null = null;
+  private eventListeners: Map<string, EventCallback[]> = new Map();
+  private reconnectAttempts = 0;
+  private maxReconnectAttempts = 5;
+  private reconnectDelay = 2000; // 2 secondes
+
+  /**
+   * Initialise la connexion WebSocket
+   */
+  connect(token: string): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      if (this.socket && this.socket.connected) {
+        console.log('WebSocket - Déjà connecté');
+        resolve(true);
+        return;
+      }
+
+      this.token = token;
+      console.log('WebSocket - Tentative de connexion avec token:', token);
+
+      // Initialiser la connexion Socket.IO
+      this.socket = io(API_BASE_URL, {
+        extraHeaders: {
+          Authorization: `Bearer ${token}`
+        },
+        auth: {
+          token: token
+        },
+        transports: ['websocket'],
+        reconnection: true,
+        reconnectionAttempts: this.maxReconnectAttempts,
+        reconnectionDelay: this.reconnectDelay
+      });
+
+      // Gérer les événements de connexion
+      this.socket.on('connect', () => {
+        console.log('WebSocket - Connecté avec succès');
+        this.reconnectAttempts = 0;
+        resolve(true);
+      });
+
+      this.socket.on('connect_error', (error) => {
+        console.error('WebSocket - Erreur de connexion:', error);
+        this.reconnectAttempts++;
+        if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+          console.error('WebSocket - Nombre maximum de tentatives de reconnexion atteint');
+          reject(error);
+        }
+      });
+
+      this.socket.on('disconnect', (reason) => {
+        console.log('WebSocket - Déconnecté:', reason);
+      });
+
+      // Écouter les messages génériques
+      this.socket.on('message', (data) => {
+        console.log('WebSocket - Message reçu:', data);
+        // Les données venant du backend sont structurées avec event et payload
+        if (data && data.message && data.data) {
+          this.handleEvent(data.message, data.data);
+        }
+      });
+
+      // Écouter les événements spécifiques aux réactions
+      this.socket.on('reaction', (data) => {
+        console.log('WebSocket - Nouvelle réaction reçue:', data);
+        this.handleEvent('reaction_added', data);
+      });
+
+      this.socket.on('reaction_updated', (data) => {
+        console.log('WebSocket - Réaction mise à jour reçue:', data);
+        this.handleEvent('reaction_updated', data);
+      });
+
+      this.socket.on('reaction_removed', (data) => {
+        console.log('WebSocket - Réaction supprimée reçue:', data);
+        this.handleEvent('reaction_removed', data);
+      });
+    });
+  }
+
+  /**
+   * Se déconnecter du WebSocket
+   */
+  disconnect(): void {
+    if (this.socket) {
+      console.log('WebSocket - Déconnexion');
+      this.socket.disconnect();
+      this.socket = null;
+      this.token = null;
+      this.eventListeners.clear();
+    }
+  }
+
+  /**
+   * S'abonner à un événement
+   * Supporte à la fois les noms d'événements backend et mobile
+   */
+  on(event: string, callback: EventCallback): () => void {
+    console.log(`WebSocket - Abonnement à l'événement: ${event}`);
+    
+    // S'abonner à l'événement spécifié
+    if (!this.eventListeners.has(event)) {
+      this.eventListeners.set(event, []);
+    }
+    
+    const listeners = this.eventListeners.get(event);
+    listeners?.push(callback);
+    
+    // S'abonner également à l'événement mappé si différent
+    const mappedEvent = EVENT_MAPPING[event];
+    if (mappedEvent && mappedEvent !== event) {
+      console.log(`WebSocket - Abonnement croisé à l'événement mappé: ${mappedEvent}`);
+      
+      if (!this.eventListeners.has(mappedEvent)) {
+        this.eventListeners.set(mappedEvent, []);
+      }
+      
+      const mappedListeners = this.eventListeners.get(mappedEvent);
+      mappedListeners?.push(callback);
+    }
+    
+    // Retourner une fonction pour se désabonner
+    return () => {
+      this.off(event, callback);
+    };
+  }
+  
+  /**
+   * Se désabonner d'un événement spécifique
+   * Supporte à la fois les noms d'événements backend et mobile
+   */
+  off(event: string, callback: EventCallback): void {
+    console.log(`WebSocket - Désabonnement de l'événement: ${event}`);
+    
+    // Récupérer les listeners pour cet événement
+    const listeners = this.eventListeners.get(event);
+    if (listeners) {
+      // Désabonner de l'événement principal
+      const index = listeners.indexOf(callback);
+      if (index !== -1) {
+        listeners.splice(index, 1);
+      }
+    }
+    
+    // Désabonner également de l'événement mappé si différent
+    const mappedEvent = EVENT_MAPPING[event];
+    if (mappedEvent && mappedEvent !== event) {
+      const mappedListeners = this.eventListeners.get(mappedEvent);
+      if (mappedListeners) {
+        const mappedIndex = mappedListeners.indexOf(callback);
+        if (mappedIndex !== -1) {
+          mappedListeners.splice(mappedIndex, 1);
+        }
+      }
+    }
+  }
+
+  /**
+   * Envoyer un message via WebSocket
+   */
+  send(event: string, data: any): boolean {
+    if (!this.socket || !this.socket.connected) {
+      console.error('WebSocket - Impossible d\'envoyer un message: non connecté');
+      return false;
+    }
+    
+    console.log(`WebSocket - Envoi d'un message: ${event}`, data);
+    
+    // Mapper l'événement mobile vers l'événement backend si nécessaire
+    const backendEvent = EVENT_MAPPING[event] || event;
+    
+    // Format attendu par le backend: { message: event, data: payload }
+    this.socket.emit('message', {
+      message: backendEvent,
+      data: data
+    });
+    
+    // Déclencher l'événement localement pour mise à jour immédiate de l'UI
+    this.handleEvent(event, data);
+    
+    return true;
+  }
+
+  /**
+   * Alias pour send - pour compatibilité avec l'API Socket.io
+   */
+  emit(event: string, data: any): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      try {
+        const result = this.send(event, data);
+        resolve(result);
+      } catch (error) {
+        console.error(`WebSocket - Erreur lors de l'envoi de l'événement ${event}:`, error);
+        reject(error);
+      }
+    });
+  }
+
+  /**
+   * Gérer un événement reçu
+   */
+  private handleEvent(event: string, data: any): void {
+    console.log(`WebSocket - Traitement de l'événement: ${event}`, data);
+    
+    // Notifier tous les listeners pour cet événement
+    const listeners = this.eventListeners.get(event);
+    if (listeners && listeners.length > 0) {
+      listeners.forEach(callback => {
+        try {
+          callback(data);
+        } catch (error) {
+          console.error(`WebSocket - Erreur dans le callback pour l'événement ${event}:`, error);
+        }
+      });
+    } else {
+      console.log(`WebSocket - Aucun listener pour l'événement: ${event}`);
+    }
+    
+    // Notifier également les listeners pour l'événement mappé si différent
+    const mappedEvent = EVENT_MAPPING[event];
+    if (mappedEvent && mappedEvent !== event) {
+      const mappedListeners = this.eventListeners.get(mappedEvent);
+      if (mappedListeners && mappedListeners.length > 0) {
+        mappedListeners.forEach(callback => {
+          try {
+            callback(data);
+          } catch (error) {
+            console.error(`WebSocket - Erreur dans le callback pour l'événement mappé ${mappedEvent}:`, error);
+          }
+        });
+      }
+    }
+  }
+
+  /**
+   * Envoyer un message à un canal
+   */
+  sendMessageToChannel(channelUuid: UUID, content: string): boolean {
+    return this.send('message_sent', {
+      destination_channel: channelUuid,
+      message: content,
+      is_public: true
+    });
+  }
+  
+  /**
+   * Envoyer un message privé à un utilisateur
+   */
+  sendDirectMessage(userUuid: UUID, content: string): boolean {
+    return this.send('message_sent', {
+      destination_user: userUuid,
+      message: content,
+      is_public: false
+    });
+  }
+
+  /**
+   * Vérifier si le WebSocket est connecté
+   */
+  isConnected(): boolean {
+    return !!this.socket && this.socket.connected;
+  }
+}
+
+// Exporter une instance singleton
+export default new WebSocketService();

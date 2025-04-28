@@ -14,13 +14,13 @@ import { MessagesModule } from "./messages/messages.module";
 import { ChannelsModule } from "./channels/channels.module";
 import { ReactionsModule } from "./reactions/reactions.module";
 import { AuthModule } from "./authentication/authentication.module";
-import {User} from "./users/users.entity";
-import {Workspace} from "./workspaces/workspaces.entity";
-import {Channel} from "./channels/channels.entity";
-import {Message} from "./messages/messages.entity";
-import {Session} from "./authentication/session.entity";
-import {Reaction} from "./reactions/reactions.entity";
-import {WorkspaceMember} from "./workspaces/members/workspace_members.entity";
+import { User } from "./users/users.entity";
+import { Workspace } from "./workspaces/workspaces.entity";
+import { Channel } from "./channels/channels.entity";
+import { Message } from "./messages/messages.entity";
+import { Session } from "./authentication/session.entity";
+import { Reaction } from "./reactions/reactions.entity";
+import { WorkspaceMember } from "./workspaces/members/workspace_members.entity";
 
 @Module({
     imports: [
@@ -55,7 +55,9 @@ import {WorkspaceMember} from "./workspaces/members/workspace_members.entity";
                         Session,
                         Reaction,
                     ],
-                    synchronize: config.get<boolean>("DATABASE_TYPEORM_SYNCHRONISE"),
+                    synchronize: config.get<boolean>(
+                        "DATABASE_TYPEORM_SYNCHRONISE",
+                    ),
                     logging: true,
                 } as TypeOrmModuleOptions;
             },

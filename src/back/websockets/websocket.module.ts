@@ -8,6 +8,7 @@ import { MessagesModule } from "../messages/messages.module";
 import { AuthModule } from "../authentication/authentication.module";
 import { ReactionsModule } from "../reactions/reactions.module";
 import { ReactionsListener } from "./listeners/reactions";
+import { MessageHandler } from "./handlers/message.handler";
 @Module({
     imports: [AuthModule, MessagesModule, ReactionsModule],
     controllers: [],
@@ -17,6 +18,7 @@ import { ReactionsListener } from "./listeners/reactions";
         WebSocketAuth,
         MessagesListener,
         ReactionsListener,
+        MessageHandler,
         Test,
     ],
 })

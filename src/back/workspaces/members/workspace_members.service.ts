@@ -23,6 +23,15 @@ export class WorkspacesMembersService {
         });
     }
 
+    async findByWorkspaceId(workspaceId: UUID): Promise<WorkspaceMember[]> {
+        return this.workspaceMembersRepo.find({
+            where: {
+                workspace: { uuid: workspaceId }
+            },
+            relations: ["user", "workspace"],
+        });
+    }
+
     async findOne(uuid: UUID): Promise<WorkspaceMember> {
         const member = await this.workspaceMembersRepo.findOne({
             where: { uuid },
@@ -52,7 +61,9 @@ export class WorkspacesMembersService {
 
         const workspace = await this.workspacesRepo.findOneBy({
             uuid: workspace_uuid,
+            
         });
+        console.log("Workspace found:", workspace);
         if (!workspace) {
             throw new NotFoundException(
                 `Workspace with UUID ${workspace_uuid} not found`,

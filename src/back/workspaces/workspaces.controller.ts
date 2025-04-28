@@ -22,16 +22,11 @@ export class WorkspacesController {
     constructor(private readonly workspacesService: WorkspacesService) {}
 
     @Get()
-    async findAll(@Req() request: any) {
-        // Log the authenticated user for debugging
-        console.log('Authenticated user:', request.user);
+    async findAll() {
         const result = await this.workspacesService.findAll();
-        console.log("result", result)
-        
-        // Proceed with finding all workspaces
         return result;
     }
-    
+
     @Get(":id")
     async findOne(@Param("id") id: UUID): Promise<Workspace> {
         const workspace = await this.workspacesService.findOne(id);
@@ -43,17 +38,19 @@ export class WorkspacesController {
 
     @Post()
     async create(@Req() request: any, @Body() dto: CreateWorkspaceDto) {
-        // Access the user object that was set by HttpAuthGuard
         const user = request.user;
-        
+
         if (!user || !user.uuid) {
-            throw new Error('User not authenticated or missing UUID');
+            throw new Error("User not authenticated or missing UUID");
         }
+
+        const entity = await this.workspacesService.add({
+            name: dto.name,
+            description: dto.description,
+            owner_uuid: user.uuid, 
+            createdAt: dto.createdAt ?? new Date(), 
+        });
         
-        const entity = await this.workspacesService.add(
-            dto.name,
-            user.uuid, // Use user.uuid instead of user_id
-        );
         return entity;
     }
 

@@ -28,37 +28,39 @@ export class WebSocketPool implements OnGatewayConnection, OnGatewayDisconnect {
     constructor(private readonly authService: AuthService) {}
 
     handleConnection(client: Socket, ...args: any[]) {
-        this.isClientAuthenticated(client).then(async ([isValid, session]) => {
-            console.log("Is Valid", isValid);
-            if (!isValid) {
-                client.disconnect(true);
-            }
-            const user = await session.owner;
-            const record = {
-                socket: client,
-                workspace: [],
-            } as UserPoolRecord;
-            console.log("sessions", session, user);
-            const workspace_members = await user.workspace_members;
-            console.log("workspace_members", workspace_members);
-            workspace_members.forEach(async (workspace_member) => {
-                const workspace = await workspace_member.workspace;
-                console.log("workspace", workspace);
-                const workspaceUuid = workspace.uuid;
-                let pool = this.workspacesPool.get(workspaceUuid);
-                if (pool == undefined) {
-                    pool = [client];
-                    this.workspacesPool.set(workspaceUuid, pool);
+        this.isClientAuthenticated(client)
+            .then(async ([isValid, session]) => {
+                console.log("Is Valid", isValid);
+                if (!isValid) {
+                    client.disconnect(true);
                 }
-                record.workspace.push(workspaceUuid);
+                const user = await session.owner;
+                const record = {
+                    socket: client,
+                    workspace: [],
+                } as UserPoolRecord;
+                console.log("sessions", session, user);
+                const workspace_members = await user.workspace_members;
+                console.log("workspace_members", workspace_members);
+                workspace_members.forEach(async (workspace_member) => {
+                    const workspace = await workspace_member.workspace;
+                    console.log("workspace", workspace);
+                    const workspaceUuid = workspace.uuid;
+                    let pool = this.workspacesPool.get(workspaceUuid);
+                    if (pool == undefined) {
+                        pool = [client];
+                        this.workspacesPool.set(workspaceUuid, pool);
+                    }
+                    record.workspace.push(workspaceUuid);
+                });
+                this.usersPool.set(user.uuid, record);
+                client["user"] = user;
+                console.log(this.workspacesPool);
+                console.log(this.usersPool);
+            })
+            .catch((reason) => {
+                client.disconnect(true);
             });
-            this.usersPool.set(user.uuid, record);
-            client["user"] = user;
-            console.log(this.workspacesPool);
-            console.log(this.usersPool);
-        }).catch((reason) => {
-            client.disconnect(true)
-        });
     }
 
     handleDisconnect(client: Socket) {
@@ -103,9 +105,9 @@ export class WebSocketPool implements OnGatewayConnection, OnGatewayDisconnect {
 
     sendEvent(socket: Socket, event: Events, payload: any) {
         socket.emit("message_sent", {
-            "timestamp": Math.floor(Date.now() / 1000),
-            "event": event,
-            "payload":  payload
+            timestamp: Math.floor(Date.now() / 1000),
+            event: event,
+            payload: payload,
         });
     }
 }

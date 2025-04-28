@@ -19,13 +19,20 @@ export class UsersService {
     findPaging(page: number, pageSize: number): Promise<User[]> {
         return this.usersRepo.find({
             skip: (page - 1) * pageSize,
-            take: pageSize  
+            take: pageSize,
         });
     }
 
     findOneByUuid(uuid: UUID): Promise<User | null> {
         return this.usersRepo.findOne({
             where: { uuid },
+            relations: ["workspace_members", "workspace_members.workspace"],
+        });
+    }
+
+    findOneByEmail(email: string): Promise<User | null> {
+        return this.usersRepo.findOne({
+            where: { email },
             relations: ["workspace_members", "workspace_members.workspace"],
         });
     }

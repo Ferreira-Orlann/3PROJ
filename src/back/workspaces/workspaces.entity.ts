@@ -23,20 +23,26 @@ export class Workspace {
     @Column()
     name: string;
 
+    @Column({ nullable: true })
+    description: string;
+
     @Column({
         name: "is_public",
         default: false,
     })
     is_public: boolean;
 
-    @Transform(({value}) => null)
+    @Column({ nullable: true })
+    createdAt: Date;
+
+    @Transform(({ value }) => null)
     @OneToMany(() => Channel, (channel) => channel.workspace)
     channels: Promise<Channel[]>;
 
     @Column({ name: "owner_uuid", nullable: true })
     owner_uuid: UUID;
-    
-    @Transform(({value}) => value?.uuid)
+
+    @Transform(({ value }) => value?.uuid)
     @ManyToOne(() => User, (user) => user.ownedWorkspaces, {})
     @JoinColumn({
         name: "owner_uuid",
@@ -44,7 +50,7 @@ export class Workspace {
     })
     owner: User;
 
-    @Transform(({value}) => null)
+    @Transform(({ value }) => null)
     @OneToMany(() => WorkspaceMember, (member) => member.workspace)
     members: Promise<WorkspaceMember[]>;
 }

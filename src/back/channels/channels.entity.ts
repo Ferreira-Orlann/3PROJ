@@ -23,10 +23,16 @@ export class Channel {
     @Column()
     name: string;
 
-    @Column({ default: false })
-    isPublic: boolean;
+    @Column({ nullable: true })
+    description: string;
 
-    @Transform(({value}) => value.uuid)
+    @Column({ default: false })
+    is_public: boolean;
+
+    @Column({ nullable: true })
+    createdAt: Date;
+
+    @Transform(({ value }) => value.uuid)
     @ManyToOne(() => User, (user) => user.createdChannels)
     @JoinColumn({
         name: "creator_uuid",
@@ -34,8 +40,10 @@ export class Channel {
     })
     creator: User;
 
-    @Transform(({value}) => value.uuid)
-    @ManyToOne(() => Workspace, (workspace) => workspace.channels, {eager: true})
+    @Transform(({ value }) => value.uuid)
+    @ManyToOne(() => Workspace, (workspace) => workspace.channels, {
+        eager: true,
+    })
     @JoinColumn({
         name: "workspace_uuid",
         referencedColumnName: "uuid",
