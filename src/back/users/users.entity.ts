@@ -54,6 +54,11 @@ export class User {
     @ApiProperty()
     email: string;
 
+    @Column({ nullable: true })
+    @Expose()
+    @ApiProperty({ required: false })
+    mdp: string;
+
     @Column()
     @Expose()
     @ApiProperty()

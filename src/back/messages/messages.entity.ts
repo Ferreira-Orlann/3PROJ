@@ -29,7 +29,7 @@ export class Message {
     @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
     date: Date;
 
-    @Transform(({value}) => value.uuid)
+    @Transform(({value}) => value?.uuid)
     @ManyToOne(() => User, { nullable: false })
     @JoinColumn({
         name: "source_uuid",
@@ -37,7 +37,7 @@ export class Message {
     })
     source: User;
 
-    @Transform(({value}) => value.uuid)
+    @Transform(({value}) => value?.uuid)
     @ManyToOne(() => User, (user) => user.createdMessage, { nullable: true })
     @JoinColumn({
         name: "destination_user_uuid",
@@ -45,7 +45,7 @@ export class Message {
     })
     destination_user: User | null;
 
-    @Transform(({value}) => value.uuid)
+    @Transform(({value}) => value?.uuid)
     @ManyToOne(() => Channel, (channel) => channel.createdMessage, {
         nullable: true,
     })

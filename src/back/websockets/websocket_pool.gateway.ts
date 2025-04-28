@@ -102,7 +102,7 @@ export class WebSocketPool implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     sendEvent(socket: Socket, event: Events, payload: any) {
-        socket.emit("message_sent", {
+        socket.emit(" ", {
             "timestamp": Math.floor(Date.now() / 1000),
             "event": event,
             "payload":  payload

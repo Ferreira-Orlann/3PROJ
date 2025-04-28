@@ -4,6 +4,7 @@ import { Workspace } from "./workspaces.entity";
 import { Repository } from "typeorm";
 import { WorkspacesMembersService } from "./members/workspace_members.service";
 import { UUID } from "crypto";
+import { CreateWorkspaceDto } from "./workspaces.dto";
 
 @Injectable()
 export class WorkspacesService {
@@ -15,15 +16,14 @@ export class WorkspacesService {
 
     async findAll(): Promise<Workspace[]> {
         try {
-            console.log('Finding all workspaces');
-            // Include relations to properly load related entities
             const workspaces = await this.workspacesRepo.find({
                 relations: ['owner']
             });
-            console.log('Found workspaces:', workspaces);
-            return workspaces || [];
+            
+            return workspaces;
         } catch (error) {
-            console.error('Error finding workspaces:', error);
+            console.error('Error finding workspaces:', error instanceof Error ? error.message : String(error));
+            console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace available');
             return [];
         }
     }
@@ -44,13 +44,15 @@ export class WorkspacesService {
         this.workspacesRepo.delete(uuid);
     }
 
-    async add(name: string, owner_uuid: UUID): Promise<Workspace> {
+    async add(dto: CreateWorkspaceDto): Promise<Workspace> {
         const workspace = await this.workspacesRepo.save({
-            name: name,
-            owner_uuid: owner_uuid,
+            name: dto.name,
+            description: dto.description,
+            owner_uuid: dto.owner_uuid,
+            createdAt: dto.createdAt,
         });
-        await this.workspaceMembersService.add(owner_uuid, workspace.uuid);
-
+        await this.workspaceMembersService.add(dto.owner_uuid, workspace.uuid);
+    
         return workspace;
     }
 

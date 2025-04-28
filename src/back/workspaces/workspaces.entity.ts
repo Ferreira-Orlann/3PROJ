@@ -23,11 +23,17 @@ export class Workspace {
     @Column()
     name: string;
 
+    @Column({ nullable: true })
+    description: string;
+
     @Column({
         name: "is_public",
         default: false,
     })
     is_public: boolean;
+
+    @Column({ nullable: true })
+    createdAt: Date;
 
     @Transform(({value}) => null)
     @OneToMany(() => Channel, (channel) => channel.workspace)

@@ -23,8 +23,14 @@ export class Channel {
     @Column()
     name: string;
 
+    @Column({ nullable: true })
+    description: string;
+
     @Column({ default: false })
-    isPublic: boolean;
+    is_public: boolean;
+
+    @Column({ nullable: true })
+    createdAt: Date;
 
     @Transform(({value}) => value.uuid)
     @ManyToOne(() => User, (user) => user.createdChannels)

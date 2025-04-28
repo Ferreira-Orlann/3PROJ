@@ -84,10 +84,22 @@ export class UsersController {
         return this.usersService.findAll();
     }
 
-
     @Get(":id")
-    getById(@Param("id") id: UUID) {
-        return this.usersService.findOneByUuid(id);
+    @ApiParam({
+        name: "id",
+        required: true,
+        type: String,
+        description: "User UUID"
+    })
+    @ApiResponse({
+        type: User
+    })
+    async getById(@Param("id") id: UUID) {
+        const user = await this.usersService.findOneByUuid(id);
+        if (!user) {
+            return null;
+        }
+        return user;
     }
 
     @Post()

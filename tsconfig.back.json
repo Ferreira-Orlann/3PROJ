@@ -19,5 +19,5 @@
     "noFallthroughCasesInSwitch": false,
     "strict": true
   },
-  "exclude": ["src/front", "vite.config.ts"]
+  "exclude": ["src/front", "src/mobile", "vite.config.ts", "node_modules"]
 }

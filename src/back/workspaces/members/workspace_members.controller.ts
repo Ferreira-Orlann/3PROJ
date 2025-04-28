@@ -21,8 +21,8 @@ export class WorkspacesMembersController {
     ) {}
 
     @Get()
-    getAll() {
-        return this.workspacesMembersService.findAll();
+    getAll(@Param("workspaceId") workspaceId: UUID) {
+        return this.workspacesMembersService.findByWorkspaceId(workspaceId);
     }
 
     @Get(":memberId")
