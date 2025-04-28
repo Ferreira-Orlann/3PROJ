@@ -7,6 +7,7 @@ import {
     Put,
     Query,
     Request,
+    SerializeOptions,
     UseGuards,
 } from "@nestjs/common";
 import { UsersService } from "./users.service";
@@ -21,6 +22,7 @@ import { ApiParam, ApiQuery, ApiResponse } from "@nestjs/swagger";
 import { User, BasicUser } from "./users.entity";
 import { data } from "react-router-dom";
 import { plainToInstance } from "class-transformer";
+import { Validate } from "class-validator";
 
 @Controller("users")
 export class UsersController {
@@ -96,11 +98,13 @@ export class UsersController {
     }
 
     @Post()
-    async create(@Body() dto: CreateUserDto) {
-        return await this.usersService.add(dto);
+    @SerializeOptions({ type: User })
+    create(@Body() dto: CreateUserDto): Promise<User> {
+        return this.usersService.add(dto);
     }
 
     @Put(":uuid")
+    @SerializeOptions({ type: User })
     async update(@Param("uuid") uuid: UUID, @Body() dto: CreateUserDto) {
         return await this.usersService.update(uuid, dto);
     }

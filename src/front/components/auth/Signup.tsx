@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from "axios"
 
 const Signup = () => {
     const [formData, setFormData] = useState({
@@ -7,6 +8,7 @@ const Signup = () => {
         lastname: "",
         email: "",
         address: "",
+        password: ""
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -17,19 +19,14 @@ const Signup = () => {
         e.preventDefault();
 
         try {
-            const response = await fetch("http://localhost:3000/api/users", {
-                method: "POST",
+            const res = await axios.post("http://localhost:3000/users", JSON.stringify(formData), {
                 headers: {
                     "Content-Type": "application/json",
-                },
-                body: JSON.stringify(formData),
-            });
+                }
+            })
 
-            if (!response.ok) {
-                throw new Error("Échec de l'inscription");
-            }
-
-            const data = await response.json();
+            const data = await res.data
+            console.log(JSON.stringify(formData))
             console.log("Inscription réussie :", data);
             // Tu peux rediriger vers /dashboard ici si besoin
         } catch (error) {
@@ -39,9 +36,6 @@ const Signup = () => {
 
     return (
         <div className="chat-window">
-            <div className="chat-header">
-                <h2>Inscription</h2>
-            </div>
             <form className="chat-input" onSubmit={handleSubmit}>
                 <input
                     type="text"
@@ -80,6 +74,14 @@ const Signup = () => {
                     name="address"
                     placeholder="Adresse"
                     value={formData.address}
+                    onChange={handleChange}
+                    required
+                />
+                <input
+                    type="text"
+                    name="password"
+                    placeholder="Mot de passe"
+                    value={formData.password}
                     onChange={handleChange}
                     required
                 />
