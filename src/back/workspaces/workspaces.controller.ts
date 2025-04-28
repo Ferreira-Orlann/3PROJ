@@ -26,7 +26,7 @@ export class WorkspacesController {
         const result = await this.workspacesService.findAll();
         return result;
     }
-    
+
     @Get(":id")
     async findOne(@Param("id") id: UUID): Promise<Workspace> {
         const workspace = await this.workspacesService.findOne(id);
@@ -39,11 +39,11 @@ export class WorkspacesController {
     @Post()
     async create(@Req() request: any, @Body() dto: CreateWorkspaceDto) {
         const user = request.user;
-        
+
         if (!user || !user.uuid) {
-            throw new Error('User not authenticated or missing UUID');
+            throw new Error("User not authenticated or missing UUID");
         }
-        
+
         const entity = await this.workspacesService.add({
             name: dto.name,
             description: dto.description,

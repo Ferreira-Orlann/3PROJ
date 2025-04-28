@@ -16,7 +16,11 @@ export class MessagesListener {
             );
             if (sockets) {
                 sockets.forEach((socket) => {
-                    this.pool.sendEvent(socket, Events.MESSAGE_CREATED, message)
+                    this.pool.sendEvent(
+                        socket,
+                        Events.MESSAGE_CREATED,
+                        message,
+                    );
                 });
             }
         } else if (message.destination_user) {
@@ -25,7 +29,11 @@ export class MessagesListener {
             );
 
             if (userRecord) {
-                this.pool.sendEvent(userRecord.socket, Events.MESSAGE_CREATED, message)
+                this.pool.sendEvent(
+                    userRecord.socket,
+                    Events.MESSAGE_CREATED,
+                    message,
+                );
             }
         }
     }
@@ -34,11 +42,21 @@ export class MessagesListener {
     async handleUpdatedMessage(message: Message) {
         console.log("📝 Message mis à jour :", message);
         if (message.destination_channel) {
-            const sockets = this.pool.getWorkspaceWebsockets(message.destination_channel.workspace.uuid);
-            sockets?.forEach((socket) => this.pool.sendEvent(socket, Events.MESSAGE_UPDATED, message));
+            const sockets = this.pool.getWorkspaceWebsockets(
+                message.destination_channel.workspace.uuid,
+            );
+            sockets?.forEach((socket) =>
+                this.pool.sendEvent(socket, Events.MESSAGE_UPDATED, message),
+            );
         } else if (message.destination_user) {
-            const userRecord = this.pool.getUserPoolRecord(message.destination_user.uuid);
-            this.pool.sendEvent(userRecord?.socket, Events.MESSAGE_UPDATED, message)
+            const userRecord = this.pool.getUserPoolRecord(
+                message.destination_user.uuid,
+            );
+            this.pool.sendEvent(
+                userRecord?.socket,
+                Events.MESSAGE_UPDATED,
+                message,
+            );
         }
     }
 
@@ -46,12 +64,21 @@ export class MessagesListener {
     async handleDeletedMessage(message: Message) {
         console.log("🗑 Message supprimé :", message);
         if (message.destination_channel) {
-            const sockets = this.pool.getWorkspaceWebsockets(message.destination_channel.workspace.uuid);
-            sockets?.forEach((socket) => this.pool.sendEvent(socket, Events.MESSAGE_REMOVED, { messageId: message.uuid }));
-            
+            const sockets = this.pool.getWorkspaceWebsockets(
+                message.destination_channel.workspace.uuid,
+            );
+            sockets?.forEach((socket) =>
+                this.pool.sendEvent(socket, Events.MESSAGE_REMOVED, {
+                    messageId: message.uuid,
+                }),
+            );
         } else if (message.destination_user) {
-            const userRecord = this.pool.getUserPoolRecord(message.destination_user.uuid);
-            this.pool.sendEvent(userRecord?.socket, Events.MESSAGE_REMOVED, { messageId: message.uuid })
+            const userRecord = this.pool.getUserPoolRecord(
+                message.destination_user.uuid,
+            );
+            this.pool.sendEvent(userRecord?.socket, Events.MESSAGE_REMOVED, {
+                messageId: message.uuid,
+            });
         }
     }
 }

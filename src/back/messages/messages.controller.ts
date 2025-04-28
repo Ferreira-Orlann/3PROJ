@@ -1,11 +1,19 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from "@nestjs/common";
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Post,
+    Put,
+    UseGuards,
+} from "@nestjs/common";
 import { MessagesService } from "./messages.service";
 import { CreateMessageDto } from "./messages.dto";
 import { UUID } from "crypto";
 import { AuthorizationGuard } from "../authorization/authorization.guard";
 import { HttpAuthGuard } from "../authentication/http.authentication.guard";
 import { Authorize } from "../authorization/authorization.decorator";
-
 
 @Controller([
     "workspaces/:workspaceUuid/channels/:channelUuid/messages",
@@ -40,7 +48,7 @@ export class MessagesController {
         @Param("channelUuid") channelUuid: UUID,
         @Param("messageUuid") messageUuid: UUID,
         @Body() dto: CreateMessageDto,
-    ){
+    ) {
         return this.messagesService.update(messageUuid, dto);
     }
 

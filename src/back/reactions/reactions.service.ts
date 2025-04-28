@@ -32,11 +32,20 @@ export class ReactionsService {
     findOneBy(uuid: UUID): Promise<Reaction | null> {
         return this.reactionRepo.findOne({
             where: { uuid },
-            relations: ["user", "message", "message.source", "message.destination_user", "message.destination_channel"],
+            relations: [
+                "user",
+                "message",
+                "message.source",
+                "message.destination_user",
+                "message.destination_channel",
+            ],
         });
     }
 
-    async update(uuid: UUID, dto: Partial<CreateReactionDto>): Promise<Reaction> {
+    async update(
+        uuid: UUID,
+        dto: Partial<CreateReactionDto>,
+    ): Promise<Reaction> {
         const reaction = await this.findOneBy(uuid);
         if (!reaction) {
             throw new NotFoundException(`Reaction with UUID ${uuid} not found`);
@@ -57,8 +66,6 @@ export class ReactionsService {
         await this.reactionRepo.delete(uuid);
         this.eventEmitter.emit(Events.REACTION_REMOVED, reaction);
     }
-
-
 
     async add(dto: CreateReactionDto): Promise<Reaction> {
         const user = await this.usersService.findOneByUuid(dto.user_uuid);

@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, Delete, UseGuards } from "@nestjs/common";
+import {
+    Body,
+    Controller,
+    Get,
+    Param,
+    Post,
+    Delete,
+    UseGuards,
+} from "@nestjs/common";
 import { ChannelsService } from "./channels.service";
 import { CreateChannelDto } from "./channels.dto";
 import { UUID } from "crypto";
@@ -9,7 +17,7 @@ import { AuthorizationGuard } from "../authorization/authorization.guard";
 @UseGuards(HttpAuthGuard, AuthorizationGuard)
 export class ChannelsController {
     constructor(private readonly channelService: ChannelsService) {
-        console.log("Channels Controller")
+        console.log("Channels Controller");
     }
 
     @Get("channels")
@@ -28,7 +36,7 @@ export class ChannelsController {
         return entity;
     }
 
-    @Post("workspaces/:workspaceUuid/channels",)
+    @Post("workspaces/:workspaceUuid/channels")
     async createWorkspaceChannel(@Body() dto: CreateChannelDto) {
         const entity = await this.channelService.add(dto);
         return entity;

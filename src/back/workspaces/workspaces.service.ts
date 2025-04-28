@@ -17,13 +17,12 @@ export class WorkspacesService {
     async findAll(): Promise<Workspace[]> {
         try {
             const workspaces = await this.workspacesRepo.find({
-                relations: ['owner']
+                relations: ["owner"],
             });
             
             return workspaces;
         } catch (error) {
-            console.error('Error finding workspaces:', error instanceof Error ? error.message : String(error));
-            console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace available');
+            console.error("Error finding workspaces:", error);
             return [];
         }
     }
@@ -32,7 +31,7 @@ export class WorkspacesService {
         try {
             return await this.workspacesRepo.findOne({
                 where: { uuid },
-                relations: ['owner']
+                relations: ["owner"],
             });
         } catch (error) {
             console.error(`Error finding workspace with UUID ${uuid}:`, error);

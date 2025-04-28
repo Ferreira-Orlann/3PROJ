@@ -6,7 +6,8 @@ import {
     Generated,
     ManyToOne,
     JoinColumn,
-    Check, OneToMany,
+    Check,
+    OneToMany,
 } from "typeorm";
 import { User } from "../users/users.entity";
 import { Channel } from "../channels/channels.entity";
@@ -29,7 +30,7 @@ export class Message {
     @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
     date: Date;
 
-    @Transform(({value}) => value?.uuid)
+    @Transform(({ value }) => value.uuid)
     @ManyToOne(() => User, { nullable: false })
     @JoinColumn({
         name: "source_uuid",
@@ -37,7 +38,7 @@ export class Message {
     })
     source: User;
 
-    @Transform(({value}) => value?.uuid)
+    @Transform(({ value }) => value.uuid)
     @ManyToOne(() => User, (user) => user.createdMessage, { nullable: true })
     @JoinColumn({
         name: "destination_user_uuid",
@@ -45,7 +46,7 @@ export class Message {
     })
     destination_user: User | null;
 
-    @Transform(({value}) => value?.uuid)
+    @Transform(({ value }) => value.uuid)
     @ManyToOne(() => Channel, (channel) => channel.createdMessage, {
         nullable: true,
     })
@@ -55,6 +56,6 @@ export class Message {
     })
     destination_channel: Channel | null;
 
-    @OneToMany(() => Reaction, (reaction) => reaction.message, {eager: true})
+    @OneToMany(() => Reaction, (reaction) => reaction.message, { eager: true })
     createdReaction: Promise<Reaction[]>;
 }
