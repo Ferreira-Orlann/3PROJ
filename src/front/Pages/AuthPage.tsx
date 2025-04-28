@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import '../styles/auth.css';
-import Signup from '../components/auth/Signup'; // ⬅️ importe ton composant
+import Signup from '../components/auth/Signup';
+import Login from '../components/auth/ Login';
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -9,14 +10,7 @@ const AuthPage = () => {
     <div className="auth-container">
       <div className="auth-box">
         <h2>{isLogin ? 'Connexion' : 'Inscription'}</h2>
-
-        {isLogin ? (
-          // Tu mettras Login ici plus tard
-          <p style={{ textAlign: 'center', margin: '30px 0' }}>Formulaire de connexion à venir</p>
-        ) : (
-          <Signup />
-        )}
-
+        {isLogin ? <Login /> : <Signup />}
         <p>
           {isLogin ? "Pas encore de compte ?" : 'Déjà inscrit ?'}{' '}
           <span onClick={() => setIsLogin(!isLogin)}>

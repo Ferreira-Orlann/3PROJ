@@ -1,0 +1,68 @@
+/* src/front/styles/inviteMemberModal.module.css */
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+  }
+  
+  .modal {
+    background: #1e1e1e;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 400px;
+    max-width: 90%;
+    text-align: center;
+    color: #fff;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+  }
+  
+  .modal h2 {
+    margin-bottom: 1rem;
+  }
+  
+  .modal input {
+    width: 100%;
+    padding: 0.8rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #444;
+    border-radius: 5px;
+    background: #2c2c2c;
+    color: #fff;
+  }
+  
+  .actions {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .actions button {
+    padding: 0.7rem 1.5rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+    transition: background 0.3s;
+  }
+  
+  .actions button:hover {
+    background-color: #0056b3;
+  }
+  
+  .cancel {
+    background-color: #666;
+  }
+  
+  .cancel:hover {
+    background-color: #444;
+  }
+  

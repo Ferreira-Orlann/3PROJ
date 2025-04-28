@@ -1,27 +1,32 @@
-import { ClassSerializerInterceptor, ConsoleLogger } from "@nestjs/common";
-
-import { NestFactory, Reflector } from "@nestjs/core";
-import { AppModule } from "./app.module";
-import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import { NestFactory, Reflector } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { ClassSerializerInterceptor, ConsoleLogger } from '@nestjs/common';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
-    const app = await NestFactory.create(AppModule, {
-        logger: new ConsoleLogger("SupPhone"),
-    });
-    app.enableCors();
+  const app = await NestFactory.create(AppModule, {
+    logger: new ConsoleLogger('SupPhone'), 
+  });
 
-    const config = new DocumentBuilder()
-        .setTitle("Docs")
-        .setDescription("Api Docs")
-        .setVersion('1.0')
-        .build();
-    const documentFactory = () => SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api', app, documentFactory);
+  app.enableCors(); 
 
-    app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector), {
-        strategy: "excludeAll"
-    }))
+  app.setGlobalPrefix('api'); 
 
-    await app.listen(process.env.PORT ?? 3000);
+  // ✅ Setup Swagger (docs API)
+  const config = new DocumentBuilder()
+    .setTitle('Docs')
+    .setDescription('API Docs de SupChat')
+    .setVersion('1.0')
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document); 
+
+  app.useGlobalInterceptors(
+    new ClassSerializerInterceptor(app.get(Reflector), {
+      strategy: 'excludeAll',
+    }),
+  );
+
+  await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

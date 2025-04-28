@@ -17,13 +17,15 @@ const Signup = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch('http://localhost:3000/api/users', {
-        method: 'POST',
+      const response = await fetch("http://localhost:3000/api/users", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
-      });
+      });      
+
+      console.log(response.body)
 
       if (!response.ok) {
         throw new Error("Échec de l'inscription");

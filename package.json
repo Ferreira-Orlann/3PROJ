@@ -43,6 +43,7 @@
     "@opentelemetry/sdk-node": "0.200.0",
     "casbin": "^5.38.0",
     "class-transformer": "^0.5.1",
+    "lucide-react": "^0.503.0",
     "minio": "^8.0.5",
     "nest-authz": "^2.15.0",
     "pg": "^8.14.1",
