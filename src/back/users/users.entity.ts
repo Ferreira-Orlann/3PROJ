@@ -17,13 +17,13 @@ import { OmitType } from "@nestjs/mapped-types";
 })
 @ApiSchema({
     description: "Represent and User",
-    name: "ExposedUser"
+    name: "ExposedUser",
 })
 export class User {
     @PrimaryGeneratedColumn("uuid")
     @Expose()
     @ApiProperty({
-        examples: ["4f8dc026-a1f2-4cd5-a394-ec8c403569c5"]
+        examples: ["4f8dc026-a1f2-4cd5-a394-ec8c403569c5"],
     })
     uuid: UUID;
 
@@ -31,10 +31,10 @@ export class User {
     @Expose()
     @ApiProperty()
     username: string;
-    
+
     @Column({
         default: UserStatus.OFFLINE,
-        enum: UserStatus
+        enum: UserStatus,
     })
     @Expose()
     @ApiProperty()
@@ -65,21 +65,26 @@ export class User {
 
     @OneToMany(() => WorkspaceMember, (member) => member.user)
     workspace_members: Promise<WorkspaceMember[]>;
-    
+
     @OneToMany(() => Channel, (channel) => channel.creator)
     createdChannels: Promise<Channel[]>;
-    
+
     @OneToMany(() => Session, (session) => session.owner)
     sessions: Promise<Session[]>;
-    
+
     @OneToMany(() => Message, (message) => message.source)
-        createdMessage: Promise<Message[]>;
-    
+    createdMessage: Promise<Message[]>;
+
     @OneToMany(() => Reaction, (reaction) => reaction.user)
     createdReaction: Promise<Reaction[]>;
 }
 
 @ApiSchema({
-    name: "User"
+    name: "User",
 })
-export class BasicUser extends OmitType(User, ["email", "firstname", "lastname", "address"]) {}
+export class BasicUser extends OmitType(User, [
+    "email",
+    "firstname",
+    "lastname",
+    "address",
+]) {}

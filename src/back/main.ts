@@ -13,15 +13,17 @@ async function bootstrap() {
     const config = new DocumentBuilder()
         .setTitle("Docs")
         .setDescription("Api Docs")
-        .setVersion('1.0')
+        .setVersion("1.0")
         .build();
     const documentFactory = () => SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api', app, documentFactory);
+    SwaggerModule.setup("api", app, documentFactory);
 
-    app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector), {
-        strategy: "excludeAll",
-        excludeExtraneousValues: true,
-    }))
+    app.useGlobalInterceptors(
+        new ClassSerializerInterceptor(app.get(Reflector), {
+            strategy: "excludeAll",
+            excludeExtraneousValues: true,
+        }),
+    );
 
     await app.listen(process.env.PORT ?? 3000);
 }

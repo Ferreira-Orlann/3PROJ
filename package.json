@@ -7,7 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "back:build": "nest build",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx}\" \"test/**/*.{ts,tsx,js,jsx}\"",
     "back:": "nest start",
     "back:dev": "nest start --watch",
     "back:debug": "nest start --debug --watch",
@@ -44,6 +44,7 @@
     "@opentelemetry/sdk-node": "0.200.0",
     "casbin": "^5.38.0",
     "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
     "minio": "^8.0.5",
     "nest-authz": "^2.15.0",
     "pg": "^8.14.1",

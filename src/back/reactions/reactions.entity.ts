@@ -18,18 +18,19 @@ export class Reaction {
     @Column()
     emoji: string;
 
-    @ManyToOne(() => User, (user) =>  user.createdReaction, { nullable: false })
+    @ManyToOne(() => User, (user) => user.createdReaction, { nullable: false })
     @JoinColumn({
         name: "user_uuid",
         referencedColumnName: "uuid",
     })
     user: User;
 
-    @ManyToOne(() => Message, (message) =>  message.createdReaction, { nullable: false })
+    @ManyToOne(() => Message, (message) => message.createdReaction, {
+        nullable: false,
+    })
     @JoinColumn({
         name: "message_uuid",
         referencedColumnName: "uuid",
     })
     message: Message;
-
 }

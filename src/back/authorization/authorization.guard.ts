@@ -21,14 +21,14 @@ export class AuthorizationGuard implements CanActivate {
     constructor(
         private readonly reflector: Reflector,
         private readonly authzService: AuthZService,
-        private readonly configService: ConfigService
+        private readonly configService: ConfigService,
     ) {}
 
     canActivate(
         context: ExecutionContext,
     ): boolean | Promise<boolean> | Observable<boolean> {
         if (this.configService.get("AUTHORIZATION_ON") == "false") {
-            return true
+            return true;
         }
         const authorize = this.reflector.get<UsePermission>(
             PERMISSIONS_METADATA,

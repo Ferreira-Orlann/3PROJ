@@ -9,7 +9,6 @@ import { WebSocketAuthGuard } from "./ws.authentication.guard";
 import { ConfigService } from "@nestjs/config";
 import { UsersModule } from "../users/users.module";
 
-
 @Module({
     imports: [
         JwtModule.registerAsync({

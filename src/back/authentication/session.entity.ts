@@ -11,6 +11,7 @@ import {
 } from "typeorm";
 import { User } from "../users/users.entity";
 import { Exclude, Transform } from "class-transformer";
+import { IsEmail, IsNotEmpty } from "class-validator";
 
 @Entity({
     name: "sessions",
@@ -24,7 +25,7 @@ export class Session {
         name: "owner_uuid",
         referencedColumnName: "uuid",
     })
-    @Transform(({value}: {value: User}) => value.uuid)
+    @Transform(({ value }: { value: User }) => value.uuid)
     owner: User;
 
     @CreateDateColumn()
@@ -43,4 +44,11 @@ export class Session {
         default: false,
     })
     revoked: boolean;
+}
+
+export class LoginDto {
+    @IsEmail()
+    email: string;
+    @IsNotEmpty()
+    password: string;
 }

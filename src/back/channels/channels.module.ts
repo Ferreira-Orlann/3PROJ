@@ -13,7 +13,7 @@ import { AuthModule } from "../authentication/authentication.module";
     imports: [
         TypeOrmModule.forFeature([Channel, Workspace, User, WorkspaceMember]),
         AuthModule,
-        AuthorizationModule
+        AuthorizationModule,
     ],
     controllers: [ChannelsController],
     providers: [ChannelsService],
