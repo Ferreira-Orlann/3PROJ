@@ -9,14 +9,18 @@ import {
 } from "typeorm";
 import { Workspace } from "../workspaces.entity";
 import { User } from "../../users/users.entity";
+import { Expose, Transform } from "class-transformer";
 
 @Entity({
     name: "workspace_members",
 })
 export class WorkspaceMember {
     @PrimaryGeneratedColumn("uuid")
+    @Expose()
     uuid: UUID;
 
+    @Transform(({ value }) => value?.uuid)
+    @Expose()
     @ManyToOne(() => User, (user) => user.workspace_members, {
         eager: true,
     })
@@ -26,6 +30,8 @@ export class WorkspaceMember {
     })
     user: User;
 
+    @Transform(({ value }) => value?.uuid)
+    @Expose()
     @ManyToOne(() => Workspace, (workspace) => workspace.members, {
         eager: true,
     })

@@ -11,28 +11,34 @@ import {
 import { Workspace } from "../workspaces/workspaces.entity";
 import { User } from "../users/users.entity";
 import { Message } from "../messages/messages.entity";
-import { Exclude, Transform } from "class-transformer";
+import { Exclude, Expose, Transform } from "class-transformer";
 
 @Entity({
     name: "channels",
 })
 export class Channel {
     @PrimaryGeneratedColumn("uuid")
+    @Expose()
     uuid: UUID;
 
     @Column()
+    @Expose()
     name: string;
 
     @Column({ nullable: true })
+    @Expose()
     description: string;
 
     @Column({ default: false })
+    @Expose()
     is_public: boolean;
 
     @Column({ nullable: true })
+    @Expose()
     createdAt: Date;
 
     @Transform(({ value }) => value.uuid)
+    @Expose()
     @ManyToOne(() => User, (user) => user.createdChannels)
     @JoinColumn({
         name: "creator_uuid",
@@ -41,6 +47,7 @@ export class Channel {
     creator: User;
 
     @Transform(({ value }) => value.uuid)
+    @Expose()
     @ManyToOne(() => Workspace, (workspace) => workspace.channels, {
         eager: true,
     })
@@ -52,5 +59,6 @@ export class Channel {
 
     @Exclude()
     @OneToMany(() => Message, (message) => message.destination_channel)
+    @Expose()
     createdMessage: Promise<Message[]>;
 }
