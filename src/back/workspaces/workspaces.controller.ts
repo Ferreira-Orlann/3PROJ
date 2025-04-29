@@ -44,14 +44,14 @@ export class WorkspacesController {
         if (!user || !user.uuid) {
             throw new Error("User not authenticated or missing UUID");
         }
-        
+
         const entity = await this.workspacesService.add({
             name: dto.name,
             description: dto.description,
-            owner_uuid: user.uuid, 
-            createdAt: dto.createdAt ?? new Date(), 
+            owner_uuid: user.uuid,
+            createdAt: dto.createdAt ?? new Date(),
         });
-        
+
         return entity;
     }
 

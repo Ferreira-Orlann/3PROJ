@@ -100,10 +100,10 @@ export class UsersController {
         name: "id",
         required: true,
         type: String,
-        description: "User UUID"
+        description: "User UUID",
     })
     @ApiResponse({
-        type: User
+        type: User,
     })
     async getById(@Param("id") id: UUID) {
         const user = await this.usersService.findOneByUuid(id);

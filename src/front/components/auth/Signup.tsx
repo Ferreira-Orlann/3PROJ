@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios"
+import axios from "axios";
 
 const Signup = () => {
     const [formData, setFormData] = useState({
@@ -8,7 +8,7 @@ const Signup = () => {
         lastname: "",
         email: "",
         address: "",
-        password: ""
+        password: "",
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -19,14 +19,18 @@ const Signup = () => {
         e.preventDefault();
 
         try {
-            const res = await axios.post("http://localhost:3000/users", JSON.stringify(formData), {
-                headers: {
-                    "Content-Type": "application/json",
-                }
-            })
+            const res = await axios.post(
+                "http://localhost:3000/users",
+                JSON.stringify(formData),
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                },
+            );
 
-            const data = await res.data
-            console.log(JSON.stringify(formData))
+            const data = await res.data;
+            console.log(JSON.stringify(formData));
             console.log("Inscription réussie :", data);
             // Tu peux rediriger vers /dashboard ici si besoin
         } catch (error) {

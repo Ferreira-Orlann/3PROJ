@@ -1,4 +1,11 @@
-import { Body, Controller, forwardRef, Inject, Post, Res } from "@nestjs/common";
+import {
+    Body,
+    Controller,
+    forwardRef,
+    Inject,
+    Post,
+    Res,
+} from "@nestjs/common";
 import { UUID } from "crypto";
 import { AuthService } from "./authentication.service";
 import { UsersService } from "../users/users.service";
@@ -17,13 +24,12 @@ export class AuthController {
     ) {}
 
     @Post("login")
-    async signin(@Body() dto: LoginDto, @Res() res): Promise<any>  {
+    async signin(@Body() dto: LoginDto, @Res() res): Promise<any> {
         try {
             console.log("Login attempt with:", dto);
-            
+
             // Find the user first
             const user = await this.usersService.findOneByEmail(dto.email);
-            
 
             // Check if user exists
             if (!user) {
@@ -44,9 +50,8 @@ export class AuthController {
                 revoked: session.revoked,
             };
             console.log("Sending response:", response);
-            res.header('Content-Type', 'application/json');
-        return res.send(response);
-            
+            res.header("Content-Type", "application/json");
+            return res.send(response);
         } catch (error) {
             console.error("Error in signin:", error);
             throw error;

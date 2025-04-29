@@ -1,18 +1,17 @@
-import { NestFactory, Reflector } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { ClassSerializerInterceptor, ConsoleLogger } from '@nestjs/common';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { NestFactory, Reflector } from "@nestjs/core";
+import { AppModule } from "./app.module";
+import { ClassSerializerInterceptor, ConsoleLogger } from "@nestjs/common";
+import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule, {
         logger: new ConsoleLogger("SupPhone"),
     });
     app.enableCors({
-        origin: '*', // Ou tu peux spécifier une liste d'origines, ex : ['http://192.168.1.102', 'http://tonAppMobile']
-        methods: ['GET', 'POST', 'PUT', 'DELETE'],
-        allowedHeaders: ['Content-Type', 'Authorization'],
-        exposedHeaders: ['Content-Type', 'Authorization'],
-
+        origin: "*", // Ou tu peux spécifier une liste d'origines, ex : ['http://192.168.1.102', 'http://tonAppMobile']
+        methods: ["GET", "POST", "PUT", "DELETE"],
+        allowedHeaders: ["Content-Type", "Authorization"],
+        exposedHeaders: ["Content-Type", "Authorization"],
     });
 
     const config = new DocumentBuilder()
@@ -30,6 +29,6 @@ async function bootstrap() {
         }),
     );
 
-    await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
+    await app.listen(process.env.PORT ?? 3000, "0.0.0.0");
 }
 bootstrap();

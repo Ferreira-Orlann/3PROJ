@@ -27,20 +27,20 @@ export class MessagesController {
     async getMessage() {
         console.log("data");
         const messages = await this.messagesService.findAll();
-        console.log('Messages chargés:', messages);
+        console.log("Messages chargés:", messages);
         return messages;
     }
-    
+
     @Get(":messageUuid")
     getMessageBy(
         @Param("workspaceUuid") workspaceUuid: UUID,
         @Param("userUuid") userUuid: UUID,
         @Param("channelUuid") channelUuid: UUID,
-        @Param("messageUuid") messageUuid: UUID
+        @Param("messageUuid") messageUuid: UUID,
     ) {
         return this.messagesService.findOneBy(messageUuid);
     }
-    
+
     @Put(":messageUuid")
     async updateMessage(
         @Param("workspaceUuid") workspaceUuid: UUID,
@@ -57,7 +57,7 @@ export class MessagesController {
         @Param("workspaceUuid") workspaceUuid: UUID,
         @Param("userUuid") userUuid: UUID,
         @Param("channelUuid") channelUuid: UUID,
-        @Param("messageUuid") messageUuid: UUID
+        @Param("messageUuid") messageUuid: UUID,
     ) {
         await this.messagesService.remove(messageUuid);
     }
@@ -67,16 +67,16 @@ export class MessagesController {
         @Param("workspaceUuid") workspaceUuid: UUID,
         @Param("userUuid") userUuid: UUID,
         @Param("channelUuid") channelUuid: UUID,
-        @Body() dto: CreateMessageDto
+        @Body() dto: CreateMessageDto,
     ) {
         // Ensure the DTO has the correct destination UUID (channelUuid)
         dto.destination_uuid = channelUuid;
-        console.log('DTO:', dto);
-        console.log('DTO:', dto.destination_uuid);
-        
+        console.log("DTO:", dto);
+        console.log("DTO:", dto.destination_uuid);
+
         // Set is_public based on whether this is a workspace channel or direct message
         dto.is_public = !!workspaceUuid;
-        
+
         const entity = await this.messagesService.add(dto);
         return entity;
     }

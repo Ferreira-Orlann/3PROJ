@@ -19,7 +19,7 @@ export class WorkspacesService {
             const workspaces = await this.workspacesRepo.find({
                 relations: ["owner"],
             });
-            
+
             return workspaces;
         } catch (error) {
             console.error("Error finding workspaces:", error);
@@ -51,7 +51,7 @@ export class WorkspacesService {
             createdAt: dto.createdAt,
         });
         await this.workspaceMembersService.add(dto.owner_uuid, workspace.uuid);
-    
+
         return workspace;
     }
 

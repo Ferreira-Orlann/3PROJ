@@ -1,5 +1,5 @@
-import NotificationsScreen from '../screens/notifications/notificationsScreen';
+import NotificationsScreen from "../screens/notifications/notificationsScreen";
 
 export default function Notifications() {
-  return <NotificationsScreen />;
+    return <NotificationsScreen />;
 }

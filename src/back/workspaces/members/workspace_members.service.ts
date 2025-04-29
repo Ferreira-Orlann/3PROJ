@@ -26,7 +26,7 @@ export class WorkspacesMembersService {
     async findByWorkspaceId(workspaceId: UUID): Promise<WorkspaceMember[]> {
         return this.workspaceMembersRepo.find({
             where: {
-                workspace: { uuid: workspaceId }
+                workspace: { uuid: workspaceId },
             },
             relations: ["user", "workspace"],
         });
@@ -61,7 +61,6 @@ export class WorkspacesMembersService {
 
         const workspace = await this.workspacesRepo.findOneBy({
             uuid: workspace_uuid,
-            
         });
         console.log("Workspace found:", workspace);
         if (!workspace) {

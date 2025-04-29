@@ -23,39 +23,39 @@ export class MessagesService {
     async findAll(): Promise<Message[]> {
         const messages = await this.messageRepo.find({
             relations: ["source", "destination_user", "destination_channel"],
-            order: { date: "ASC" } // Sort messages by date in ascending order
+            order: { date: "ASC" }, // Sort messages by date in ascending order
         });
         return messages;
     }
-    
+
     findMessagesByChannel(channelUuid: UUID): Promise<Message[]> {
         return this.messageRepo.find({
             where: {
-                destination_channel: { uuid: channelUuid }
+                destination_channel: { uuid: channelUuid },
             },
             relations: ["source", "destination_user", "destination_channel"],
-            order: { date: "ASC" }
+            order: { date: "ASC" },
         });
     }
 
     findMessagesByUser(userUuid: UUID): Promise<Message[]> {
         return this.messageRepo.find({
             where: {
-                destination_user: { uuid: userUuid }
+                destination_user: { uuid: userUuid },
             },
             relations: ["source", "destination_user", "destination_channel"],
-            order: { date: "ASC" }
+            order: { date: "ASC" },
         });
     }
 
     findMessagesByWorkspace(workspaceUuid: UUID): Promise<Message[]> {
         return this.messageRepo.find({
             where: {
-                destination_channel: { workspace: { uuid: workspaceUuid } }
+                destination_channel: { workspace: { uuid: workspaceUuid } },
             },
             relations: ["source", "destination_user", "destination_channel"],
-            order: { date: "ASC" }
-        }); 
+            order: { date: "ASC" },
+        });
     }
 
     findOneBy(uuid: UUID): Promise<Message | null> {
