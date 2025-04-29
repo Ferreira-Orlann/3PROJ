@@ -1,22 +1,17 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+// src/front/App.tsx
 
-import AuthPage from "../front/Pages/AuthPage"; // 👈 On change ici
-import HomePage from "../front/Pages/index";
-import NotificationsPage from "../front/Pages/notifications";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import WorkspacesPage from './Pages/Workspaces';
+import WorkspaceDetailPage from './Pages/WorkspaceDetailPage';
 
-const App = () => {
-    return (
-        <Router>
-            <Routes>
-                <Route path="/" element={<AuthPage />} />{" "}
-                {/* 👈 Page de login au démarrage */}
-                <Route path="/dashboard" element={<HomePage />} />{" "}
-                {/* 👈 Page principale renommée */}
-                <Route path="/notifications" element={<NotificationsPage />} />
-            </Routes>
-        </Router>
-    );
-};
+const App = () => (
+  <Router>
+    <Routes>
+      <Route path="/" element={<WorkspacesPage />} />
+      <Route path="/workspace/:id" element={<WorkspaceDetailPage />} /> {/* L'ID sera passé ici */}
+    </Routes>
+  </Router>
+);
 
 export default App;
