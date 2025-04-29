@@ -1,16 +1,16 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, UsePipes, ValidationPipe } from "@nestjs/common";
 import { Events } from "../../events.enum";
 import { MessagesService } from "../../messages/messages.service";
-import { SupGatewayRoute } from "../decorators";
-import { SupGateway } from "../decorators";
 import { UUID } from "crypto";
+import { SubscribeMessage, WebSocketGateway, WsException } from "@nestjs/websockets";
 
 @Injectable()
-@SupGateway()
+@UsePipes(new ValidationPipe({ exceptionFactory: (errors) => new WsException(errors) }))
+@WebSocketGateway()
 export class MessageHandler {
     constructor(private readonly messagesService: MessagesService) {}
 
-    @SupGatewayRoute(Events.MESSAGE_CREATED)
+    @SubscribeMessage("message.create")
     async handleMessageCreated(data: any) {
         console.log(
             "🔄 Traitement du message WebSocket message.created:",
@@ -65,7 +65,7 @@ export class MessageHandler {
         }
     }
 
-    @SupGatewayRoute(Events.MESSAGE_UPDATED)
+    @SubscribeMessage("message.update")
     async handleMessageUpdated(data: any) {
         console.log(
             "🔄 Traitement du message WebSocket message.updated:",

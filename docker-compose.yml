@@ -54,6 +54,12 @@ services:
     ports:
       - "6379:6379"
     command: ["redis-server"]
+  # elb:
+  #   image: haproxy
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - ./config/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
 
 volumes:
   prometheus:
