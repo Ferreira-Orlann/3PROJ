@@ -11,6 +11,7 @@ import { Reaction } from "../reactions/reactions.entity";
 import { Expose } from "class-transformer";
 import { ApiProperty, ApiSchema } from "@nestjs/swagger";
 import { OmitType } from "@nestjs/mapped-types";
+import { IsEmail, IsNotEmpty } from "class-validator";
 
 @Entity({
     name: "users",
@@ -30,6 +31,7 @@ export class User {
     @Column()
     @Expose()
     @ApiProperty()
+    @IsNotEmpty()
     username: string;
 
     @Column({
@@ -43,26 +45,31 @@ export class User {
     @Column()
     @Expose()
     @ApiProperty()
+    @IsNotEmpty()
     firstname: string;
 
     @Column()
     @Expose()
     @ApiProperty()
+    @IsNotEmpty()
     lastname: string;
 
     @Column()
     @Expose()
     @ApiProperty()
+    @IsEmail()
     email: string;
 
     @Column({ nullable: true })
     @Expose()
+    @IsNotEmpty()
     @ApiProperty({ required: false })
     mdp: string;
 
     @Column()
     @Expose()
     @ApiProperty()
+    @IsNotEmpty()
     address: string;
 
     @OneToMany(() => Workspace, (workspace) => workspace.owner)
@@ -93,3 +100,6 @@ export class BasicUser extends OmitType(User, [
     "lastname",
     "address",
 ]) {}
+
+@ApiSchema()
+export class CreateUserDto extends OmitType(User, ["uuid", "status"]) {}

@@ -11,7 +11,6 @@ import {
     UseGuards,
 } from "@nestjs/common";
 import { UsersService } from "./users.service";
-import { CreateUserDto } from "./users.dto";
 import { UUID } from "crypto";
 import {
     HttpAuthGuard,
@@ -19,7 +18,7 @@ import {
 } from "../authentication/http.authentication.guard";
 import { ConfigService } from "@nestjs/config";
 import { ApiParam, ApiQuery, ApiResponse } from "@nestjs/swagger";
-import { User, BasicUser } from "./users.entity";
+import { User, BasicUser, CreateUserDto } from "./users.entity";
 import { plainToInstance } from "class-transformer";
 
 @Controller("users")
