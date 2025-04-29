@@ -32,11 +32,34 @@ services:
       - MINIO_ROOT_PASSWORD=minioadmin
     volumes:
       - minio:/data
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      - RABBITMQ_DEFAULT_USER=myuser
+      - RABBITMQ_DEFAULT_PASS=mypassword
+      - RABBITMQ_DEFAULT_VHOST=/
+    ports:
+      - "5672:5672" # AMQP
+      - "15672:15672" # Management Interface
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
+    restart: unless-stopped
+  redis:
+    image: redis:latest
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+    ports:
+      - "6379:6379"
+    command: ["redis-server"]
 
 volumes:
   prometheus:
   postgres_data:
   minio:
+  rabbitmq:
 networks:
   localprom:
     driver: bridge
