@@ -45,6 +45,37 @@ class WebSocketService {
     private reconnectAttempts = 0;
     private maxReconnectAttempts = 5;
     private reconnectDelay = 2000; // 2 secondes
+    
+    /**
+     * Vérifie si le WebSocket est connecté
+     */
+    isConnected(): boolean {
+        return this.socket !== null && this.socket.connected;
+    }
+    
+    /**
+     * Ajoute un écouteur d'événement directement sur la socket
+     */
+    addSocketListener(event: string, callback: (...args: any[]) => void): void {
+        if (this.socket) {
+            this.socket.on(event, callback);
+        } else {
+            console.warn("WebSocket - Impossible d'ajouter un écouteur: socket non initialisée");
+        }
+    }
+    
+    /**
+     * Supprime un écouteur d'événement de la socket
+     */
+    removeSocketListener(event: string, callback?: (...args: any[]) => void): void {
+        if (this.socket) {
+            if (callback) {
+                this.socket.off(event, callback);
+            } else {
+                this.socket.off(event);
+            }
+        }
+    }
 
     /**
      * Initialise la connexion WebSocket
@@ -63,19 +94,33 @@ class WebSocketService {
                 token,
             );
 
+            // URL WebSocket complète pour le débogage
+            const wsUrl = API_BASE_URL;
+            console.log("WebSocket - Tentative de connexion à l'URL:", wsUrl);
+            
             // Initialiser la connexion Socket.IO
-            this.socket = io(API_BASE_URL, {
+            this.socket = io(wsUrl, {
                 extraHeaders: {
-                    Authorization: `Bearer ${token}`,
+                    authorization: `Bearer ${token}`,  // Utiliser 'authorization' en minuscules
                 },
                 auth: {
-                    token: token,
+                    token: `Bearer ${token}`,  // Ajouter 'Bearer' au token dans l'objet auth
                 },
                 transports: ["websocket"],
                 reconnection: true,
                 reconnectionAttempts: this.maxReconnectAttempts,
                 reconnectionDelay: this.reconnectDelay,
+                forceNew: true,  // Forcer une nouvelle connexion
+                timeout: 10000,   // Augmenter le timeout
             });
+            
+            console.log("WebSocket - Headers envoyés:", {
+                authorization: `Bearer ${token}`,
+                auth: { token: `Bearer ${token}` }
+            });
+            
+            // Afficher l'ID de la socket pour débogage
+            console.log("WebSocket - Socket ID:", this.socket.id);
 
             // Gérer les événements de connexion
             this.socket.on("connect", () => {
@@ -101,11 +146,23 @@ class WebSocketService {
 
             // Écouter les messages génériques
             this.socket.on("message", (data) => {
-                console.log("WebSocket - Message reçu:", data);
+                console.log("WebSocket - Message reçu (event 'message'):", data);
                 // Les données venant du backend sont structurées avec event et payload
                 if (data && data.message && data.data) {
+                    console.log("WebSocket - Traitement du message avec event:", data.message);
                     this.handleEvent(data.message, data.data);
+                } else {
+                    console.log("WebSocket - Format de message non reconnu:", data);
+                    // Essayer quand même de traiter le message
+                    this.handleEvent("message", data);
                 }
+            });
+            
+            // Écouter spécifiquement l'événement message.created du backend
+            this.socket.on("message.created", (data) => {
+                console.log("WebSocket - Message créé reçu (event 'message.created'):", data);
+                this.handleEvent("message", data);
+                this.handleEvent("message_sent", data);
             });
 
             // Écouter les événements spécifiques aux réactions
@@ -260,12 +317,14 @@ class WebSocketService {
         // Notifier tous les listeners pour cet événement
         const listeners = this.eventListeners.get(event);
         if (listeners && listeners.length > 0) {
-            listeners.forEach((callback) => {
+            console.log(`WebSocket - ${listeners.length} listeners trouvés pour l'événement ${event}`);
+            listeners.forEach((callback, index) => {
                 try {
+                    console.log(`WebSocket - Exécution du callback #${index + 1} pour l'événement ${event}`);
                     callback(data);
                 } catch (error) {
                     console.error(
-                        `WebSocket - Erreur dans le callback pour l'événement ${event}:`,
+                        `WebSocket - Erreur dans le callback #${index + 1} pour l'événement ${event}:`,
                         error,
                     );
                 }
@@ -317,12 +376,6 @@ class WebSocketService {
         });
     }
 
-    /**
-     * Vérifier si le WebSocket est connecté
-     */
-    isConnected(): boolean {
-        return !!this.socket && this.socket.connected;
-    }
 }
 
 // Exporter une instance singleton

@@ -16,11 +16,7 @@ export class MessagesListener {
             );
             if (sockets) {
                 sockets.forEach((socket) => {
-                    this.pool.sendEvent(
-                        socket,
-                        Events.MESSAGE_CREATED,
-                        message,
-                    );
+                    socket.emit("message", message);
                 });
             }
         } else if (message.destination_user) {
@@ -29,14 +25,24 @@ export class MessagesListener {
             );
 
             if (userRecord) {
-                this.pool.sendEvent(
-                    userRecord.socket,
-                    Events.MESSAGE_CREATED,
-                    message,
-                );
+                userRecord.socket.emit("message", message);
+            }
+        }
+
+        if (message.source) {
+        console.log("🔔 Notifier l'expéditeur :", message.source.uuid);
+
+        const senderSocket = this.pool.getUserPoolRecord(message.source.uuid);
+        if (senderSocket) {
+            senderSocket.socket.emit("message_sent", {
+                message,
+                status: "delivered",
+                timestamp: new Date(),
+                });
             }
         }
     }
+
 
     @OnEvent(Events.MESSAGE_UPDATED)
     async handleUpdatedMessage(message: Message) {

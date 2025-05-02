@@ -68,11 +68,14 @@ const messageService = {
     },
 
     getDirectMessages: async (
-        userUuid: UUID,
-        channelUuid: UUID,
+        recipientUuid: UUID
     ): Promise<Message[]> => {
+        // Pour les messages privés, on utilise la nouvelle API users/recipientId/messages
+        // où recipientId est l'ID de l'utilisateur avec qui on discute
+        
+        console.log(`Fetching direct messages with user ${recipientUuid}`);
         const response = await apiClient.get<Message[]>(
-            `/users/${userUuid}/channels/${channelUuid}/messages`,
+            `/users/${recipientUuid}/messages`,
         );
         return response.data;
     },
@@ -90,15 +93,48 @@ const messageService = {
     },
 
     sendDirectMessage: async (
-        userUuid: UUID,
-        channelUuid: UUID,
-        messageData: CreateMessageData,
+        recipientUuid: UUID,
+        messageData: CreateMessageData
     ): Promise<Message> => {
-        const response = await apiClient.post<Message>(
-            `/users/${userUuid}/channels/${channelUuid}/messages`,
-            messageData,
-        );
-        return response.data;
+        // Pour les messages privés, on utilise la nouvelle API users/recipientId/messages
+        // où recipientId est l'ID de l'utilisateur à qui on envoie le message
+
+        // Vérification des paramètres
+        if (!recipientUuid) {
+            console.error("sendDirectMessage - recipientUuid est vide ou null");
+            throw new Error("L'UUID du destinataire est requis");
+        }
+        
+        if (!messageData.source_uuid) {
+            console.error("sendDirectMessage - source_uuid est vide ou null dans messageData");
+            throw new Error("L'UUID de l'expéditeur est requis");
+        }
+        
+        if (!messageData.destination_uuid) {
+            console.error("sendDirectMessage - destination_uuid est vide ou null dans messageData");
+            throw new Error("L'UUID du destinataire est requis dans messageData");
+        }
+        
+        // S'assurer que les UUIDs dans messageData correspondent aux attentes
+        if (messageData.destination_uuid !== recipientUuid) {
+            console.warn("sendDirectMessage - destination_uuid ne correspond pas à recipientUuid, correction automatique");
+            messageData.destination_uuid = recipientUuid;
+        }
+        
+        console.log(`sendDirectMessage - Envoi d'un message à l'utilisateur ${recipientUuid}`);
+        console.log(`sendDirectMessage - Données du message:`, messageData);
+        
+        try {
+            const response = await apiClient.post<Message>(
+                `/users/${recipientUuid}/messages`,
+                messageData,
+            );
+            console.log(`sendDirectMessage - Message envoyé avec succès, réponse:`, response.data);
+            return response.data;
+        } catch (error: any) {
+            console.error(`sendDirectMessage - Erreur lors de l'envoi du message:`, error.response?.data || error.message);
+            throw error;
+        }
     },
 
     editMessage: async (

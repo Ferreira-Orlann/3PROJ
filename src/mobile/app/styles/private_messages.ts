@@ -50,14 +50,21 @@ export const styles = StyleSheet.create({
     },
     errorContainer: {
         flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
+        justifyContent: 'center',
+        alignItems: 'center',
         padding: 20,
+    },
+    loadingText: {
+        fontSize: 16,
+        color: '#ffffff',
+        marginBottom: 20,
+        textAlign: 'center',
     },
     errorText: {
         fontSize: 18,
-        color: "#ffffff",
+        color: "#ff6b6b",
         marginBottom: 20,
+        textAlign: "center",
     },
     backButton: {
         backgroundColor: "#7289da",

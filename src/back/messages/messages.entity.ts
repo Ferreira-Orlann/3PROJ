@@ -44,7 +44,6 @@ export class Message {
     source: User;
 
 
-    @Transform(({ value }) => value ? value.uuid : null)
     @ManyToOne(() => User, (user) => user.createdMessage, { nullable: true })
     @Expose()
     @JoinColumn({
@@ -54,7 +53,7 @@ export class Message {
     destination_user: User | null;
 
 
-    @Transform(({ value }) => value ? value.uuid : null)
+
     @ManyToOne(() => Channel, (channel) => channel.createdMessage, {
         nullable: true,
     })
@@ -65,7 +64,6 @@ export class Message {
     })
     destination_channel: Channel | null;
 
-    @Transform(({ value }) => value ? value : [])
     @Expose()
     @OneToMany(() => Reaction, (reaction) => reaction.message, { eager: true })
     createdReaction: Promise<Reaction[]>;

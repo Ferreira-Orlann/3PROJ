@@ -79,7 +79,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 
             // Récupérer les informations utilisateur
             try {
-                const userResponse = await apiClient.get(`/users/${uuid}`, {
+                const userResponse = await apiClient.get(`/users/${email}`, {
                     headers: {
                         Authorization: `Bearer ${authToken}`,
                     },
@@ -97,7 +97,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 
                 // Créer l'objet utilisateur à partir des données
                 const mappedUser: User = {
-                    uuid: uuid,
+                    uuid: currentUser.uuid,
                     username:
                         (currentUser?.firstname && currentUser?.lastname)
                             ? currentUser.firstname + " " + currentUser.lastname
@@ -116,6 +116,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
                 // Mettre à jour l'état et rediriger
                 setToken(authToken);
                 setUser(mappedUser);
+                
                 router.replace("/screens/homeScreen");
             } catch (userError) {
                 console.error("Error fetching user data:", userError);
@@ -131,6 +132,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
             setIsLoading(false);
         }
     };
+    console.log("useDirectMessage - Utilisateur courant (de useAuth):", user);
 
     const register = async (
         username: string,
@@ -183,7 +185,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
                 
                 // Créer l'objet utilisateur
                 const mappedUser: User = {
-                    uuid: uuid || userResponse.uuid || "",
+                    uuid: currentUser.uuid,
                     username: (currentUser?.firstname && currentUser?.lastname)
                         ? currentUser.firstname + " " + currentUser.lastname
                         : registerData.firstname + " " + registerData.lastname,

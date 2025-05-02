@@ -19,22 +19,20 @@ export class WorkspaceMember {
     @Expose()
     uuid: UUID;
 
-    @Transform(({ value }) => value?.uuid)
-    @Expose()
     @ManyToOne(() => User, (user) => user.workspace_members, {
         eager: true,
     })
+    @Expose()
     @JoinColumn({
         name: "user_uuid",
         referencedColumnName: "uuid",
     })
     user: User;
 
-    @Transform(({ value }) => value?.uuid)
-    @Expose()
     @ManyToOne(() => Workspace, (workspace) => workspace.members, {
         eager: true,
     })
+    @Expose()
     @JoinColumn({
         name: "workspace_uuid",
         referencedColumnName: "uuid",

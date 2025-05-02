@@ -147,6 +147,7 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
         const onMessageReceived = websocketService.on(
             "message_sent",
             (data) => {
+                console.log("ChatContainer - message_sent reçu:", data);
                 // Vérifier si le message appartient au canal actuel
                 const isForCurrentChannel =
                     (data.destination_channel &&
@@ -154,7 +155,82 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
                     (data.channel && data.channel.uuid === channelUuid);
 
                 if (isForCurrentChannel) {
-                    fetchMessages();
+                    console.log("ChatContainer - Message pour ce canal, mise à jour");
+                    // Ajouter directement le message à l'UI au lieu de recharger tous les messages
+                    // Cela permet une mise à jour plus rapide et plus fluide
+                    const messageData = data.data ? data.data : data;
+                    const messageExists = uiMessages.some(msg => msg.uuid === messageData.uuid);
+                    
+                    if (!messageExists) {
+                        setUiMessages(prev => [...prev, messageData]);
+                    } else {
+                        console.log("ChatContainer - Message déjà présent dans l'UI");
+                    }
+                }
+            },
+        );
+        
+        // Écouter aussi l'événement message.created du backend
+        const onMessageCreated = websocketService.on(
+            "message.created",
+            (data) => {
+                console.log("ChatContainer - message.created reçu:", JSON.stringify(data));
+                // Traiter de la même manière que message_sent
+                const messageData = data.data ? data.data : data;
+                console.log("ChatContainer - messageData formaté:", JSON.stringify(messageData));
+                
+                // Vérifier si c'est un message privé (destination_user plutôt que destination_channel)
+                const isPrivateMessage = messageData.destination_user !== null && messageData.destination_user !== undefined;
+                console.log("ChatContainer - Est un message privé:", isPrivateMessage);
+                
+                // Extraire les UUIDs pour faciliter la comparaison
+                let sourceUuid = typeof messageData.source === 'string' 
+                    ? messageData.source 
+                    : messageData.source?.uuid;
+                    
+                let destUuid = typeof messageData.destination_user === 'string' 
+                    ? messageData.destination_user 
+                    : messageData.destination_user?.uuid;
+                    
+                console.log("ChatContainer - sourceUuid:", sourceUuid);
+                console.log("ChatContainer - destUuid:", destUuid);
+                console.log("ChatContainer - userUuid:", userUuid);
+                console.log("ChatContainer - channelUuid:", channelUuid);
+                
+                // Vérifier si le message est pour le canal actuel
+                const isForCurrentChannel = messageData.destination_channel && 
+                    (typeof messageData.destination_channel === 'string' 
+                        ? messageData.destination_channel === channelUuid
+                        : messageData.destination_channel.uuid === channelUuid);
+                
+                // Vérifier si c'est un message privé pour cette conversation
+                const isForCurrentPrivateChat = isPrivateMessage && (
+                    // Message envoyé par l'utilisateur courant au destinataire
+                    (sourceUuid === userUuid && destUuid === channelUuid) ||
+                    // Message reçu du destinataire
+                    (sourceUuid === channelUuid && destUuid === userUuid)
+                );
+                
+                console.log("ChatContainer - isForCurrentChannel:", isForCurrentChannel);
+                console.log("ChatContainer - isForCurrentPrivateChat:", isForCurrentPrivateChat);
+
+                if (isForCurrentChannel || isForCurrentPrivateChat) {
+                    console.log("ChatContainer - Message pour cette conversation, ajout à l'UI");
+                    
+                    // Vérifier si le message existe déjà
+                    const messageExists = uiMessages.some(msg => msg.uuid === messageData.uuid);
+                    console.log("ChatContainer - Message existe déjà:", messageExists);
+                    
+                    if (!messageExists) {
+                        console.log("ChatContainer - Ajout du nouveau message à l'UI");
+                        setUiMessages(prev => {
+                            const newMessages = [...prev, messageData];
+                            console.log("ChatContainer - Nombre de messages après ajout:", newMessages.length);
+                            return newMessages;
+                        });
+                    }
+                } else {
+                    console.log("ChatContainer - Message ignoré (pas pour cette conversation)");
                 }
             },
         );
@@ -212,6 +288,7 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
         // Nettoyage lors du démontage
         return () => {
             websocketService.off("message_sent", onMessageReceived);
+            websocketService.off("message.created", onMessageCreated);
             websocketService.off("reaction_added", onReactionReceived);
             websocketService.off("reaction_removed", onReactionRemoved);
         };
@@ -220,55 +297,125 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
     // Mettre à jour les messages de l'UI quand les messages API changent
     useEffect(() => {
         if (apiMessages && apiMessages.length > 0) {
-            setUiMessages(apiMessages);
+            console.log("ChatContainer - Mise à jour des messages UI depuis API:", apiMessages.length);
+            console.log("ChatContainer - Premier message API:", JSON.stringify(apiMessages[0]));
+            console.log("ChatContainer - Dernier message API:", JSON.stringify(apiMessages[apiMessages.length - 1]));
+            
+            // Fusionner les messages API avec les messages UI existants
+            // pour éviter de perdre les messages reçus via WebSocket
+            setUiMessages(prev => {
+                console.log("ChatContainer - Messages UI existants:", prev.length);
+                if (prev.length > 0) {
+                    console.log("ChatContainer - Premier message UI existant:", JSON.stringify(prev[0]));
+                    console.log("ChatContainer - Dernier message UI existant:", JSON.stringify(prev[prev.length - 1]));
+                }
+                
+                // Créer un ensemble des UUID des messages existants
+                const existingIds = new Set(prev.map(msg => msg.uuid));
+                console.log("ChatContainer - IDs existants:", Array.from(existingIds));
+                
+                // Filtrer les nouveaux messages qui ne sont pas déjà dans l'UI
+                const newMessages = apiMessages.filter(msg => !existingIds.has(msg.uuid));
+                
+                if (newMessages.length > 0) {
+                    console.log(`ChatContainer - Ajout de ${newMessages.length} nouveaux messages`);
+                    console.log("ChatContainer - Nouveaux messages:", newMessages.map(msg => msg.uuid));
+                    
+                    // Trier les messages par date
+                    const combinedMessages = [...prev, ...newMessages].sort((a, b) => 
+                        new Date(a.date).getTime() - new Date(b.date).getTime()
+                    );
+                    
+                    return combinedMessages;
+                }
+                
+                // Si aucun nouveau message, remplacer complètement pour s'assurer que l'ordre est correct
+                // Mais d'abord, trier les messages par date
+                const sortedMessages = [...apiMessages].sort((a, b) => 
+                    new Date(a.date).getTime() - new Date(b.date).getTime()
+                );
+                
+                return sortedMessages;
+            });
         } else {
             console.log("ChatContainer - Pas de messages API à afficher");
         }
     }, [apiMessages]);
 
+    // Gérer les messages initiaux
+    useEffect(() => {
+        if (initialMessages && initialMessages.length > 0) {
+            console.log("ChatContainer - Initialisation avec des messages existants:", initialMessages.length);
+            console.log("ChatContainer - Premier message:", JSON.stringify(initialMessages[0]));
+            console.log("ChatContainer - Dernier message:", JSON.stringify(initialMessages[initialMessages.length - 1]));
+            setUiMessages(initialMessages);
+        }
+    }, [initialMessages]);
+
     // Scroll to bottom when messages change
     useEffect(() => {
+        console.log("ChatContainer - Messages UI mis à jour, nombre de messages:", uiMessages.length);
+        if (uiMessages.length > 0) {
+            console.log("ChatContainer - Dernier message UI:", JSON.stringify(uiMessages[uiMessages.length - 1]));
+        }
+        
         if (flatListRef.current && uiMessages.length > 0) {
             setTimeout(() => {
                 flatListRef.current?.scrollToEnd({ animated: true });
+                console.log("ChatContainer - Scroll to end exécuté");
             }, 100);
         }
     }, [uiMessages]);
 
-    // Handle sending a new message
-    const handleSendMessage = async (
-        message: string,
-        attachments: ApiAttachment[],
-    ): Promise<any> => {
-        if (!message.trim()) return;
+    // Fonction pour envoyer un message
+    const handleSendMessage = async (content: string) => {
+        if (!content.trim()) return;
 
         try {
-            let response;
+            console.log("ChatContainer - Envoi d'un message:", content);
 
-            // Use external send message function if provided, otherwise use the hook's function
+            // Créer un message temporaire pour affichage immédiat
+            const tempMessage: ApiMessage = {
+                uuid: `temp-${Date.now()}` as UUID,
+                message: content,
+                is_public: workspaceUuid !== null,
+                date: new Date().toISOString(),
+                source: {
+                    uuid: userUuid,
+                    username: currentUser
+                },
+                destination_channel: workspaceUuid ? { uuid: channelUuid } : null,
+                destination_user: !workspaceUuid ? { uuid: channelUuid } : null,
+                createdReaction: []
+            };
+            
+            // Ajouter le message temporaire à l'UI pour feedback immédiat
+            setUiMessages(prev => [...prev, tempMessage]);
+            console.log("ChatContainer - Message temporaire ajouté à l'UI");
+
+            // Si une fonction d'envoi externe est fournie, l'utiliser
             if (externalSendMessage) {
-                response = await externalSendMessage(message);
+                console.log("ChatContainer - Utilisation de la fonction d'envoi externe");
+                await externalSendMessage(content);
             } else {
-                // Envoyer le message en passant uniquement le contenu (string)
-                // apiSendMessage s'occupe de construire l'objet complet avec les UUID nécessaires
-                response = await apiSendMessage(message);
+                // Sinon, utiliser la fonction d'envoi de message du hook
+                console.log("ChatContainer - Utilisation de apiSendMessage");
+                await apiSendMessage(content);
             }
 
-            // Si nous sommes en mode hors ligne (WebSocket non connecté),
-            // forcer un rechargement des messages pour afficher le message envoyé
-            if (!isWebSocketConnected) {
-                await fetchMessages();
-            }
+            console.log("ChatContainer - Message envoyé avec succès");
+            
+            // Rafraîchir les messages après l'envoi pour obtenir le vrai message
+            // avec son UUID permanent du serveur
+            setTimeout(() => {
+                console.log("ChatContainer - Rafraîchissement des messages après envoi");
+                fetchMessages();
+            }, 500); // Ajouter un délai pour laisser le temps au serveur de traiter le message
 
-            return response;
         } catch (error) {
-            console.error(
-                "ChatContainer - Erreur lors de l'envoi du message:",
-                error,
-            );
-            // En cas d'erreur, on recharge quand même les messages
-            await fetchMessages();
-            throw error; // Propager l'erreur pour que ChatInput puisse la gérer
+            console.error("Erreur lors de l'envoi du message:", error);
+            // Retirer le message temporaire en cas d'erreur
+            setUiMessages(prev => prev.filter(msg => !msg.uuid.toString().startsWith('temp-')));
         }
     };
 
