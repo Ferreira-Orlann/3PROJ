@@ -13,7 +13,7 @@ const AuthPage = () => {
 
     const handleLogin = async () => {
         try {
-            const succesful = authService.login(email, password);
+            const succesful = await authService.login(email, password);
             if (!succesful) {
                 return;
             }

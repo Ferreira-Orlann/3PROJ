@@ -64,7 +64,7 @@ export class AuthService {
 
     private verifyDate(date: Date, duration: number) {
         const expirationDate = new Date(date);
-        expirationDate.setSeconds(duration);
+        expirationDate.setSeconds(expirationDate.getSeconds() + duration);
         return expirationDate > new Date();
     }
 }
