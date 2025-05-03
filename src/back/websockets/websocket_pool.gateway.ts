@@ -106,7 +106,7 @@ export class WebSocketPool implements OnGatewayConnection, OnGatewayDisconnect {
     sendEvent(socket: Socket, event: Events, payload: any) {
         // Utiliser le bon événement en fonction du type d'événement
         let eventName = "message";
-        
+
         if (event === Events.MESSAGE_CREATED) {
             eventName = "message_received";
         } else if (event === Events.MESSAGE_UPDATED) {
@@ -120,13 +120,13 @@ export class WebSocketPool implements OnGatewayConnection, OnGatewayDisconnect {
         } else if (event === Events.REACTION_REMOVED) {
             eventName = "reaction_removed";
         }
-        
+
         console.log(`Sending ${eventName} event to socket:`, {
             event: event,
             eventName: eventName,
-            payloadType: payload ? typeof payload : 'null'
+            payloadType: payload ? typeof payload : "null",
         });
-        
+
         socket.emit(eventName, {
             message: event,
             data: payload,

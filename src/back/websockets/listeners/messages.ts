@@ -30,19 +30,20 @@ export class MessagesListener {
         }
 
         if (message.source) {
-        console.log("🔔 Notifier l'expéditeur :", message.source.uuid);
+            console.log("🔔 Notifier l'expéditeur :", message.source.uuid);
 
-        const senderSocket = this.pool.getUserPoolRecord(message.source.uuid);
-        if (senderSocket) {
-            senderSocket.socket.emit("message_sent", {
-                message,
-                status: "delivered",
-                timestamp: new Date(),
+            const senderSocket = this.pool.getUserPoolRecord(
+                message.source.uuid,
+            );
+            if (senderSocket) {
+                senderSocket.socket.emit("message_sent", {
+                    message,
+                    status: "delivered",
+                    timestamp: new Date(),
                 });
             }
         }
     }
-
 
     @OnEvent(Events.MESSAGE_UPDATED)
     async handleUpdatedMessage(message: Message) {

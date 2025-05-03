@@ -18,7 +18,10 @@ import WebSocketDebugger from "@/app/components/debug/WebSocketDebugger";
 import { Message as UIMessage } from "../../../services/private_messages";
 import { useDirectMessage } from "@/app/hooks/private_messages";
 import { styles } from "@/app/styles/private_messages";
-import messageService, { Message as ApiMessage, Reaction as ApiReaction } from "@/app/services/api/endpoints/messages";
+import messageService, {
+    Message as ApiMessage,
+    Reaction as ApiReaction,
+} from "@/app/services/api/endpoints/messages";
 
 export default function DirectMessageScreen() {
     const insets = useSafeAreaInsets();
@@ -29,53 +32,66 @@ export default function DirectMessageScreen() {
     // Utiliser le hook personnalisé pour la logique de l'écran
     // Utiliser une assertion de type pour s'assurer que TypeScript reconnaît correctement le type de retour
     const directMessageHook = useDirectMessage(userId);
-    const { user, messages, loading, error, currentUserUuid, handleSendMessage, handleAddReaction, handleRemoveReaction } = directMessageHook;
-        
+    const {
+        user,
+        messages,
+        loading,
+        error,
+        currentUserUuid,
+        handleSendMessage,
+        handleAddReaction,
+        handleRemoveReaction,
+    } = directMessageHook;
+
     // Logs détaillés pour déboguer
     console.log("DirectMessageScreen - userId:", userId);
     console.log("DirectMessageScreen - currentUserUuid:", currentUserUuid);
     console.log("DirectMessageScreen - user:", JSON.stringify(user));
     console.log("DirectMessageScreen - nombre de messages:", messages.length);
     if (messages.length > 0) {
-        console.log("DirectMessageScreen - dernier message:", JSON.stringify(messages[messages.length - 1]));
+        console.log(
+            "DirectMessageScreen - dernier message:",
+            JSON.stringify(messages[messages.length - 1]),
+        );
     }
-    
+
     // Convertir les messages UI en format API pour le ChatContainer
     // Le ChatContainer attend des messages au format API
     const apiMessages = useMemo(() => {
-        return messages.map(uiMessage => {
+        return messages.map((uiMessage) => {
             // Créer un message au format API à partir du message UI
             const reactions: ApiReaction[] = [];
-            
+
             // Convertir les réactions si elles existent
             if (uiMessage.reactions && uiMessage.reactions.length > 0) {
-                uiMessage.reactions.forEach(r => {
+                uiMessage.reactions.forEach((r) => {
                     const userUuid = r.users[0] || currentUserUuid;
                     reactions.push({
-                        uuid: (uiMessage.id + '-' + r.emoji) as UUID,
+                        uuid: (uiMessage.id + "-" + r.emoji) as UUID,
                         emoji: r.emoji,
                         user: {
                             uuid: userUuid as UUID,
-                            username: userUuid === currentUserUuid ? "Moi" : "User"
-                        }
+                            username:
+                                userUuid === currentUserUuid ? "Moi" : "User",
+                        },
                     });
                 });
             }
-            
+
             // Déterminer la source du message
             let source: string | { uuid: UUID; username: string };
             if (uiMessage.sender === "Moi" && currentUserUuid) {
-                source = { 
-                    uuid: currentUserUuid, 
-                    username: "Moi" 
+                source = {
+                    uuid: currentUserUuid,
+                    username: "Moi",
                 };
             } else {
-                source = { 
-                    uuid: userId as UUID, 
-                    username: uiMessage.sender 
+                source = {
+                    uuid: userId as UUID,
+                    username: uiMessage.sender,
                 };
             }
-            
+
             // Déterminer le destinataire
             let destination_user: string | { uuid: UUID } | null;
             if (uiMessage.sender === "Moi") {
@@ -83,7 +99,7 @@ export default function DirectMessageScreen() {
             } else {
                 destination_user = { uuid: currentUserUuid as UUID };
             }
-            
+
             const apiMessage: ApiMessage = {
                 uuid: uiMessage.id as UUID,
                 message: uiMessage.content,
@@ -92,13 +108,13 @@ export default function DirectMessageScreen() {
                 source: source,
                 destination_channel: null,
                 destination_user: destination_user,
-                createdReaction: reactions
+                createdReaction: reactions,
             };
-            
+
             return apiMessage;
         });
     }, [messages, currentUserUuid, userId]);
-    
+
     // Log pour déboguer la conversion des messages
     console.log("Nombre de messages API après conversion:", apiMessages.length);
 
@@ -123,7 +139,7 @@ export default function DirectMessageScreen() {
             </>
         );
     }
-    
+
     // Afficher un message d'erreur si une erreur s'est produite
     if (error || !user) {
         return (
@@ -180,9 +196,13 @@ export default function DirectMessageScreen() {
                                         },
                                     ]}
                                 />
-                                <Text style={styles.userName}>{user.name || user.username}</Text>
+                                <Text style={styles.userName}>
+                                    {user.name || user.username}
+                                </Text>
                             </View>
-                            <Text style={styles.userStatus}>{user.status || "hors ligne"}</Text>
+                            <Text style={styles.userStatus}>
+                                {user.status || "hors ligne"}
+                            </Text>
                         </View>
 
                         <View style={styles.headerActions}>
@@ -222,9 +242,19 @@ export default function DirectMessageScreen() {
                         onAddReaction={handleAddReaction}
                     />
                     {/* Afficher le nombre de messages pour déboguer */}
-                    <View style={{ position: 'absolute', top: 5, right: 5, backgroundColor: 'rgba(0,0,0,0.5)', padding: 5, borderRadius: 5 }}>
-                        <Text style={{ color: 'white', fontSize: 10 }}>
-                            Messages: {messages.length} | API: {apiMessages.length}
+                    <View
+                        style={{
+                            position: "absolute",
+                            top: 5,
+                            right: 5,
+                            backgroundColor: "rgba(0,0,0,0.5)",
+                            padding: 5,
+                            borderRadius: 5,
+                        }}
+                    >
+                        <Text style={{ color: "white", fontSize: 10 }}>
+                            Messages: {messages.length} | API:{" "}
+                            {apiMessages.length}
                         </Text>
                     </View>
                 </View>

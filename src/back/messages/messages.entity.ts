@@ -34,7 +34,7 @@ export class Message {
     @Expose()
     date: Date;
 
-    @Transform(({ value }) => value ? value.uuid : null)
+    @Transform(({ value }) => (value ? value.uuid : null))
     @Expose()
     @ManyToOne(() => User, { nullable: false })
     @JoinColumn({
@@ -43,7 +43,6 @@ export class Message {
     })
     source: User;
 
-
     @ManyToOne(() => User, (user) => user.createdMessage, { nullable: true })
     @Expose()
     @JoinColumn({
@@ -51,8 +50,6 @@ export class Message {
         referencedColumnName: "uuid",
     })
     destination_user: User | null;
-
-
 
     @ManyToOne(() => Channel, (channel) => channel.createdMessage, {
         nullable: true,
