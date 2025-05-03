@@ -50,15 +50,15 @@ export const styles = StyleSheet.create({
     },
     errorContainer: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
+        justifyContent: "center",
+        alignItems: "center",
         padding: 20,
     },
     loadingText: {
         fontSize: 16,
-        color: '#ffffff',
+        color: "#ffffff",
         marginBottom: 20,
-        textAlign: 'center',
+        textAlign: "center",
     },
     errorText: {
         fontSize: 18,

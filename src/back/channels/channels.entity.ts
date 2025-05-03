@@ -37,7 +37,7 @@ export class Channel {
     @Expose()
     createdAt: Date;
 
-    @Transform(({ value }) => value ? value.uuid : null)
+    @Transform(({ value }) => (value ? value.uuid : null))
     @Expose()
     @ManyToOne(() => User, (user) => user.createdChannels)
     @JoinColumn({
@@ -46,7 +46,7 @@ export class Channel {
     })
     creator: User;
 
-    @Transform(({ value }) => value ? value.uuid : null)
+    @Transform(({ value }) => (value ? value.uuid : null))
     @Expose()
     @ManyToOne(() => Workspace, (workspace) => workspace.channels, {
         eager: true,

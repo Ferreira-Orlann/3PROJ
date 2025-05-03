@@ -162,9 +162,8 @@ export const useMessages = (
                 // Messages privés
                 try {
                     // Utiliser la nouvelle API pour les messages privés
-                    fetchedMessages = await messageService.getDirectMessages(
-                        userUuid
-                    );
+                    fetchedMessages =
+                        await messageService.getDirectMessages(userUuid);
                 } catch (apiError: any) {
                     console.error(
                         "useMessages - fetchMessages - Erreur API messages privés:",
@@ -273,7 +272,7 @@ export const useMessages = (
                         // Utiliser la nouvelle API pour envoyer des messages privés
                         newMessage = await messageService.sendDirectMessage(
                             userUuid,
-                            messageData
+                            messageData,
                         );
                     } else {
                         throw new Error(
