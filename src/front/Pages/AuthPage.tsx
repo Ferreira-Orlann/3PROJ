@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "../styles/auth.css";
-import Signup from "../components/auth/Signup"; // ⬅️ importe ton composant
+import Signup from "../components/auth/Signup"; 
 
 const AuthPage = () => {
     const [isLogin, setIsLogin] = useState(true);
@@ -11,27 +11,28 @@ const AuthPage = () => {
 
     const handleLogin = async () => {
         try {
-          const response = await fetch('http://localhost:3000/auth/login', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email }),
-          });
-      
-          if (!response.ok) {
-            throw new Error('Connexion échouée');
-          }
-      
-          const data = await response.json();
-          console.log('Session:', data); // tu peux stocker le token ici si besoin
-      
-          // Redirection après connexion réussie
-          window.location.href = '/workspaces';
+            const response = await fetch('http://localhost:3000/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password }), // <-- ici
+            });
+    
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Connexion échouée');
+            }
+    
+            const data = await response.json();
+            console.log('Session:', data);
+    
+            window.location.href = '/workspaces';
         } catch (err: any) {
-          setError(err.message || 'Erreur inconnue');
+            setError(err.message || 'Erreur inconnue');
         }
-      };
+    };
+    
       
     return (
         <div className="auth-container">
