@@ -9,7 +9,7 @@ class AuthService {
             "http://localhost:3000/auth/login",
             { email, password },
         );
-        if (res.status != 200) {
+        if (res.status != 201) {
             return false;
         }
         this.session = res.data;
