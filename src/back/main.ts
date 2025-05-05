@@ -12,10 +12,11 @@ async function bootstrap() {
         logger: new ConsoleLogger("SupPhone"),
     });
     app.enableCors({
-        origin: "*", // Ou tu peux spécifier une liste d'origines, ex : ['http://192.168.1.102', 'http://tonAppMobile']
-        methods: ["GET", "POST", "PUT", "DELETE"],
+        origin: "http://localhost:5173", // Ou tu peux spécifier une liste d'origines, ex : ['http://192.168.1.102', 'http://tonAppMobile']
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         allowedHeaders: ["Content-Type", "Authorization"],
         exposedHeaders: ["Content-Type", "Authorization"],
+        credentials: true, // Si tu utilises des cookies de session
     });
 
     const config = new DocumentBuilder()

@@ -1,30 +1,72 @@
-// src/front/components/workspaces/CreateWorkspaceModal.tsx
-
 import React, { useState } from "react";
 import styles from "../../styles/workspacesPage.module.css";
 
 interface CreateWorkspaceModalProps {
     onClose: () => void;
-    onCreate: (name: string, description: string, visibility: string) => void;
+    onWorkspaceCreated: () => void;
 }
 
-const CreateWorkspaceModal = ({
-    onClose,
-    onCreate,
-}: CreateWorkspaceModalProps) => {
+// ⚠️ Token en dur (exemple uniquement pour test local)
+const HARDCODED_TOKEN = "eyJhbGciOiJIUzI1NiJ9.NjA0YWNmYWItZTFmYy00MjAzLWE2MjItMzUwZTk5MzNkNGY0.LcLp3yFB9r2CHil2RM0iZrTDZUcqqpadUSz3X6MyH90"; // Remplace par ton vrai token JWT
+
+const CreateWorkspaceModal = ({ onClose, onWorkspaceCreated }: CreateWorkspaceModalProps) => {
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [visibility, setVisibility] = useState("public");
+    const [error, setError] = useState("");
 
-    const handleCreate = () => {
-        onCreate(name, description, visibility); // Appeler la fonction de création
-        onClose(); // Fermer le modal après la création
+    const handleCreate = async () => {
+        if (!HARDCODED_TOKEN) {
+            setError("Token manquant.");
+            return;
+        }
+
+        if (!name || !description) {
+            setError("Tous les champs sont requis.");
+            return;
+        }
+
+        try {
+            const response = await fetch("http://localhost:3000/workspaces", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${HARDCODED_TOKEN}`,
+                },
+                credentials: "include",
+                body: JSON.stringify({
+                    name,
+                    description,
+                    is_public: visibility === "public",
+                }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                if (response.status === 401) {
+                    setError("Token invalide ou expiré.");
+                } else {
+                    setError(errorData.message || "Erreur lors de la création.");
+                }
+                throw new Error(errorData.message || "Erreur lors de la création");
+            }
+
+            const data = await response.json();
+            console.log("Workspace créé:", data);
+
+            onWorkspaceCreated();
+            onClose();
+        } catch (err: any) {
+            setError(err.message || "Erreur inconnue");
+        }
     };
 
     return (
         <div className={styles.modalOverlay}>
             <div className={styles.modalContent}>
                 <h2>Créer un nouvel espace de travail</h2>
+
+                {error && <p className={styles.error}>{error}</p>}
 
                 <input
                     type="text"
@@ -48,10 +90,7 @@ const CreateWorkspaceModal = ({
                 </select>
 
                 <div className={styles.modalButtons}>
-                    <button
-                        onClick={handleCreate}
-                        className={styles.createButton}
-                    >
+                    <button onClick={handleCreate} className={styles.createButton}>
                         Créer
                     </button>
                     <button onClick={onClose} className={styles.cancelButton}>

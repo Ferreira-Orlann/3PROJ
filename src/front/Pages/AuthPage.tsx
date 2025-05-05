@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import "../styles/auth.css";
-import Signup from "../components/auth/Signup"; // ⬅️ importe ton composant
 import { SESSION_LOCALSTORE_NAME } from "../consts";
 import { Session } from "../types/auth";
 import authService from "../services/auth.service";
+import Signup from "../components/auth/Signup"; 
 
 const AuthPage = () => {
     const [isLogin, setIsLogin] = useState(true);
@@ -32,7 +32,6 @@ const AuthPage = () => {
             setError(err.message || "Erreur inconnue");
         }
     };
-
     return (
         <div className="auth-container">
             <div className="auth-box">
