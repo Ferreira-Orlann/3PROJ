@@ -46,39 +46,66 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     // Convertir les réactions API en réactions UI pour l'affichage
     const getUIReactions = (): UIReaction[] => {
         const groupedReactions: UIReaction[] = [];
-        console.log("ChatMessage - getUIReactions - message:", message);
         console.log(
-            "ChatMessage - getUIReactions - message.createdReaction:",
-            isCurrentUser,
+            "ChatMessage - getUIReactions - message.uuid:",
+            message.uuid,
         );
 
-        if (message.createdReaction && Array.isArray(message.createdReaction)) {
-            message.createdReaction.forEach((reaction) => {
-                if (
-                    !reaction ||
-                    !reaction.emoji ||
-                    !reaction.user ||
-                    !reaction.user.uuid
-                ) {
-                    return;
-                }
-
-                const existingReaction = groupedReactions.find(
-                    (r) => r.emoji === reaction.emoji,
-                );
-                if (existingReaction) {
-                    existingReaction.count++;
-                    existingReaction.users.push(reaction.user.uuid);
-                } else {
-                    groupedReactions.push({
-                        emoji: reaction.emoji,
-                        count: 1,
-                        users: [reaction.user.uuid],
-                    });
-                }
-            });
+        // Vérifier si message.createdReaction existe et est un tableau
+        if (!message.createdReaction) {
+            console.log("ChatMessage - Pas de réactions pour ce message");
+            return [];
         }
 
+        if (!Array.isArray(message.createdReaction)) {
+            console.log(
+                "ChatMessage - createdReaction n'est pas un tableau:",
+                message.createdReaction,
+            );
+            return [];
+        }
+
+        console.log(
+            "ChatMessage - Nombre de réactions:",
+            message.createdReaction.length,
+        );
+
+        // Traiter chaque réaction et les regrouper par emoji
+        message.createdReaction.forEach((reaction) => {
+            // Vérifier que la réaction est valide
+            if (
+                !reaction ||
+                !reaction.emoji ||
+                !reaction.user ||
+                !reaction.user.uuid
+            ) {
+                console.log(
+                    "ChatMessage - Réaction invalide ignorée:",
+                    reaction,
+                );
+                return;
+            }
+
+            // Rechercher si cette réaction existe déjà dans notre groupe
+            const existingReaction = groupedReactions.find(
+                (r) => r.emoji === reaction.emoji,
+            );
+
+            if (existingReaction) {
+                // Incrémenter le compteur et ajouter l'utilisateur
+                existingReaction.count++;
+                existingReaction.users.push(reaction.user.uuid);
+            } else {
+                // Créer une nouvelle entrée pour cette réaction
+                groupedReactions.push({
+                    emoji: reaction.emoji,
+                    count: 1,
+                    users: [reaction.user.uuid],
+                });
+            }
+        });
+
+        console.log("ChatMessage - Réactions groupées:", groupedReactions);
         return groupedReactions;
     };
 
@@ -89,10 +116,39 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     useEffect(() => {
         const fetchUserInfo = async () => {
             try {
-                const user = await userService.getUserById(
-                    message.source as UUID,
-                );
-                setSenderName(user.username);
+                // Vérifier si message.source est un objet ou une chaîne
+                if (
+                    typeof message.source === "object" &&
+                    message.source !== null &&
+                    message.source.username
+                ) {
+                    // Si c'est un objet avec un username, utiliser directement
+                    setSenderName(message.source.username);
+                    console.log(
+                        "ChatMessage - Nom d'utilisateur obtenu depuis l'objet source:",
+                        message.source.username,
+                    );
+                } else if (typeof message.source === "string") {
+                    // Si c'est une chaîne (UUID), récupérer les infos utilisateur
+                    console.log(
+                        "ChatMessage - Récupération des infos utilisateur pour UUID:",
+                        message.source,
+                    );
+                    const user = await userService.getUserById(
+                        message.source as UUID,
+                    );
+                    setSenderName(user.username);
+                    console.log(
+                        "ChatMessage - Nom d'utilisateur récupéré:",
+                        user.username,
+                    );
+                } else {
+                    console.error(
+                        "ChatMessage - Format de source invalide:",
+                        message.source,
+                    );
+                    setSenderName("Unknown");
+                }
             } catch (error) {
                 console.error("Error fetching user info:", error);
                 setSenderName("Unknown");

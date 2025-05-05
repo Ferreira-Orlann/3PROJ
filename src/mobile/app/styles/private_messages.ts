@@ -54,10 +54,17 @@ export const styles = StyleSheet.create({
         alignItems: "center",
         padding: 20,
     },
-    errorText: {
-        fontSize: 18,
+    loadingText: {
+        fontSize: 16,
         color: "#ffffff",
         marginBottom: 20,
+        textAlign: "center",
+    },
+    errorText: {
+        fontSize: 18,
+        color: "#ff6b6b",
+        marginBottom: 20,
+        textAlign: "center",
     },
     backButton: {
         backgroundColor: "#7289da",

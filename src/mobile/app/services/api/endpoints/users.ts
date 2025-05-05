@@ -36,7 +36,7 @@ const userService = {
     },
 
     getUserById: async (userId: UUID): Promise<User> => {
-        const response = await apiClient.get<User>(`/users/${userId}`);
+        const response = await apiClient.get<User>(`/users/uuid/${userId}`);
         return response.data;
     },
 

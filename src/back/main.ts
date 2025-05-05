@@ -1,6 +1,10 @@
 import { NestFactory, Reflector } from "@nestjs/core";
 import { AppModule } from "./app.module";
-import { ClassSerializerInterceptor, ConsoleLogger, ValidationPipe } from "@nestjs/common";
+import {
+    ClassSerializerInterceptor,
+    ConsoleLogger,
+    ValidationPipe,
+} from "@nestjs/common";
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 
 async function bootstrap() {
@@ -27,7 +31,7 @@ async function bootstrap() {
         new ClassSerializerInterceptor(app.get(Reflector), {
             strategy: "excludeAll",
             excludeExtraneousValues: true,
-        })
+        }),
     );
 
     app.useGlobalPipes(new ValidationPipe());

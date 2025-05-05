@@ -104,10 +104,32 @@ export class WebSocketPool implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     sendEvent(socket: Socket, event: Events, payload: any) {
-        socket.emit("message_sent", {
-            timestamp: Math.floor(Date.now() / 1000),
+        // Utiliser le bon événement en fonction du type d'événement
+        let eventName = "message";
+
+        if (event === Events.MESSAGE_CREATED) {
+            eventName = "message_received";
+        } else if (event === Events.MESSAGE_UPDATED) {
+            eventName = "message_updated";
+        } else if (event === Events.MESSAGE_REMOVED) {
+            eventName = "message_removed";
+        } else if (event === Events.REACTION_CREATED) {
+            eventName = "reaction";
+        } else if (event === Events.REACTION_UPDATED) {
+            eventName = "reaction_updated";
+        } else if (event === Events.REACTION_REMOVED) {
+            eventName = "reaction_removed";
+        }
+
+        console.log(`Sending ${eventName} event to socket:`, {
             event: event,
-            payload: payload,
+            eventName: eventName,
+            payloadType: payload ? typeof payload : "null",
+        });
+
+        socket.emit(eventName, {
+            message: event,
+            data: payload,
         });
     }
 }

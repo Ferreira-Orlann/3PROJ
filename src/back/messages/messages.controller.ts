@@ -15,10 +15,7 @@ import { AuthorizationGuard } from "../authorization/authorization.guard";
 import { HttpAuthGuard } from "../authentication/http.authentication.guard";
 import { Authorize } from "../authorization/authorization.decorator";
 
-@Controller([
-    "workspaces/:workspaceUuid/channels/:channelUuid/messages",
-    "users/:userUuid/channels/:channelUuid/messages",
-])
+@Controller()
 @UseGuards(HttpAuthGuard, AuthorizationGuard)
 export class MessagesController {
     constructor(private readonly messagesService: MessagesService) {}
@@ -31,20 +28,43 @@ export class MessagesController {
         return messages;
     }
 
-    @Get(":messageUuid")
+    @Get("workspaces/:workspaceUuid/channels/:channelUuid/messages")
+    async getWorkspaceMessages(
+        @Param("workspaceUuid") workspaceUuid: UUID,
+        @Param("channelUuid") channelUuid: UUID,
+    ) {
+        return await this.messagesService.findMessagesByChannel(channelUuid);
+    }
+
+    @Get("users/:userUuid/messages")
+    async getPrivateMessages(@Param("userUuid") userUuid: UUID) {
+        return await this.messagesService.findMessagesByUser(userUuid);
+    }
+
+    @Get(
+        "workspaces/:workspaceUuid/channels/:channelUuid/messages/:messageUuid",
+    )
     getMessageBy(
         @Param("workspaceUuid") workspaceUuid: UUID,
-        @Param("userUuid") userUuid: UUID,
         @Param("channelUuid") channelUuid: UUID,
         @Param("messageUuid") messageUuid: UUID,
     ) {
         return this.messagesService.findOneBy(messageUuid);
     }
 
-    @Put(":messageUuid")
+    @Get("users/:userUuid/messages/:messageUuid")
+    getMessageByPrivate(
+        @Param("userUuid") userUuid: UUID,
+        @Param("messageUuid") messageUuid: UUID,
+    ) {
+        return this.messagesService.findOneBy(messageUuid);
+    }
+
+    @Put(
+        "workspaces/:workspaceUuid/channels/:channelUuid/messages/:messageUuid",
+    )
     async updateMessage(
         @Param("workspaceUuid") workspaceUuid: UUID,
-        @Param("userUuid") userUuid: UUID,
         @Param("channelUuid") channelUuid: UUID,
         @Param("messageUuid") messageUuid: UUID,
         @Body() dto: CreateMessageDto,
@@ -52,30 +72,69 @@ export class MessagesController {
         return this.messagesService.update(messageUuid, dto);
     }
 
-    @Delete(":messageUuid")
-    async deleteMessage(
-        @Param("workspaceUuid") workspaceUuid: UUID,
+    @Put("users/:userUuid/messages/:messageUuid")
+    async updatePrivateMessage(
         @Param("userUuid") userUuid: UUID,
+        @Param("messageUuid") messageUuid: UUID,
+        @Body() dto: CreateMessageDto,
+    ) {
+        return this.messagesService.update(messageUuid, dto);
+    }
+
+    @Delete(
+        "workspaces/:workspaceUuid/channels/:channelUuid/messages/:messageUuid",
+    )
+    async removeWorkspaceMessage(
+        @Param("workspaceUuid") workspaceUuid: UUID,
         @Param("channelUuid") channelUuid: UUID,
         @Param("messageUuid") messageUuid: UUID,
     ) {
         await this.messagesService.remove(messageUuid);
     }
 
-    @Post()
-    async createMessage(
-        @Param("workspaceUuid") workspaceUuid: UUID,
+    @Delete("users/:userUuid/messages/:messageUuid")
+    async removePrivateMessage(
         @Param("userUuid") userUuid: UUID,
+        @Param("messageUuid") messageUuid: UUID,
+    ) {
+        await this.messagesService.remove(messageUuid);
+    }
+
+    // Route pour les messages de workspace
+    @Post("workspaces/:workspaceUuid/channels/:channelUuid/messages")
+    async createWorkspaceMessage(
+        @Param("workspaceUuid") workspaceUuid: UUID,
         @Param("channelUuid") channelUuid: UUID,
         @Body() dto: CreateMessageDto,
     ) {
-        // Ensure the DTO has the correct destination UUID (channelUuid)
-        dto.destination_uuid = channelUuid;
-        console.log("DTO:", dto);
-        console.log("DTO:", dto.destination_uuid);
+        console.log("Route params (workspace):", {
+            workspaceUuid,
+            channelUuid,
+        });
 
-        // Set is_public based on whether this is a workspace channel or direct message
-        dto.is_public = !!workspaceUuid;
+        // Message de canal de workspace
+        dto.destination_uuid = channelUuid;
+        dto.is_public = true;
+
+        console.log("DTO après traitement (workspace):", dto);
+
+        const entity = await this.messagesService.add(dto);
+        return entity;
+    }
+
+    // Route pour les messages privés
+    @Post("users/:userUuid/messages")
+    async createPrivateMessage(
+        @Param("userUuid") userUuid: UUID,
+        @Body() dto: CreateMessageDto,
+    ) {
+        console.log("Route params (privé):", { userUuid });
+
+        // Message privé
+        dto.destination_uuid = userUuid;
+        dto.is_public = false;
+
+        console.log("DTO après traitement (privé):", dto);
 
         const entity = await this.messagesService.add(dto);
         return entity;

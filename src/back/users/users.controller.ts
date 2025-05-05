@@ -89,14 +89,19 @@ export class UsersController {
         }
     }
 
-    @Get(":mail")
+    @Get("all")
     findAll() {
         return this.usersService.findAll();
     }
 
-    @Get(":id")
+    @Get(":email")
+    findOneByEmail(@Param("email") email: string) {
+        return this.usersService.findOneByEmail(email);
+    }
+
+    @Get("uuid/:uuid")
     @ApiParam({
-        name: "id",
+        name: "uuid",
         required: true,
         type: String,
         description: "User UUID",
@@ -104,11 +109,14 @@ export class UsersController {
     @ApiResponse({
         type: User,
     })
-    async getById(@Param("id") id: UUID) {
-        const user = await this.usersService.findOneByUuid(id);
+    async getById(@Param("uuid") uuid: UUID) {
+        console.log("Recherche de l'utilisateur avec UUID:", uuid);
+        const user = await this.usersService.findOneByUuid(uuid);
         if (!user) {
+            console.log("Aucun utilisateur trouvé avec UUID:", uuid);
             return null;
         }
+        console.log("Utilisateur trouvé:", user.username);
         return user;
     }
 
