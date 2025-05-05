@@ -18,7 +18,7 @@ const App = () => {
                 <Route path="/notifications" element={<NotificationsPage />} />
                 <Route path="/workspaces" element={<WorkspacesPage />} />
                 <Route
-                    path="/workspace/:id"
+                    path="/workspace/:uuid"
                     element={<WorkspaceDetailPage />}
                 />{" "}
                 {/* L'ID sera passé ici */}

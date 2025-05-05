@@ -1,5 +1,6 @@
 import axios from "axios";
 import { Session } from "../types/auth";
+import { SESSION_LOCALSTORE_NAME } from "../consts";
 
 class AuthService {
     private session: Session;
@@ -9,6 +10,7 @@ class AuthService {
             "http://localhost:3000/auth/login",
             { email, password },
         );
+        console.log("Response:", res);
         if (res.status != 201) {
             return false;
         }
@@ -17,6 +19,14 @@ class AuthService {
     }
 
     public getSession(): Session {
+        if (!this.session) {
+            const sessionString = localStorage.getItem(SESSION_LOCALSTORE_NAME);
+            if (sessionString) {
+                this.session = JSON.parse(sessionString);
+            } else {
+                throw new Error("Session not found");
+            }
+        }
         return this.session;
     }
 }

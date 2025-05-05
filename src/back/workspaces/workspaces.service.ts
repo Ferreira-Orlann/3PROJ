@@ -40,8 +40,12 @@ export class WorkspacesService {
     }
 
     async remove(uuid: UUID): Promise<void> {
-        this.workspacesRepo.delete(uuid);
+        const result = await this.workspacesRepo.delete(uuid);
+        if (result.affected === 0) {
+            throw new NotFoundException(`Le workspace avec l'UUID ${uuid} n'existe pas`);
+        }
     }
+    
 
     async add(dto: CreateWorkspaceDto): Promise<Workspace> {
         const workspace = await this.workspacesRepo.save({
@@ -60,6 +64,7 @@ export class WorkspacesService {
         name?: string,
         is_public?: boolean,
     ): Promise<Workspace | null> {
+        console.log("Workspace to update:", uuid);
         const workspace = await this.workspacesRepo.findOneBy({ uuid });
         if (!workspace) {
             throw new NotFoundException(`Workspace with ID ${uuid} not found`);
@@ -72,7 +77,6 @@ export class WorkspacesService {
         if (is_public !== undefined) {
             workspace.is_public = is_public;
         }
-
         return this.workspacesRepo.save(workspace);
     }
 }

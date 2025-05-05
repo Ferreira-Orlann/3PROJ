@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import styles from "../styles/workspaceDetailPage.module.css";
+import authService from "../services/auth.service";
 
 const WorkspaceDetailPage = () => {
     const { uuid } = useParams();
@@ -10,8 +11,9 @@ const WorkspaceDetailPage = () => {
 
     const [newName, setNewName] = useState(workspace?.name || "");
     const [message, setMessage] = useState("");
+    const [isDeleting, setIsDeleting] = useState(false);
 
-    const token = "eyJhbGciOiJIUzI1NiJ9.NjA0YWNmYWItZTFmYy00MjAzLWE2MjItMzUwZTk5MzNkNGY0.LcLp3yFB9r2CHil2RM0iZrTDZUcqqpadUSz3X6MyH90"; // Remplace par un vrai token si possible
+    const token = authService.getSession().token;
 
     const headers: any = {
         "Content-Type": "application/json",
@@ -41,6 +43,9 @@ const WorkspaceDetailPage = () => {
         const confirmDelete = window.confirm("Es-tu sûr de vouloir supprimer ce workspace ?");
         if (!confirmDelete) return;
 
+        setIsDeleting(true);
+        setMessage("");
+
         try {
             const response = await fetch(`http://localhost:3000/workspaces/${uuid}`, {
                 method: "DELETE",
@@ -54,38 +59,56 @@ const WorkspaceDetailPage = () => {
 
             setMessage("Workspace supprimé avec succès !");
             setTimeout(() => {
-                navigate("/workspaces"); // Redirige vers la page d’accueil des workspaces
+                navigate("/workspaces");
             }, 1000);
         } catch (error) {
             setMessage(error instanceof Error ? error.message : "Une erreur inconnue s'est produite.");
+        } finally {
+            setIsDeleting(false);
         }
     };
 
     return (
         <div className={styles.container}>
-            <h1>Détails de l’espace de travail</h1>
-            <h2>Nom actuel : {workspace?.name}</h2>
-            <h3>UUID : {workspace?.uuid}</h3>
+            <div className={styles.card}>
+                <div className={styles.header}>
+                    <div className={styles.logo}>
+                        <span>{workspace?.name?.charAt(0).toUpperCase()}</span>
+                    </div>
+                    <div>
+                        <h2 className={styles.name}>{workspace?.name}</h2>
+                        <p className={styles.uuid}>UUID : {workspace?.uuid}</p>
+                    </div>
+                </div>
 
-            <div className={styles.renameSection}>
-                <input
-                    type="text"
-                    value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
-                    placeholder="Nouveau nom"
-                    className={styles.input}
-                />
-                <button className={styles.button} onClick={handleRename}>
-                    Renommer
-                </button>
+                <div className={styles.form}>
+                    <input
+                        type="text"
+                        value={newName}
+                        onChange={(e) => setNewName(e.target.value)}
+                        placeholder="Nouveau nom"
+                        className={styles.input}
+                    />
+                    <button className={styles.renameBtn} onClick={handleRename}>
+                        Renommer
+                    </button>
+                </div>
+
+                <div className={styles.actions}>
+                    <button 
+                        className={styles.deleteBtn} 
+                        onClick={handleDelete} 
+                        disabled={isDeleting}
+                    >
+                        {isDeleting ? "Suppression..." : "Supprimer"}
+                    </button>
+                    <button className={styles.chatBtn}>
+                        Tchat
+                    </button>
+                </div>
+
+                {message && <p className={styles.message}>{message}</p>}
             </div>
-
-            <div className={styles.actions}>
-                <button className={styles.button} onClick={handleDelete}>Supprimer</button>
-                <button className={styles.button}>Tchat</button>
-            </div>
-
-            {message && <p className={styles.message}>{message}</p>}
         </div>
     );
 };

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Home, Bell, User, Settings } from "lucide-react";
 import styles from "../styles/workspacesPage.module.css";
 import CreateWorkspaceModal from "../components/workspaces/CreateWorkspaceModal";
+import authService from "../services/auth.service";
 
 const WorkspacesPage = () => {
     const [showModal, setShowModal] = useState(false);
@@ -12,7 +13,9 @@ const WorkspacesPage = () => {
 
     const fetchWorkspaces = async () => {
         try {
-            const token = "eyJhbGciOiJIUzI1NiJ9.NjA0YWNmYWItZTFmYy00MjAzLWE2MjItMzUwZTk5MzNkNGY0.LcLp3yFB9r2CHil2RM0iZrTDZUcqqpadUSz3X6MyH90";
+            const token = authService.getSession().token;
+            console.log("Token récupéré :", token);
+
 
             const response = await fetch("http://localhost:3000/workspaces", {
                 headers: {
@@ -22,6 +25,7 @@ const WorkspacesPage = () => {
 
             if (!response.ok) {
                 throw new Error("Erreur lors du chargement des workspaces");
+                
             }
 
             const data = await response.json();
