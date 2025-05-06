@@ -99,24 +99,29 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
                 const mappedUser: User = {
                     uuid: currentUser.uuid,
                     username:
-                        (currentUser?.firstname && currentUser?.lastname)
+                        currentUser?.firstname && currentUser?.lastname
                             ? currentUser.firstname + " " + currentUser.lastname
                             : email.split("@")[0],
                     email: currentUser?.email || email,
                     mdp: password,
                     status:
-                        (currentUser?.status as "online" | "away" | "offline") ||
-                        "online",
+                        (currentUser?.status as
+                            | "online"
+                            | "away"
+                            | "offline") || "online",
                 };
 
                 // Stocker les données de session
                 await AsyncStorage.setItem("userToken", authToken);
-                await AsyncStorage.setItem("userData", JSON.stringify(mappedUser));
+                await AsyncStorage.setItem(
+                    "userData",
+                    JSON.stringify(mappedUser),
+                );
 
                 // Mettre à jour l'état et rediriger
                 setToken(authToken);
                 setUser(mappedUser);
-                
+
                 router.replace("/screens/homeScreen");
             } catch (userError) {
                 console.error("Error fetching user data:", userError);
@@ -164,7 +169,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 
             // Extraire le token et l'UUID
             const { token: authToken, uuid } = authResponse;
-            
+
             // Récupérer les informations utilisateur
             try {
                 const userDataResponse = await apiClient.get(`/users/${uuid}`, {
@@ -172,38 +177,51 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
                         Authorization: `Bearer ${authToken}`,
                     },
                 });
-                
+
                 const userData = userDataResponse.data;
                 console.log("User data after registration:", userData);
-                
+
                 // Récupérer le bon utilisateur qui correspond à l'email
                 const currentUser = Array.isArray(userData)
                     ? userData.find((user) => user.email === email)
                     : userData;
-                    
+
                 console.log("Current registered user:", currentUser);
-                
+
                 // Créer l'objet utilisateur
                 const mappedUser: User = {
                     uuid: currentUser.uuid,
-                    username: (currentUser?.firstname && currentUser?.lastname)
-                        ? currentUser.firstname + " " + currentUser.lastname
-                        : registerData.firstname + " " + registerData.lastname,
+                    username:
+                        currentUser?.firstname && currentUser?.lastname
+                            ? currentUser.firstname + " " + currentUser.lastname
+                            : registerData.firstname +
+                              " " +
+                              registerData.lastname,
                     email: currentUser?.email || email,
                     mdp: password,
-                    status: (currentUser?.status as "online" | "away" | "offline") || "online",
+                    status:
+                        (currentUser?.status as
+                            | "online"
+                            | "away"
+                            | "offline") || "online",
                 };
-                
+
                 // Stocker les données de session
                 await AsyncStorage.setItem("userToken", authToken);
-                await AsyncStorage.setItem("userData", JSON.stringify(mappedUser));
-                
+                await AsyncStorage.setItem(
+                    "userData",
+                    JSON.stringify(mappedUser),
+                );
+
                 // Mettre à jour l'état et rediriger
                 setToken(authToken);
                 setUser(mappedUser);
                 router.replace("/screens/homeScreen");
             } catch (userError) {
-                console.error("Error fetching user data after registration:", userError);
+                console.error(
+                    "Error fetching user data after registration:",
+                    userError,
+                );
                 // Même en cas d'erreur, on stocke le token et on redirige
                 await AsyncStorage.setItem("userToken", authToken);
                 setToken(authToken);

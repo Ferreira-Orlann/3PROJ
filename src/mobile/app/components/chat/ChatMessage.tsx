@@ -46,20 +46,29 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     // Convertir les réactions API en réactions UI pour l'affichage
     const getUIReactions = (): UIReaction[] => {
         const groupedReactions: UIReaction[] = [];
-        console.log("ChatMessage - getUIReactions - message.uuid:", message.uuid);
-        
+        console.log(
+            "ChatMessage - getUIReactions - message.uuid:",
+            message.uuid,
+        );
+
         // Vérifier si message.createdReaction existe et est un tableau
         if (!message.createdReaction) {
             console.log("ChatMessage - Pas de réactions pour ce message");
             return [];
         }
-        
+
         if (!Array.isArray(message.createdReaction)) {
-            console.log("ChatMessage - createdReaction n'est pas un tableau:", message.createdReaction);
+            console.log(
+                "ChatMessage - createdReaction n'est pas un tableau:",
+                message.createdReaction,
+            );
             return [];
         }
-        
-        console.log("ChatMessage - Nombre de réactions:", message.createdReaction.length);
+
+        console.log(
+            "ChatMessage - Nombre de réactions:",
+            message.createdReaction.length,
+        );
 
         // Traiter chaque réaction et les regrouper par emoji
         message.createdReaction.forEach((reaction) => {
@@ -70,7 +79,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                 !reaction.user ||
                 !reaction.user.uuid
             ) {
-                console.log("ChatMessage - Réaction invalide ignorée:", reaction);
+                console.log(
+                    "ChatMessage - Réaction invalide ignorée:",
+                    reaction,
+                );
                 return;
             }
 
@@ -78,7 +90,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             const existingReaction = groupedReactions.find(
                 (r) => r.emoji === reaction.emoji,
             );
-            
+
             if (existingReaction) {
                 // Incrémenter le compteur et ajouter l'utilisateur
                 existingReaction.count++;
@@ -105,18 +117,36 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         const fetchUserInfo = async () => {
             try {
                 // Vérifier si message.source est un objet ou une chaîne
-                if (typeof message.source === 'object' && message.source !== null && message.source.username) {
+                if (
+                    typeof message.source === "object" &&
+                    message.source !== null &&
+                    message.source.username
+                ) {
                     // Si c'est un objet avec un username, utiliser directement
                     setSenderName(message.source.username);
-                    console.log("ChatMessage - Nom d'utilisateur obtenu depuis l'objet source:", message.source.username);
-                } else if (typeof message.source === 'string') {
+                    console.log(
+                        "ChatMessage - Nom d'utilisateur obtenu depuis l'objet source:",
+                        message.source.username,
+                    );
+                } else if (typeof message.source === "string") {
                     // Si c'est une chaîne (UUID), récupérer les infos utilisateur
-                    console.log("ChatMessage - Récupération des infos utilisateur pour UUID:", message.source);
-                    const user = await userService.getUserById(message.source as UUID);
+                    console.log(
+                        "ChatMessage - Récupération des infos utilisateur pour UUID:",
+                        message.source,
+                    );
+                    const user = await userService.getUserById(
+                        message.source as UUID,
+                    );
                     setSenderName(user.username);
-                    console.log("ChatMessage - Nom d'utilisateur récupéré:", user.username);
+                    console.log(
+                        "ChatMessage - Nom d'utilisateur récupéré:",
+                        user.username,
+                    );
                 } else {
-                    console.error("ChatMessage - Format de source invalide:", message.source);
+                    console.error(
+                        "ChatMessage - Format de source invalide:",
+                        message.source,
+                    );
                     setSenderName("Unknown");
                 }
             } catch (error) {

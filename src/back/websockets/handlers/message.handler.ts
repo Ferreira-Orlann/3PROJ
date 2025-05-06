@@ -2,10 +2,18 @@ import { Injectable, UsePipes, ValidationPipe } from "@nestjs/common";
 import { Events } from "../../events.enum";
 import { MessagesService } from "../../messages/messages.service";
 import { UUID } from "crypto";
-import { SubscribeMessage, WebSocketGateway, WsException } from "@nestjs/websockets";
+import {
+    SubscribeMessage,
+    WebSocketGateway,
+    WsException,
+} from "@nestjs/websockets";
 
 @Injectable()
-@UsePipes(new ValidationPipe({ exceptionFactory: (errors) => new WsException(errors) }))
+@UsePipes(
+    new ValidationPipe({
+        exceptionFactory: (errors) => new WsException(errors),
+    }),
+)
 @WebSocketGateway()
 export class MessageHandler {
     constructor(private readonly messagesService: MessagesService) {}

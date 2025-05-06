@@ -37,13 +37,13 @@ export class MessagesController {
     }
 
     @Get("users/:userUuid/messages")
-    async getPrivateMessages(
-        @Param("userUuid") userUuid: UUID,
-    ) {
+    async getPrivateMessages(@Param("userUuid") userUuid: UUID) {
         return await this.messagesService.findMessagesByUser(userUuid);
     }
 
-    @Get("workspaces/:workspaceUuid/channels/:channelUuid/messages/:messageUuid")
+    @Get(
+        "workspaces/:workspaceUuid/channels/:channelUuid/messages/:messageUuid",
+    )
     getMessageBy(
         @Param("workspaceUuid") workspaceUuid: UUID,
         @Param("channelUuid") channelUuid: UUID,
@@ -60,7 +60,9 @@ export class MessagesController {
         return this.messagesService.findOneBy(messageUuid);
     }
 
-    @Put("workspaces/:workspaceUuid/channels/:channelUuid/messages/:messageUuid")
+    @Put(
+        "workspaces/:workspaceUuid/channels/:channelUuid/messages/:messageUuid",
+    )
     async updateMessage(
         @Param("workspaceUuid") workspaceUuid: UUID,
         @Param("channelUuid") channelUuid: UUID,
@@ -79,7 +81,9 @@ export class MessagesController {
         return this.messagesService.update(messageUuid, dto);
     }
 
-    @Delete("workspaces/:workspaceUuid/channels/:channelUuid/messages/:messageUuid")
+    @Delete(
+        "workspaces/:workspaceUuid/channels/:channelUuid/messages/:messageUuid",
+    )
     async removeWorkspaceMessage(
         @Param("workspaceUuid") workspaceUuid: UUID,
         @Param("channelUuid") channelUuid: UUID,
@@ -103,12 +107,15 @@ export class MessagesController {
         @Param("channelUuid") channelUuid: UUID,
         @Body() dto: CreateMessageDto,
     ) {
-        console.log("Route params (workspace):", { workspaceUuid, channelUuid });
-        
+        console.log("Route params (workspace):", {
+            workspaceUuid,
+            channelUuid,
+        });
+
         // Message de canal de workspace
         dto.destination_uuid = channelUuid;
         dto.is_public = true;
-        
+
         console.log("DTO après traitement (workspace):", dto);
 
         const entity = await this.messagesService.add(dto);
@@ -122,11 +129,11 @@ export class MessagesController {
         @Body() dto: CreateMessageDto,
     ) {
         console.log("Route params (privé):", { userUuid });
-        
+
         // Message privé
         dto.destination_uuid = userUuid;
         dto.is_public = false;
-        
+
         console.log("DTO après traitement (privé):", dto);
 
         const entity = await this.messagesService.add(dto);

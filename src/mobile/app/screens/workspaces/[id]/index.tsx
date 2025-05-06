@@ -113,7 +113,7 @@ export default function WorkspaceScreen() {
                     const apiMembers = await memberService.getWorkspaceMembers(
                         uuid as UUID,
                     );
-                    console.log("membersApi", apiMembers)
+                    console.log("membersApi", apiMembers);
                     members = apiMembers.map((apiMember) => ({
                         ...apiMember,
                         uuid: apiMember.uuid,
@@ -191,16 +191,21 @@ export default function WorkspaceScreen() {
     const handleOpenDirectMessage = (member: Member) => {
         // Get the user ID from either member.uuid or member.user.uuid if available
         const userId = member.user?.uuid || member.uuid;
-        
+
         if (!userId) {
-            console.error("Erreur: UUID de l'utilisateur non disponible", member);
-            alert("Impossible d'ouvrir la conversation: identifiant utilisateur manquant");
+            console.error(
+                "Erreur: UUID de l'utilisateur non disponible",
+                member,
+            );
+            alert(
+                "Impossible d'ouvrir la conversation: identifiant utilisateur manquant",
+            );
             return;
         }
-        
+
         const dmId = `${userId}`;
         console.log("Navigation vers message privé avec ID:", dmId);
-        
+
         router.push({
             pathname: "/screens/private_messages/[userId]",
             params: { userId: dmId },
@@ -695,7 +700,12 @@ export default function WorkspaceScreen() {
                                             color="#8e9297"
                                         />
                                         <Text style={styles.statText}>
-                                            Créé le {workspace.createdAt ? workspace.createdAt.toLocaleDateString('fr-FR') : 'date inconnue'}
+                                            Créé le{" "}
+                                            {workspace.createdAt
+                                                ? workspace.createdAt.toLocaleDateString(
+                                                      "fr-FR",
+                                                  )
+                                                : "date inconnue"}
                                         </Text>
                                     </View>
                                 </View>
