@@ -1,6 +1,6 @@
 import { UUID } from "typeorm/driver/mongodb/bson.typings";
 
-export type UserStatus = "online" | "offline"
+export type UserStatus = "online" | "offline";
 
 export type User = {
     uuid: UUID;
@@ -10,4 +10,4 @@ export type User = {
     lastname: string;
     email: string;
     address: string;
-}
+};

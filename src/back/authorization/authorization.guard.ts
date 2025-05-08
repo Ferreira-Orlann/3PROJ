@@ -5,10 +5,7 @@ import {
     NotAcceptableException,
 } from "@nestjs/common";
 import { Observable } from "rxjs";
-import {
-    PERMISSIONS_METADATA,
-    UsePermission,
-} from "./authorization.decorator";
+import { PERMISSIONS_METADATA, UsePermission } from "./authorization.decorator";
 import { Reflector } from "@nestjs/core";
 import { User } from "../users/users.entity";
 import { ConfigService } from "@nestjs/config";
@@ -37,7 +34,7 @@ export class AuthorizationGuard implements CanActivate {
         }
         const permission = authorize(context);
         if (typeof permission == "boolean" || permission instanceof Boolean) {
-            return (permission as unknown) as boolean
+            return permission as unknown as boolean;
         }
         let user: User;
         switch (context.getType()) {

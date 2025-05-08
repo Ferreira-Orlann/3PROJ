@@ -22,11 +22,10 @@ export class AuthService {
 
     async createSession(user: User): Promise<Session> {
         const uuid = randomUUID();
-        const session = new Session()
-        session.uuid = uuid,
-        session.token = this.jwtService.sign(uuid)
-        session.second_duration = 600
-        session.owner = user
+        const session = new Session();
+        (session.uuid = uuid), (session.token = this.jwtService.sign(uuid));
+        session.second_duration = 600;
+        session.owner = user;
         const result = await this.sessionRepo.save(session);
         return result;
     }

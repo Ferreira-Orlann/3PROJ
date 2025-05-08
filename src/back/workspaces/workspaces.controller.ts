@@ -29,8 +29,8 @@ export class WorkspacesController {
             resource: randomUUID(),
             // resource: "8b80c760-4d83-4ed1-9dd0-14969995a1a7",
             domain: "0",
-            permission: "READ"
-        }
+            permission: "READ",
+        };
     })
     @Get()
     async findAll() {

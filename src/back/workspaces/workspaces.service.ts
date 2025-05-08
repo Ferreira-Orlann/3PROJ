@@ -42,10 +42,11 @@ export class WorkspacesService {
     async remove(uuid: UUID): Promise<void> {
         const result = await this.workspacesRepo.delete(uuid);
         if (result.affected === 0) {
-            throw new NotFoundException(`Le workspace avec l'UUID ${uuid} n'existe pas`);
+            throw new NotFoundException(
+                `Le workspace avec l'UUID ${uuid} n'existe pas`,
+            );
         }
     }
-    
 
     async add(dto: CreateWorkspaceDto): Promise<Workspace> {
         const workspace = await this.workspacesRepo.save({

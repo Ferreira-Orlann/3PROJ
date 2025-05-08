@@ -13,7 +13,7 @@ if (__DEV__) {
         // L'émulateur iOS peut utiliser localhost directement
         HOST = "localhost";
     }
-    
+
     // Pour les appareils physiques sur le même réseau Wi-Fi
     // Décommentez la ligne ci-dessous et remplacez par l'adresse IP actuelle de votre ordinateur
     HOST = "192.168.1.111";

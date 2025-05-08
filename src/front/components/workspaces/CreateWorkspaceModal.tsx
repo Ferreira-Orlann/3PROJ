@@ -8,7 +8,10 @@ interface CreateWorkspaceModalProps {
     onWorkspaceCreated: () => void;
 }
 
-const CreateWorkspaceModal = ({ onClose, onWorkspaceCreated }: CreateWorkspaceModalProps) => {
+const CreateWorkspaceModal = ({
+    onClose,
+    onWorkspaceCreated,
+}: CreateWorkspaceModalProps) => {
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [visibility, setVisibility] = useState("public");
@@ -21,7 +24,11 @@ const CreateWorkspaceModal = ({ onClose, onWorkspaceCreated }: CreateWorkspaceMo
         }
 
         try {
-            const data = workspacesService.create(name, description, visibility == "public")
+            const data = workspacesService.create(
+                name,
+                description,
+                visibility == "public",
+            );
             console.log("Workspace créé:", data);
 
             onWorkspaceCreated();
@@ -60,7 +67,10 @@ const CreateWorkspaceModal = ({ onClose, onWorkspaceCreated }: CreateWorkspaceMo
                 </select>
 
                 <div className={styles.modalButtons}>
-                    <button onClick={handleCreate} className={styles.createButton}>
+                    <button
+                        onClick={handleCreate}
+                        className={styles.createButton}
+                    >
                         Créer
                     </button>
                     <button onClick={onClose} className={styles.cancelButton}>

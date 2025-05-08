@@ -6,7 +6,7 @@ class AuthService {
     private session: Session;
 
     constructor() {
-        this.session = null
+        this.session = null;
     }
 
     public async login(email: string, password: string): Promise<boolean> {
@@ -22,15 +22,17 @@ class AuthService {
     }
 
     public setSession(session: Session) {
-        localStorage.setItem(SESSION_LOCALSTORE_NAME, JSON.stringify(session))
+        localStorage.setItem(SESSION_LOCALSTORE_NAME, JSON.stringify(session));
     }
 
     public getSession(): Session {
         if (this.session != undefined) {
-            return this.session
+            return this.session;
         } else {
-            this.session = JSON.parse(localStorage.getItem(SESSION_LOCALSTORE_NAME))
-            return this.session
+            this.session = JSON.parse(
+                localStorage.getItem(SESSION_LOCALSTORE_NAME),
+            );
+            return this.session;
         }
     }
 

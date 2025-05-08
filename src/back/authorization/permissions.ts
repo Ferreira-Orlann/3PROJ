@@ -1,1 +1,1 @@
-export type Permission = "READ"
+export type Permission = "READ";
