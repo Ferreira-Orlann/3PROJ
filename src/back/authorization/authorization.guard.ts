@@ -6,21 +6,19 @@ import {
 } from "@nestjs/common";
 import { Observable } from "rxjs";
 import {
-    Permission,
     PERMISSIONS_METADATA,
     UsePermission,
 } from "./authorization.decorator";
 import { Reflector } from "@nestjs/core";
-import { AuthZService } from "nest-authz";
 import { User } from "../users/users.entity";
-import { Config } from "casbin";
 import { ConfigService } from "@nestjs/config";
+import { AuthorizationService } from "./authorization.service";
 
 @Injectable()
 export class AuthorizationGuard implements CanActivate {
     constructor(
         private readonly reflector: Reflector,
-        private readonly authzService: AuthZService,
+        private readonly auth: AuthorizationService,
         private readonly configService: ConfigService,
     ) {}
 
@@ -38,6 +36,9 @@ export class AuthorizationGuard implements CanActivate {
             return true;
         }
         const permission = authorize(context);
+        if (typeof permission == "boolean" || permission instanceof Boolean) {
+            return (permission as unknown) as boolean
+        }
         let user: User;
         switch (context.getType()) {
             case "http":
@@ -52,11 +53,11 @@ export class AuthorizationGuard implements CanActivate {
         if (!user) {
             return false;
         }
-        return this.authzService.enforce(
-            user.uuid,
+        return this.auth.enforce(
+            user,
             permission.domain,
             permission.resource,
-            permission.action,
+            permission.permission,
         );
     }
 }

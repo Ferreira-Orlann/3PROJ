@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Home, Bell, User, Settings } from "lucide-react";
 import styles from "../styles/workspacesPage.module.css";
 import CreateWorkspaceModal from "../components/workspaces/CreateWorkspaceModal";
+import authService from "../services/auth.service";
 
 const WorkspacesPage = () => {
     const [showModal, setShowModal] = useState(false);
@@ -43,6 +44,8 @@ const WorkspacesPage = () => {
             channels: ["Stratégie"],
         },
     ]);
+
+    console.log("Session:", authService.getSession())
 
     const handleCreateWorkspace = (
         name: string,

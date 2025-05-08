@@ -53,19 +53,6 @@ export class UsersController {
         @Query("pageSize") pageSize: number = 10,
         @Query("basic") basic: boolean = false,
     ): Promise<User[] | BasicUser[]> {
-        console.log("Get Users");
-        // const en = await this.authzService.enforce(
-        //     req.user?.uuid,
-        //     "test",
-        //     "message",
-        //     "CREATE",
-        // );
-        // console.log("Bool:", en);
-        // console.log(await this.authzService.getAllSubjects());
-        // console.log(await this.authzService.getAllRoles());
-        // console.log(await this.authzService.getAllObjects());
-        // console.log(await this.authzService.getAllActions());
-        // console.log(await this.authzService.getUsersForRole("admin", "test"));
         if (basic) {
             pageSize = Math.min(
                 pageSize,
