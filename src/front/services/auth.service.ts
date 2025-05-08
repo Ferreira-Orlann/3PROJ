@@ -5,6 +5,10 @@ import { SESSION_LOCALSTORE_NAME } from "../consts";
 class AuthService {
     private session: Session;
 
+    constructor() {
+        this.session = null
+    }
+
     public async login(email: string, password: string): Promise<boolean> {
         const res = await axios.post<Session>(
             "http://localhost:3000/auth/login",
@@ -28,6 +32,16 @@ class AuthService {
             this.session = JSON.parse(localStorage.getItem(SESSION_LOCALSTORE_NAME))
             return this.session
         }
+    }
+
+    public getSession(): Session {
+        if (!this.session) {
+            const sessionString = localStorage.getItem(SESSION_LOCALSTORE_NAME);
+            if (sessionString) {
+                this.session = JSON.parse(sessionString);
+            }
+        }
+        return this.session;
     }
 }
 
