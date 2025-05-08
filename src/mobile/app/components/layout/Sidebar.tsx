@@ -17,12 +17,15 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "../../theme/colors";
 import useHomeScreen from "../../hooks/home";
+import useDirectMessages, { DirectMessageUser } from "../../hooks/useDirectMessages";
 import { UUID } from "crypto";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Sidebar() {
     const insets = useSafeAreaInsets();
     const pathname = usePathname();
     const router = useRouter();
+    const auth = useAuth();
     const [expandedWorkspace, setExpandedWorkspace] = useState<string | null>(
         null,
     );
@@ -32,6 +35,9 @@ export default function Sidebar() {
 
     // Utiliser le hook useHomeScreen pour récupérer les workspaces
     const { state, filteredWorkspaces } = useHomeScreen();
+    
+    // Utiliser le hook useDirectMessages pour récupérer les conversations privées
+    const { state: dmState, refreshDirectMessages } = useDirectMessages();
 
     // Animation values
     const sidebarWidth = useRef(new Animated.Value(60)).current; // Largeur initiale réduite
@@ -167,6 +173,20 @@ export default function Sidebar() {
             collapseSidebar();
         }
     };
+    
+    // Handle direct message selection
+    const handleDirectMessageSelect = (userId: UUID) => {
+        // Rediriger vers la page de conversation privée
+        // Utiliser un chemin existant pour le moment, nous créerons la page de messages directs plus tard
+        router.push({
+            pathname: "/screens/direct-messages",
+            params: { userId: userId.toString() },
+        });
+        // Optionally collapse sidebar after selection on mobile
+        if (Dimensions.get("window").width < 768) {
+            collapseSidebar();
+        }
+    };
 
     return (
         <Animated.View
@@ -278,11 +298,53 @@ export default function Sidebar() {
                     <Text style={styles.sectionTitle}>Messages directs</Text>
                 </View>
                 <ScrollView style={styles.scrollSection}>
-                    <View style={styles.emptyContainer}>
-                        <Text style={styles.emptyText}>
-                            Fonctionnalité à venir
-                        </Text>
-                    </View>
+                    {dmState.isLoading ? (
+                        <View style={styles.loadingContainer}>
+                            <ActivityIndicator
+                                size="small"
+                                color={Colors.primary}
+                            />
+                            <Text style={styles.loadingText}>
+                                Chargement...
+                            </Text>
+                        </View>
+                    ) : dmState.error ? (
+                        <View style={styles.errorContainer}>
+                            <Text style={styles.errorText}>{dmState.error}</Text>
+                        </View>
+                    ) : dmState.users.length === 0 ? (
+                        <View style={styles.emptyContainer}>
+                            <Text style={styles.emptyText}>
+                                Aucune conversation privée
+                            </Text>
+                        </View>
+                    ) : (
+                        dmState.users.map((user) => (
+                            <TouchableOpacity
+                                key={user.uuid.toString()}
+                                style={styles.directMessageItem}
+                                onPress={() => handleDirectMessageSelect(user.uuid)}
+                            >
+                                <View style={styles.userAvatar}>
+                                    <Text style={styles.avatarText}>
+                                        {user.username[0]}
+                                    </Text>
+                                </View>
+                                {isExpanded && (
+                                    <View style={styles.userInfo}>
+                                        <Text style={styles.userName}>
+                                            {user.username}
+                                        </Text>
+                                        {user.lastMessage && (
+                                            <Text style={styles.lastMessage} numberOfLines={1}>
+                                                {user.lastMessage}
+                                            </Text>
+                                        )}
+                                    </View>
+                                )}
+                            </TouchableOpacity>
+                        ))
+                    )}
                 </ScrollView>
             </View>
 
@@ -307,6 +369,36 @@ const styles = StyleSheet.create({
         position: "absolute",
         zIndex: 1,
         overflow: "hidden",
+    },
+    directMessageItem: {
+        flexDirection: "row",
+        alignItems: "center",
+        padding: 8,
+        marginVertical: 2,
+        borderRadius: 4,
+    },
+    userAvatar: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: "#5865F2", // Couleur bleue pour les avatars des messages directs
+        justifyContent: "center",
+        alignItems: "center",
+        marginRight: 8,
+    },
+    userInfo: {
+        flex: 1,
+        justifyContent: "center",
+    },
+    userName: {
+        color: "#ffffff",
+        fontSize: 14,
+        fontWeight: "500",
+    },
+    lastMessage: {
+        color: "#8e9297",
+        fontSize: 12,
+        marginTop: 2,
     },
     loadingContainer: {
         padding: 12,

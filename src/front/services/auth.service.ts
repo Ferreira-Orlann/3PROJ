@@ -14,7 +14,6 @@ class AuthService {
             "http://localhost:3000/auth/login",
             { email, password },
         );
-        console.log("Response:", res);
         if (res.status != 201) {
             return false;
         }
@@ -22,11 +21,17 @@ class AuthService {
         return true;
     }
 
-    public saveSession() {
-        localStorage.setItem(
-            SESSION_LOCALSTORE_NAME,
-            JSON.stringify(this.session),
-        );
+    public setSession(session: Session) {
+        localStorage.setItem(SESSION_LOCALSTORE_NAME, JSON.stringify(session))
+    }
+
+    public getSession(): Session {
+        if (this.session != undefined) {
+            return this.session
+        } else {
+            this.session = JSON.parse(localStorage.getItem(SESSION_LOCALSTORE_NAME))
+            return this.session
+        }
     }
 
     public getSession(): Session {

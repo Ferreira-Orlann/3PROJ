@@ -11,6 +11,23 @@ const WorkspacesPage = () => {
     const [error, setError] = useState("");
     const navigate = useNavigate();
 
+    console.log("Session:", authService.getSession())
+
+    const handleCreateWorkspace = (
+        name: string,
+        description: string,
+        visibility: string,
+    ) => {
+        const newWorkspace = {
+            id: (workspaces.length + 1).toString(),
+            name,
+            description,
+            visibility,
+            icon: name.charAt(0).toUpperCase(),
+            channels: [],
+        };
+        setWorkspaces([newWorkspace, ...workspaces]);
+
     const fetchWorkspaces = async () => {
         try {
             const token = authService.getSession().token;
