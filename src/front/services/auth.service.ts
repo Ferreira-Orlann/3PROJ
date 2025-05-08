@@ -34,8 +34,6 @@ class AuthService {
             const sessionString = localStorage.getItem(SESSION_LOCALSTORE_NAME);
             if (sessionString) {
                 this.session = JSON.parse(sessionString);
-            } else {
-                throw new Error("Session not found");
             }
         }
         return this.session;

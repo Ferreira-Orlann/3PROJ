@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import "../styles/auth.css";
-import { SESSION_LOCALSTORE_NAME } from "../consts";
-import { Session } from "../types/auth";
 import authService from "../services/auth.service";
 import Signup from "../components/auth/Signup"; 
 import { useAuthContext } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const AuthPage = () => {
     const [isLogin, setIsLogin] = useState(true);
@@ -12,6 +11,7 @@ const AuthPage = () => {
     const [error, setError] = useState("");
     const [password, setPassword] = useState("");
     const { user, session, setUser, setSession } = useAuthContext()
+    const navigate = useNavigate()
 
     const handleLogin = async () => {
         try {
@@ -23,7 +23,7 @@ const AuthPage = () => {
             authService.saveSession()
             setSession(session)
 
-            window.location.href = "/workspaces";
+            navigate("/workspaces")
         } catch (err: any) {
             setError(err.message || "Erreur inconnue");
         }

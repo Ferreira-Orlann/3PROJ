@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Session } from "../types/auth";
+import AuthPage from "../Pages/AuthPage";
+import authService from "../services/auth.service";
 
 type User = {
     uuid: string;
@@ -25,9 +27,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     const [user, setUser] = useState<Partial<User> | null>(null);
     const [session, setSession] = useState<Session | null>(null);
 
+    useEffect(() => {
+        const stockageSession = authService.getSession()
+        if (stockageSession != null) {
+            setSession(stockageSession)
+        }
+    })
+    
     return (
         <AuthContext.Provider value={{user, session, setUser, setSession}}>
-            {children}
+            {session == null ? <AuthPage /> : children}
         </AuthContext.Provider>
     );
 };
