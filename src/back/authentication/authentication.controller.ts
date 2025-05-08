@@ -2,14 +2,17 @@ import {
     Body,
     Controller,
     forwardRef,
+    HttpException,
+    HttpStatus,
     Inject,
     Post,
     Res,
+    SerializeOptions,
 } from "@nestjs/common";
 import { AuthService } from "./authentication.service";
 import { UsersService } from "../users/users.service";
 import { ApiSchema } from "@nestjs/swagger";
-import { LoginDto, Session } from "./session.entity";
+import { ExposedSession, LoginDto, Session } from "./session.entity";
 
 @ApiSchema({
     description: "Authentification",
@@ -23,25 +26,24 @@ export class AuthController {
     ) {}
 
     @Post("login")
-    async signin(@Body() dto: LoginDto, @Res() res): Promise<Session> {
-        try {
-            console.log("Login attempt with:", dto);
+    @SerializeOptions({
+        type: ExposedSession
+    })
+    async signin(@Body() dto: LoginDto): Promise<Session> {
+        console.log("Login attempt with:", dto);
 
-            // Find the user first
-            const user = await this.usersService.findOneByEmail(dto.email);
+        // Find the user first
+        const user = await this.usersService.findOneByEmail(dto.email);
 
-            // Check if user exists
-            if (!user) {
-                console.log("User not found");
-                throw new Error(`User with identifier ${dto.email} not found`);
-            }
-
-            // Create session for the user
-            const session = await this.authService.createSession(user);
-            return session;
-        } catch (error) {
-            console.error("Error in signin:", error);
-            throw error;
+        // Check if user exists
+        if (!user) {
+            console.log("User not found");
+            throw new HttpException(`User with identifier ${dto.email} not found`, HttpStatus.NOT_FOUND);
         }
+
+        // Create session for the user
+        const session = await this.authService.createSession(user);
+        console.log("Controller Session:", session)
+        return session;
     }
 }

@@ -12,6 +12,7 @@ import { Expose } from "class-transformer";
 import { ApiProperty, ApiSchema } from "@nestjs/swagger";
 import { OmitType } from "@nestjs/mapped-types";
 import { IsEmail, IsNotEmpty } from "class-validator";
+import { UUIDHolder } from "../uuid";
 
 @Entity({
     name: "users",
@@ -20,7 +21,7 @@ import { IsEmail, IsNotEmpty } from "class-validator";
     description: "Represent and User",
     name: "ExposedUser",
 })
-export class User {
+export class User implements UUIDHolder {
     @PrimaryGeneratedColumn("uuid")
     @Expose()
     @ApiProperty({
