@@ -27,7 +27,7 @@ export class AuthController {
 
     @Post("login")
     @SerializeOptions({
-        type: ExposedSession
+        type: ExposedSession,
     })
     async signin(@Body() dto: LoginDto): Promise<Session> {
         console.log("Login attempt with:", dto);
@@ -38,12 +38,15 @@ export class AuthController {
         // Check if user exists
         if (!user) {
             console.log("User not found");
-            throw new HttpException(`User with identifier ${dto.email} not found`, HttpStatus.NOT_FOUND);
+            throw new HttpException(
+                `User with identifier ${dto.email} not found`,
+                HttpStatus.NOT_FOUND,
+            );
         }
 
         // Create session for the user
         const session = await this.authService.createSession(user);
-        console.log("Controller Session:", session)
+        console.log("Controller Session:", session);
         return session;
     }
 }

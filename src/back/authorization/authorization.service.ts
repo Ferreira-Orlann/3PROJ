@@ -9,7 +9,12 @@ import { UUID } from "crypto";
 export class AuthorizationService {
     constructor(private readonly authzService: AuthZService) {}
 
-    async enforce(user: User, domain: UUID | "0", resource: UUID, permission: Permission): Promise<boolean> {
+    async enforce(
+        user: User,
+        domain: UUID | "0",
+        resource: UUID,
+        permission: Permission,
+    ): Promise<boolean> {
         console.log("Get Users", domain, resource, permission);
         // console.log("Bool:", en);
         console.log(await this.authzService.getAllSubjects());

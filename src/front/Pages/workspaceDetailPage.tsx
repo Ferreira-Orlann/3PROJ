@@ -17,16 +17,19 @@ const WorkspaceDetailPage = () => {
 
     const headers: any = {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
     };
 
     const handleRename = async () => {
         try {
-            const response = await fetch(`http://localhost:3000/workspaces/${uuid}`, {
-                method: "PUT",
-                headers,
-                body: JSON.stringify({ name: newName }),
-            });
+            const response = await fetch(
+                `http://localhost:3000/workspaces/${uuid}`,
+                {
+                    method: "PUT",
+                    headers,
+                    body: JSON.stringify({ name: newName }),
+                },
+            );
 
             if (!response.ok) {
                 const error = await response.text();
@@ -35,22 +38,31 @@ const WorkspaceDetailPage = () => {
 
             setMessage("Nom mis à jour avec succès !");
         } catch (error) {
-            setMessage(error instanceof Error ? error.message : "Une erreur inconnue s'est produite.");
+            setMessage(
+                error instanceof Error
+                    ? error.message
+                    : "Une erreur inconnue s'est produite.",
+            );
         }
     };
 
     const handleDelete = async () => {
-        const confirmDelete = window.confirm("Es-tu sûr de vouloir supprimer ce workspace ?");
+        const confirmDelete = window.confirm(
+            "Es-tu sûr de vouloir supprimer ce workspace ?",
+        );
         if (!confirmDelete) return;
 
         setIsDeleting(true);
         setMessage("");
 
         try {
-            const response = await fetch(`http://localhost:3000/workspaces/${uuid}`, {
-                method: "DELETE",
-                headers,
-            });
+            const response = await fetch(
+                `http://localhost:3000/workspaces/${uuid}`,
+                {
+                    method: "DELETE",
+                    headers,
+                },
+            );
 
             if (!response.ok) {
                 const error = await response.text();
@@ -62,7 +74,11 @@ const WorkspaceDetailPage = () => {
                 navigate("/workspaces");
             }, 1000);
         } catch (error) {
-            setMessage(error instanceof Error ? error.message : "Une erreur inconnue s'est produite.");
+            setMessage(
+                error instanceof Error
+                    ? error.message
+                    : "Une erreur inconnue s'est produite.",
+            );
         } finally {
             setIsDeleting(false);
         }
@@ -95,16 +111,14 @@ const WorkspaceDetailPage = () => {
                 </div>
 
                 <div className={styles.actions}>
-                    <button 
-                        className={styles.deleteBtn} 
-                        onClick={handleDelete} 
+                    <button
+                        className={styles.deleteBtn}
+                        onClick={handleDelete}
                         disabled={isDeleting}
                     >
                         {isDeleting ? "Suppression..." : "Supprimer"}
                     </button>
-                    <button className={styles.chatBtn}>
-                        Tchat
-                    </button>
+                    <button className={styles.chatBtn}>Tchat</button>
                 </div>
 
                 {message && <p className={styles.message}>{message}</p>}

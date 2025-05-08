@@ -39,7 +39,7 @@ export class Session {
     @Column()
     @Expose()
     second_duration: number;
-    
+
     @Index()
     @Exclude()
     @Column({

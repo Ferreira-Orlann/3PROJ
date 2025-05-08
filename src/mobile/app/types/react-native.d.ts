@@ -1,4 +1,4 @@
 /**
  * React Native TypeScript declaration file
  */
-declare module 'react-native';
+declare module "react-native";

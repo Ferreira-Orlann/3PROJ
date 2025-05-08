@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "../styles/auth.css";
 import authService from "../services/auth.service";
-import Signup from "../components/auth/Signup"; 
+import Signup from "../components/auth/Signup";
 import { useAuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
@@ -10,8 +10,8 @@ const AuthPage = () => {
     const [email, setEmail] = useState("");
     const [error, setError] = useState("");
     const [password, setPassword] = useState("");
-    const { user, session, setUser, setSession } = useAuthContext()
-    const navigate = useNavigate()
+    const { user, session, setUser, setSession } = useAuthContext();
+    const navigate = useNavigate();
 
     const handleLogin = async () => {
         try {
@@ -20,10 +20,10 @@ const AuthPage = () => {
                 return;
             }
             const session = authService.getSession();
-            authService.saveSession()
-            setSession(session)
+            authService.saveSession();
+            setSession(session);
 
-            navigate("/workspaces")
+            navigate("/workspaces");
         } catch (err: any) {
             setError(err.message || "Erreur inconnue");
         }

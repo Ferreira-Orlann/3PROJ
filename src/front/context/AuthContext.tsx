@@ -9,7 +9,7 @@ type User = {
 
 type AuthContextType = {
     user: Partial<User> | null;
-    session: Session | null
+    session: Session | null;
     setUser: (session: Session) => void;
     setSession: (session: Session) => void;
 };
@@ -18,7 +18,7 @@ const AuthContext = createContext<AuthContextType>({
     user: null,
     session: null,
     setUser: () => {},
-    setSession: () => {}
+    setSession: () => {},
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -28,14 +28,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     const [session, setSession] = useState<Session | null>(null);
 
     useEffect(() => {
-        const stockageSession = authService.getSession()
+        const stockageSession = authService.getSession();
         if (stockageSession != null) {
-            setSession(stockageSession)
+            setSession(stockageSession);
         }
-    })
-    
+    });
+
     return (
-        <AuthContext.Provider value={{user, session, setUser, setSession}}>
+        <AuthContext.Provider value={{ user, session, setUser, setSession }}>
             {session == null ? <AuthPage /> : children}
         </AuthContext.Provider>
     );

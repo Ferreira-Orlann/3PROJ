@@ -11,7 +11,9 @@ export type AuthrorizationDescription = {
     permission: Permission;
 };
 
-export type UsePermission = (context: ExecutionContext) => AuthrorizationDescription | boolean;
+export type UsePermission = (
+    context: ExecutionContext,
+) => AuthrorizationDescription | boolean;
 
 export const Authorize = (use: UsePermission) => {
     return SetMetadata(PERMISSIONS_METADATA, use);
