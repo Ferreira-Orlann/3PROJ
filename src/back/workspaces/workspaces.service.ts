@@ -55,7 +55,6 @@ export class WorkspacesService {
             owner_uuid: dto.owner_uuid,
             createdAt: dto.createdAt,
         });
-        await this.workspaceMembersService.add(dto.owner_uuid, workspace.uuid);
 
         return workspace;
     }

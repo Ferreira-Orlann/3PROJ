@@ -2,6 +2,7 @@ import axios from "axios";
 import authService from "./auth.service";
 import { Workspace } from "../types/workspace";
 import { UUID } from "crypto";
+import { PartialRequired } from "../types/utils";
 
 class WorkspacesService {
     public async create(
@@ -67,6 +68,24 @@ class WorkspacesService {
             resolve(response.data);
         });
     }
+
+    public async delete(workspace: PartialRequired<Workspace, "uuid">) {
+        const response = await axios.delete<Workspace>(
+            `http://localhost:3000/workspaces/${workspace.uuid}`,
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${authService.getSession().token}`,
+                },
+            },
+        );
+        return new Promise((resolve, reject) => {
+            if (response.status != 200) {
+                reject(response.data);
+            }
+            resolve(response.data);
+        });
+    } 
 }
 
 export default new WorkspacesService();
