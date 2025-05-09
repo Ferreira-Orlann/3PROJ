@@ -8,7 +8,7 @@ const Signup = () => {
         lastname: "",
         email: "",
         address: "",
-        password: "",
+        mdp: "",
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -83,9 +83,9 @@ const Signup = () => {
                 />
                 <input
                     type="text"
-                    name="password"
+                    name="mdp"
                     placeholder="Mot de passe"
-                    value={formData.password}
+                    value={formData.mdp}
                     onChange={handleChange}
                     required
                 />

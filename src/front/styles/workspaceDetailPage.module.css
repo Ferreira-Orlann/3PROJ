@@ -1,375 +1,152 @@
-/* Container principal */
-.container {
-    display: flex;
+.headerBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  background-color: #2f3136;
+  color: white;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #202225;
+  font-family: "Segoe UI", sans-serif;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  flex-wrap: wrap;
+}
+
+.leftSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex-grow: 1;
+  gap: 0.5rem;
+}
+
+.centered {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logo {
+  width: 40px;
+  height: 40px;
+  background-color: #5865f2;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.nameContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.name {
+  font-size: 1.1rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 2px 4px;
+  transition: background-color 0.2s;
+}
+
+.name:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.nameInput {
+  font-size: 1.1rem;
+  font-weight: 500;
+  background: #1e1f22;
+  color: white;
+  border: 1px solid #7289da;
+  border-radius: 4px;
+  padding: 2px 6px;
+  outline: none;
+  width: 200px;
+}
+
+.uuid {
+  font-size: 0.75rem;
+  color: #b9bbbe;
+  margin-top: 2px;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.deleteBtn,
+.chatBtn {
+  background-color: #4f545c;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.chatBtn:hover {
+  background-color: #5865f2;
+}
+
+.deleteBtn {
+  background-color: #ed4245;
+}
+
+.deleteBtn:hover {
+  background-color: #c53a3d;
+}
+
+.message {
+  position: absolute;
+  top: 70px;
+  left: 1.5rem;
+  color: #43b581;
+  font-weight: 500;
+}
+
+.tabBar {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #444;
+}
+
+.tabButton {
+  background-color: transparent;
+  color: #aaa;
+  border: none;
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: color 0.3s, border-bottom 0.3s;
+}
+
+.tabButton:hover {
+  color: #8a4df5;
+  border-bottom: 2px solid #8a4df5;
+}
+
+/* Responsive pour petit écran */
+@media (max-width: 768px) {
+  .headerBar {
     flex-direction: column;
-    height: 100vh;
-    background-color: #1e1f25; /* Fond sombre */
-    color: white;
-    font-family: 'Arial', sans-serif;
-    padding: 20px;
-  }
-  
-  /* Header (en-tête) */
-  .header {
-    text-align: center;
-    margin-bottom: 2rem;
-  }
-  
-  .workspaceIcon {
-    width: 60px;
-    height: 60px;
-    background-color: #6c47ff; /* Bleu violet */
-    color: white;
-    border-radius: 50%;
-    font-size: 2rem;
-    display: flex;
     align-items: center;
-    justify-content: center;
-    margin: 0 auto 1rem;
   }
-  
-  .workspaceInfo {
-    text-align: center;
-    margin-top: 10px;
-  }
-  
-  /* Tabs - Onglets */
-  .tabs {
-    display: flex;
-    justify-content: center;
-    gap: 2rem;
-    margin-bottom: 2rem;
-  }
-  
-  .tabs button {
-    background: none;
-    border: none;
-    font-size: 1.2rem;
-    color: #aaa; /* Gris clair */
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    padding: 0.6rem 1rem;
-    transition: color 0.3s, border-bottom 0.3s;
-  }
-  
-  /* Onglet actif */
-  .activeTab {
-    color: #6c47ff; /* Accent bleu violet */
-    border-bottom: 3px solid #6c47ff;
-    font-weight: bold;
-  }
-  
-  /* Contenu des onglets */
-  .tabContent {
-    background: #2b2d35; /* Fond plus clair */
-    padding: 2rem;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  }
-  
-  /* Liste de contenu (Canaux, Membres) */
-  .contentList {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-  
-  /* Formulaire Paramètres */
-  .settingsContent form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-  
-  /* Champs du formulaire */
-  .formGroup {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .formGroup label {
-    margin-bottom: 0.5rem;
-    font-weight: bold;
-    color: #ccc;
-  }
-  
-  input,
-  textarea,
-  select {
-    padding: 0.8rem;
-    border-radius: 8px;
-    border: 1px solid #444654; /* Bordure grise foncée */
-    background: #33353f; /* Fond sombre pour les champs */
-    color: white;
-  }
-  
-  input:focus,
-  textarea:focus,
-  select:focus {
-    outline: none;
-    border: 1px solid #6c47ff; /* Accent bleu violet */
-    background-color: #444;
-  }
-  
-  /* Membres */
-  .memberItem {
-    display: flex;
-    justify-content: space-between;
-    background: #33353f;
-    padding: 1rem;
-    border-radius: 8px;
-    border: 1px solid #444654;
-    transition: background-color 0.3s;
-  }
-  
-  .memberItem:hover {
-    background-color: #444654; /* Survol avec une légère modification */
-  }
-  
-  .online, .absent, .offline {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    margin-left: 5px;
-  }
-  
-  .online {
-    background-color: #4ade80;
-  }
-  
-  .absent {
-    background-color: #facc15;
-  }
-  
-  .offline {
-    background-color: #9ca3af;
-  }
-  
-  /* Canaux */
-  .channelItem {
-    display: flex;
-    justify-content: space-between;
-    background: #33353f;
-    padding: 1rem;
-    border-radius: 8px;
-    border: 1px solid #444654;
-    transition: background-color 0.3s;
-  }
-  
-  .channelItem:hover {
-    background-color: #444654;
-  }
-  
-  /* Bouton Inviter un membre */
-  .inviteButton {
+
+  .actions {
     margin-top: 1rem;
-    background-color: #6c47ff;
-    color: white;
-    padding: 0.8rem 1.2rem;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-weight: bold;
-    transition: background-color 0.3s;
-    cursor: pointer;
   }
-  
-  .inviteButton:hover {
-    background-color: #5535cc;
-  }
-  
-  /* Modal */
-  .modalOverlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(30, 31, 37, 0.85); /* Overlay sombre */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 999;
-  }
-  
-  .modalContent {
-    background: #2b2d35;
-    padding: 30px;
-    border-radius: 12px;
-    width: 400px;
-    max-width: 90%;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    color: white;
-  }
-  
-  .modalContent input,
-  .modalContent textarea,
-  .modalContent select {
-    width: 100%;
-    padding: 10px;
-    background-color: #33353f;
-    border: 1px solid #444654;
-    border-radius: 8px;
-    color: white;
-  }
-  
-  .modalButtons {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 15px;
-  }
-  
-  .cancelButton {
-    padding: 10px 20px;
-    background-color: #6b7280;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background 0.3s;
-  }
-  
-  .cancelButton:hover {
-    background-color: #4b5563;
-  }
-  
-/* Chat Box */
-.chatBox {
-    margin-top: 20px;
-    background-color: #33353f;
-    padding: 20px;
-    border-radius: 12px;
-    height: 450px;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-  }
-  
-  .messagesContainer {
-    flex: 1;
-    overflow-y: auto;
-    margin-bottom: 15px;
-    padding-right: 10px;
-    padding-left: 10px;
-  }
-  
-  .message {
-    background-color: #444654;
-    color: white;
-    padding: 12px 20px;
-    border-radius: 8px;
-    margin-bottom: 12px;
-    transition: background-color 0.3s ease;
-    position: relative;
-  }
-  
-  .message:hover {
-    background-color: #555e69;
-  }
-  
-  .message p {
-    margin: 0;
-  }
-  
-  /* Input area */
-  .inputContainer {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  .input {
-    width: 100%;
-    padding: 12px;
-    background-color: #444654;
-    border: 1px solid #444654;
-    border-radius: 8px;
-    color: white;
-    font-size: 14px;
-    box-sizing: border-box;
-    transition: border 0.3s ease;
-  }
-  
-  .input:focus {
-    outline: none;
-    border-color: #6c47ff;
-  }
-  
-  .inputActions {
-    display: flex;
-    gap: 15px;
-    justify-content: space-between;
-  }
-  
-  .fileInput {
-    display: none; /* Le fichier se cache, on l'affichera avec un bouton */
-  }
-  
-  .sendButton,
-  .sendFileButton {
-    background-color: #6c47ff;
-    color: white;
-    padding: 10px 18px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.3s ease;
-  }
-  
-  .sendButton:hover,
-  .sendFileButton:hover {
-    background-color: #5535cc;
-  }
-  
-  /* Popup des réactions */
-  .reactionsPopup {
-    position: absolute;
-    top: -40px;
-    left: 0;
-    background-color: rgba(0, 0, 0, 0.7);
-    color: white;
-    border-radius: 8px;
-    padding: 8px;
-    display: flex;
-    gap: 10px;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-  }
-  
-  .reactionsPopup.show {
-    opacity: 1;
-    pointer-events: all;
-  }
-  
-  .reactionButton {
-    cursor: pointer;
-    font-size: 18px;
-    transition: transform 0.2s ease;
-  }
-  
-  .reactionButton:hover {
-    transform: scale(1.2);
-  }
-  
-  /* Show emoji reaction popup on message hover */
-  .message:hover .reactionsPopup {
-    opacity: 1;
-    pointer-events: all;
-  }
-  
-  .reactionsList {
-    display: flex;
-    gap: 10px;
-    font-size: 18px;
-    margin-top: 8px;
-  }
-  
+}
