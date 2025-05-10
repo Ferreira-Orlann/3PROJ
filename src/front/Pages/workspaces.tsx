@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Home, Bell, User, Settings } from "lucide-react";
 import styles from "../styles/workspacesPage.module.css";
 import CreateWorkspaceModal from "../components/workspaces/CreateWorkspaceModal";
 import authService from "../services/auth.service";
@@ -11,21 +10,37 @@ const WorkspacesPage = () => {
     const [error, setError] = useState("");
     const navigate = useNavigate();
 
+    console.log("Session:", authService.getSession());
+
+    const handleCreateWorkspace = (
+        name: string,
+        description: string,
+        visibility: string,
+    ) => {
+        const newWorkspace = {
+            id: (workspaces.length + 1).toString(),
+            name,
+            description,
+            visibility,
+            icon: name.charAt(0).toUpperCase(),
+            channels: [],
+        };
+        setWorkspaces([newWorkspace, ...workspaces]);
+    };
+
     const fetchWorkspaces = async () => {
         try {
             const token = authService.getSession().token;
             console.log("Token récupéré :", token);
 
-
             const response = await fetch("http://localhost:3000/workspaces", {
                 headers: {
-                    "Authorization": `Bearer ${token}`,
+                    Authorization: `Bearer ${token}`,
                 },
             });
 
             if (!response.ok) {
                 throw new Error("Erreur lors du chargement des workspaces");
-                
             }
 
             const data = await response.json();
@@ -61,7 +76,9 @@ const WorkspacesPage = () => {
                             </div>
                             <div className={styles.workspaceInfo}>
                                 <p>{workspace.name}</p>
-                                <span>{workspace.is_public ? "Public" : "Privé"}</span>
+                                <span>
+                                    {workspace.is_public ? "Public" : "Privé"}
+                                </span>
                             </div>
                         </div>
                     ))}

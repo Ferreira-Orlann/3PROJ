@@ -1,77 +1,72 @@
-// src/front/pages/WorkspaceDetailPage.tsx
-
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import styles from "../styles/workspaceDetailPage.module.css";
 import authService from "../services/auth.service";
 import Member from "../components/workspaces/Member";
 import { channelService } from "../services/channel.service";
-import CreateChannelModal from "../components/workspaces/CreateChannelModal"; // ajuste le chemin si besoin
+import CreateChannelModal from "../components/workspaces/CreateChannelModal";
+import { Workspace } from "../types/workspace";
+import workspacesService from "../services/workspaces.service";
+import { UUID } from "crypto";
 
 const WorkspaceDetailPage = () => {
     const { uuid } = useParams();
     const location = useLocation();
     const navigate = useNavigate();
-    const workspace = location.state;
-    const [showChannelModal, setShowChannelModal] = useState(false);
 
-    const [editing, setEditing] = useState(false);
+    const [workspace, setWorkspace] = useState<Workspace | null>(location.state || null);
     const [newName, setNewName] = useState(workspace?.name || "");
     const [message, setMessage] = useState("");
     const [isDeleting, setIsDeleting] = useState(false);
+    const [editing, setEditing] = useState(false);
     const [activeTab, setActiveTab] = useState("members");
     const [members, setMembers] = useState<string[]>([]);
 
     const token = authService.getSession().token;
-
     const headers: any = {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
     };
 
     useEffect(() => {
+        if (!workspace) {
+            workspacesService.getByUUID(uuid as UUID).then((ws) => {
+                setWorkspace(ws);
+                setNewName(ws.name);
+            });
+        }
+    }, [uuid, workspace]);
+
+    useEffect(() => {
         if (activeTab === "members") {
-            // Exemple de chargement fictif des membres
-            // Remplace ça par un appel API réel si besoin
-            setMembers(["Alice", "Bob", "Charlie"]);
+            setMembers(["Alice", "Bob", "Charlie"]); // Remplace par appel API réel si besoin
         }
     }, [activeTab]);
 
     const handleRename = async () => {
-        if (newName === workspace?.name) {
+        if (!workspace || newName === workspace.name) {
             setEditing(false);
             return;
         }
 
         try {
-            const response = await fetch(`http://localhost:3000/workspaces/${uuid}`, {
-                method: "PUT",
-                headers,
-                body: JSON.stringify({ name: newName }),
-            });
-
-            if (!response.ok) throw new Error(await response.text());
-
+            await workspacesService.update({ uuid: workspace.uuid, name: newName });
             setMessage("Nom mis à jour !");
-            setEditing(false);
+            setWorkspace({ ...workspace, name: newName });
         } catch (error) {
             setMessage(error instanceof Error ? error.message : "Erreur inconnue");
+        } finally {
+            setEditing(false);
         }
     };
 
     const handleDelete = async () => {
-        if (!window.confirm("Confirmer la suppression ?")) return;
+        if (!workspace || !window.confirm("Confirmer la suppression ?")) return;
         setIsDeleting(true);
         setMessage("");
 
         try {
-            const response = await fetch(`http://localhost:3000/workspaces/${uuid}`, {
-                method: "DELETE",
-                headers,
-            });
-
-            if (!response.ok) throw new Error(await response.text());
-
+            await workspacesService.delete(workspace);
             setMessage("Workspace supprimé !");
             setTimeout(() => navigate("/workspaces"), 1000);
         } catch (error) {
@@ -86,7 +81,7 @@ const WorkspaceDetailPage = () => {
             <div className={styles.headerBar}>
                 <div className={styles.leftSection}>
                     <div className={styles.logo}>
-                        <span>{workspace?.name?.charAt(0).toUpperCase()}</span>
+                        <span>{workspace ? workspace.name?.charAt(0).toUpperCase() : "?"}</span>
                     </div>
 
                     <div className={styles.nameContainer}>
@@ -107,7 +102,7 @@ const WorkspaceDetailPage = () => {
                                 {newName}
                             </span>
                         )}
-                        <span className={styles.uuid}>UUID: {uuid}</span>
+                        <span className={styles.uuid}>UUID: {workspace?.uuid || uuid}</span>
                     </div>
 
                     <div className={styles.tabBar}>
@@ -117,6 +112,15 @@ const WorkspaceDetailPage = () => {
                     </div>
                 </div>
 
+                <div className={styles.actions}>
+                    <button
+                        className={styles.deleteBtn}
+                        onClick={handleDelete}
+                        disabled={isDeleting}
+                    >
+                        {isDeleting ? "Suppression..." : "Supprimer"}
+                    </button>
+                </div>
             </div>
 
             {message && <p className={styles.message}>{message}</p>}
@@ -131,48 +135,42 @@ const WorkspaceDetailPage = () => {
                     </div>
                 )}
 
-{activeTab === "channels" && (
-    <div>
-        <h2>Créer un canal</h2>
-        <form
-    onSubmit={async (e) => {
-        e.preventDefault();
-        const form = e.target as HTMLFormElement;
-        const input = form.elements.namedItem("channelName") as HTMLInputElement;
-        const name = input.value.trim();
-        if (!name) return;
+                {activeTab === "channels" && (
+                    <div>
+                        <h2>Créer un canal</h2>
+                        <form
+                            onSubmit={async (e) => {
+                                e.preventDefault();
+                                const form = e.target as HTMLFormElement;
+                                const input = form.elements.namedItem("channelName") as HTMLInputElement;
+                                const name = input.value.trim();
+                                if (!name || !workspace) return;
 
-        try {
-            const token = authService.getSession().token;
-            const response = await fetch("http://localhost:3000/workspaces/${uuid}/channels", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ name, workspaceUuid: uuid }),
-            });
+                                try {
+                                    const response = await fetch(`http://localhost:3000/workspaces/${workspace.uuid}/channels`, {
+                                        method: "POST",
+                                        headers,
+                                        body: JSON.stringify({ name, workspaceUuid: workspace.uuid }),
+                                    });
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(errorText);
-            }
+                                    if (!response.ok) {
+                                        const errorText = await response.text();
+                                        throw new Error(errorText);
+                                    }
 
-            setMessage("Canal créé !");
-            input.value = "";
-        } catch (error: any) {
-            console.error("Erreur :", error);
-            setMessage(error.message || "Erreur inconnue");
-        }
-    }}
->
-    <input type="text" name="channelName" placeholder="Nom du canal" required />
-    <button type="submit">Créer</button>
-</form>
-
-    </div>
-)}
-
+                                    setMessage("Canal créé !");
+                                    input.value = "";
+                                } catch (error: any) {
+                                    console.error("Erreur :", error);
+                                    setMessage(error.message || "Erreur inconnue");
+                                }
+                            }}
+                        >
+                            <input type="text" name="channelName" placeholder="Nom du canal" required />
+                            <button type="submit">Créer</button>
+                        </form>
+                    </div>
+                )}
 
                 {activeTab === "settings" && (
                     <div>
