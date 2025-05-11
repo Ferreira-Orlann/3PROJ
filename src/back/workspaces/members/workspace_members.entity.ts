@@ -6,10 +6,12 @@ import {
     Generated,
     JoinColumn,
     ManyToOne,
+    ManyToMany,
 } from "typeorm";
 import { Workspace } from "../workspaces.entity";
 import { User } from "../../users/users.entity";
 import { Expose, Transform } from "class-transformer";
+import { Role } from "src/back/authorization/role.entity";
 
 @Entity({
     name: "workspace_members",
@@ -38,4 +40,11 @@ export class WorkspaceMember {
         referencedColumnName: "uuid",
     })
     workspace: Workspace;
+
+    @ManyToMany(() => Role, role => role.members)
+    @Expose()
+    @JoinColumn({
+        referencedColumnName: "uuid",
+    })
+    roles: Promise<Role[]>;
 }

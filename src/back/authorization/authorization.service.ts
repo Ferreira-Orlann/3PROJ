@@ -1,33 +1,52 @@
 import { Injectable } from "@nestjs/common";
-import { User } from "../users/users.entity";
-import { UUIDHolder } from "../uuid";
-import { Permission } from "./permissions";
-import { AuthZService } from "nest-authz";
 import { UUID } from "crypto";
+import { CreateRoleDto, Role } from "./role.entity";
+import { Repository } from "typeorm";
+import { InjectRepository } from "@nestjs/typeorm";
 
 @Injectable()
 export class AuthorizationService {
-    constructor(private readonly authzService: AuthZService) {}
+    constructor(
+        @InjectRepository(Role)
+        private readonly rolesRepo: Repository<Role>,
+    ) {}
 
-    async enforce(user: User, domain: UUID | "0", resource: UUID, permission: Permission): Promise<boolean> {
-        console.log("Get Users", domain, resource, permission);
-        // console.log("Bool:", en);
-        console.log(await this.authzService.getAllSubjects());
-        console.log(await this.authzService.getAllRoles());
-        console.log(await this.authzService.getAllObjects());
-        console.log(await this.authzService.getAllActions());
-        // console.log(await this.authzService.getUsersForRole("admin", "test"));
-        // return await this.authzService.enforce(
-        //     req.user?.uuid,
-        //     "test",
-        //     "message",
-        //     "CREATE",
-        // );;
-        return this.authzService.enforce(
-            user.uuid,
-            domain,
-            resource,
-            permission,
-        );
+    findAllRoles(): Promise<Role[]> {
+        return this.rolesRepo.find();
+    }
+
+    findPagingRoles(page: number, pageSize: number, workspaceUUID: UUID): Promise<Role[]> {
+        return this.rolesRepo.find({
+            skip: (page - 1) * pageSize,
+            take: pageSize,
+            where: {
+                workspace: {
+                    uuid: workspaceUUID
+                }
+            }
+        });
+    }
+
+    findOneRoleByUuidAndWorkspace(uuid: UUID, workspaceUUID: UUID): Promise<Role | null> {
+        return this.rolesRepo.findOne({
+            where: { 
+                uuid, 
+                workspace: {
+                    uuid: workspaceUUID
+                }
+            }
+        });
+    }
+
+    async removeRole(uuid: UUID): Promise<void> {
+        this.rolesRepo.delete(uuid);
+    }
+
+    async addRole(dto: CreateRoleDto): Promise<Role> {
+        return this.rolesRepo.save(dto);
+    }
+
+    async updateRole(uuid: UUID, dto): Promise<Role> {
+        return this.rolesRepo.save({ ...dto, uuid });
     }
 }

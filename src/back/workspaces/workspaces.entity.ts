@@ -15,6 +15,7 @@ import { Transform } from "class-transformer";
 import { Expose } from "class-transformer";
 import { ApiProperty, ApiSchema } from "@nestjs/swagger";
 import { OmitType } from "@nestjs/mapped-types";
+import { Role } from "../authorization/role.entity";
 
 @Entity({
     name: "workspaces",
@@ -72,4 +73,8 @@ export class Workspace {
     @Transform(({ value }) => null)
     @OneToMany(() => WorkspaceMember, (member) => member.workspace)
     members: Promise<WorkspaceMember[]>;
+
+    @Transform(({ value }) => null)
+    @OneToMany(() => Role, (role) => role.workspace)
+    roles: Promise<Role[]>;
 }

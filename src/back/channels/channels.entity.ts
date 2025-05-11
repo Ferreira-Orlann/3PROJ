@@ -13,6 +13,11 @@ import { User } from "../users/users.entity";
 import { Message } from "../messages/messages.entity";
 import { Exclude, Expose, Transform } from "class-transformer";
 
+export enum ChannelType {
+    TEXT = "text",
+    GOOGLE_WORKSPACE = "google_workspace",
+}
+
 @Entity({
     name: "channels",
 })
@@ -36,6 +41,13 @@ export class Channel {
     @Column({ nullable: true })
     @Expose()
     createdAt: Date;
+
+    @Column({
+        default: ChannelType.TEXT,
+        enum: ChannelType
+    })
+    @Expose()
+    channel_type: ChannelType
 
     @Transform(({ value }) => (value ? value.uuid : null))
     @Expose()

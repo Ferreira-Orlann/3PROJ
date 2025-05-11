@@ -104,3 +104,4 @@ export class BasicUser extends OmitType(User, [
 
 @ApiSchema()
 export class CreateUserDto extends OmitType(User, ["uuid", "status"]) {}
+
