@@ -20,6 +20,7 @@
     "noFallthroughCasesInSwitch": false,
     "strict": true
   },
+  
   "exclude": [
     "src/mobile/**/*",
     "node_modules"

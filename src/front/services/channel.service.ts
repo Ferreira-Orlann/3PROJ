@@ -1,28 +1,46 @@
-// src/front/services/channel.service.ts
-import axios from "axios";
-import authService from "./auth.service";
-
-const API_URL = "http://localhost:3000";
-
-export interface CreateChannelDto {
-    name: string;
-    workspaceUuid: string;
-}
+// src/services/channel.service.ts
+import authService from './auth.service';  // Correctement importé
 
 export const channelService = {
-    async create(dto: CreateChannelDto) {
-        const token = authService.getSession().token;
+    getAll: async () => {
+        const token = authService.getSession().token; // Utilisation correcte de authService
+        if (!token) {
+            throw new Error("Token non trouvé");
+        }
 
-        const response = await axios.post(
-            `${API_URL}/workspaces/${dto.workspaceUuid}/channels`,
-            dto,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            }
-        );
+        const response = await fetch("http://localhost:3000/channels", {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+            },
+        });
 
-        return response.data;
+        if (!response.ok) {
+            throw new Error("Erreur lors de la récupération des canaux");
+        }
+
+        return await response.json();
     },
+
+    create: async (workspaceUuid: string, name: string) => {
+        const token = authService.getSession().token;
+        if (!token) {
+            throw new Error("Token non trouvé");
+        }
+
+        const response = await fetch(`http://localhost:3000/workspaces/${workspaceUuid}/channels`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+            },
+            body: JSON.stringify({ name }),
+        });
+
+        if (!response.ok) {
+            throw new Error("Erreur lors de la création du canal");
+        }
+
+        return await response.json();
+    }
 };

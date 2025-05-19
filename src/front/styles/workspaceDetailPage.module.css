@@ -1,5 +1,8 @@
+
+
+
 .headerBar {
-  display: flex;
+  /* display: flex; */
   justify-content: space-between;
   align-items: flex-start;
   background-color: #2f3136;
@@ -149,4 +152,242 @@
   .actions {
     margin-top: 1rem;
   }
+}
+
+.channelSection {
+  margin-top: 20px;
+}
+
+.channelTitle {
+  font-size: 14px;
+  color: #aaa;
+  margin-bottom: 10px;
+}
+
+.channelList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  max-height: calc(100vh - 250px); /* Ajuste selon ton layout */
+}
+
+.channelItem {
+  display: flex;
+  align-items: center;
+  background-color: #2b2d35;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid #33353f;
+  color: white;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+}
+
+.channelItem:hover {
+  background-color: #33353f;
+}
+
+.channelIcon {
+  background-color: #6c47ff;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 6px;
+  margin-right: 12px;
+}
+
+.channelName {
+  font-size: 14px;
+}
+
+
+
+
+
+
+
+:root {
+  --bg-color: #2f3136;
+  --text-color: #e0e0e0;
+  --accent-color: #7f5af0;
+  --danger-color: #ff6b6b;
+  --border-color: #2c2c3a;
+  --input-bg: #2c2c3a;
+  --input-text: #ffffff;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Header */
+/* .headerBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-color);
+  border-bottom: 1px solid var(--border-color);
+  padding: 1rem 2rem;
+} */
+
+/* .leftSection {
+  display: flex;
+  flex-direction: column;
+} */
+
+/* .logo {
+  background: var(--accent-color);
+  color: white;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-weight: bold;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nameContainer {
+  margin-top: 0.5rem;
+} */
+
+/* .name {
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text-color);
+}
+
+.uuid {
+  font-size: 0.8rem;
+  color: #aaa;
+}
+
+.nameInput {
+  font-size: 1.5rem;
+  padding: 0.3rem;
+  background: var(--input-bg);
+  color: var(--input-text);
+  border: 1px solid var(--accent-color);
+  border-radius: 4px;
+}
+
+.tabBar {
+  margin-top: 1rem;
+} */
+
+/* .tabButton {
+  margin-right: 1rem;
+  background: transparent;
+  border: 1px solid var(--accent-color);
+  color: var(--accent-color);
+  padding: 0.4rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+} */
+
+/* .tabButton:hover {
+  background: var(--accent-color);
+  color: white;
+} */
+
+/* Actions */
+.actions {
+  display: flex;
+  align-items: center;
+}
+
+.deleteBtn {
+  background: var(--danger-color);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.deleteBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Messages */
+.message {
+  background: #32324a;
+  color: #c2fbd7;
+  padding: 0.8rem;
+  border-left: 4px solid var(--accent-color);
+  margin: 1rem 2rem;
+  border-radius: 4px;
+}
+
+/* Tab content */
+.tabContent {
+  padding: 2rem;
+}
+
+/* Channel List */
+.channelList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.channelCard {
+  background: #2b2b40;
+  border: 1px solid var(--border-color);
+  padding: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.3s ease;
+}
+
+.channelCard:hover {
+  background: #393960;
+  transform: scale(1.02);
+}
+
+.channelCard h3 {
+  margin: 0 0 0.5rem 0;
+  color: var(--accent-color);
+}
+
+.channelCard p {
+  font-size: 0.85rem;
+  color: #bbb;
+}
+
+/* Create channel form */
+form {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+input[name="channelName"] {
+  flex: 1;
+  padding: 0.5rem;
+  border-radius: 5px;
+  border: 1px solid var(--border-color);
+  background: var(--input-bg);
+  color: var(--input-text);
+}
+
+button[type="submit"] {
+  background: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 0.5rem 1.2rem;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button[type="submit"]:hover {
+  background: #6d48e5;
 }

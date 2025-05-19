@@ -9,28 +9,22 @@ import NotificationsPage from "../front/Pages/notifications";
 import WorkspacesPage from "./Pages/Workspaces";
 import WorkspaceDetailPage from "./Pages/WorkspaceDetailPage";
 import { AuthProvider } from "./context/AuthContext";
+import LoginPage from "../front/Pages/AuthPage";
+import ChannelPage from "./pages/ChannelPage";
 
 const App = () => {
     return (
         <Router>
             <AuthProvider>
                 <Routes>
-                    <Route
-                        path="/"
-                        element={<Navigate to="/workspaces" replace />}
-                    />
-                    <Route path="/dashboard" element={<HomePage />} />{" "}
-                    {/* 👈 Page principale renommée */}
-                    <Route
-                        path="/notifications"
-                        element={<NotificationsPage />}
-                    />
+                    <Route path="/" element={<Navigate to="/login" replace />} />
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/dashboard" element={<HomePage />} />
+                    <Route path="/notifications" element={<NotificationsPage />} />
                     <Route path="/workspaces" element={<WorkspacesPage />} />
-                    <Route
-                        path="/workspace/:uuid"
-                        element={<WorkspaceDetailPage />}
-                    />{" "}
-                    {/* L'ID sera passé ici */}
+                    <Route path="/workspace/:uuid" element={<WorkspaceDetailPage />} />
+                    <Route path="/workspace/:uuid/channel/:channelId" element={<ChannelPage />} />
+                    {/* Ajoute d'autres routes ici */}
                 </Routes>
             </AuthProvider>
         </Router>

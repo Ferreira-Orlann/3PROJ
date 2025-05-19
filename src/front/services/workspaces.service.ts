@@ -86,6 +86,27 @@ class WorkspacesService {
             resolve(response.data);
         });
     } 
+    public async getAll(): Promise<Workspace[]> {
+        const session = authService.getSession();
+        console.log("Session actuelle:", session); // ← ajoute ça
+      
+        const response = await axios.get<Workspace[]>(
+          "http://localhost:3000/workspaces",
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.token}`,
+            },
+          }
+        );
+      
+        if (response.status !== 200) {
+          throw new Error("Impossible de récupérer les workspaces");
+        }
+        return response.data;
+      }
+      
+      
 }
 
 export default new WorkspacesService();

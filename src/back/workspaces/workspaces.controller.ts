@@ -13,25 +13,15 @@ import {
 import { WorkspacesService } from "./workspaces.service";
 import { CreateWorkspaceDto } from "./workspaces.dto";
 import { Workspace } from "./workspaces.entity";
-import { randomUUID, UUID } from "crypto";
+import { UUID } from "crypto";
 import { HttpAuthGuard } from "../authentication/http.authentication.guard";
-import { AuthorizationGuard } from "../authorization/authorization.guard";
-import { Authorize } from "../authorization/authorization.decorator";
 
 @UseGuards(HttpAuthGuard)
 @Controller("workspaces")
 export class WorkspacesController {
     constructor(private readonly workspacesService: WorkspacesService) {}
 
-    @UseGuards(HttpAuthGuard, AuthorizationGuard)
-    @Authorize((ctx) => {
-        return {
-            resource: randomUUID(),
-            // resource: "8b80c760-4d83-4ed1-9dd0-14969995a1a7",
-            domain: "0",
-            permission: "READ",
-        };
-    })
+    // Retire les gardes HttpAuthGuard et AuthorizationGuard
     @Get()
     async findAll() {
         const result = await this.workspacesService.findAll();
@@ -51,18 +41,18 @@ export class WorkspacesController {
     @Post()
     async create(@Req() request: any, @Body() dto: CreateWorkspaceDto) {
         const user = request.user;
-
+ 
         if (!user || !user.uuid) {
             throw new Error("User not authenticated or missing UUID");
         }
-
+ 
         const entity = await this.workspacesService.add({
             name: dto.name,
             description: dto.description,
             owner_uuid: user.uuid,
             createdAt: dto.createdAt ?? new Date(),
         });
-
+ 
         return entity;
     }
 

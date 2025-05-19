@@ -1,17 +1,15 @@
 import React, { useState } from "react";
 import "../styles/auth.css";
+import { SESSION_LOCALSTORE_NAME } from "../consts";
+import { Session } from "../types/auth";
 import authService from "../services/auth.service";
-import Signup from "../components/auth/Signup";
-import { useAuthContext } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import Signup from "../components/auth/Signup"; 
 
 const AuthPage = () => {
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState("");
     const [error, setError] = useState("");
     const [password, setPassword] = useState("");
-    const { user, session, setUser, setSession } = useAuthContext();
-    const navigate = useNavigate();
 
     const handleLogin = async () => {
         try {
@@ -19,11 +17,17 @@ const AuthPage = () => {
             if (!succesful) {
                 return;
             }
-            const session = authService.getSession();
-            authService.saveSession();
-            setSession(session);
 
-            navigate("/workspaces");
+            const session = authService.getSession();
+            console.log("Session:", session); // tu peux stocker le token ici si besoin
+
+            // Redirection après connexion réussie
+            window.location.href = "/workspaces";
+
+            localStorage.setItem(
+                SESSION_LOCALSTORE_NAME,
+                JSON.stringify(session),
+            );
         } catch (err: any) {
             setError(err.message || "Erreur inconnue");
         }

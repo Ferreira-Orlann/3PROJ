@@ -17,6 +17,8 @@ const CreateWorkspaceModal = ({
     const [visibility, setVisibility] = useState("public");
     const [error, setError] = useState("");
 
+    console.log("workspacesService dans le composant", workspacesService);
+
     const handleCreate = async () => {
         if (!name || !description) {
             setError("Tous les champs sont requis.");
