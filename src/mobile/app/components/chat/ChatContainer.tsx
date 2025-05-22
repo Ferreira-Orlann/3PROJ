@@ -7,10 +7,13 @@ import {
     Platform,
     Alert,
     Text,
+    Modal,
+    TouchableOpacity,
 } from "react-native";
 import { UUID } from "crypto";
 import ChatInput from "./ChatInput";
 import ChatMessage from "./ChatMessage";
+import EmojiPicker from "./EmojiPicker";
 import useMessages from "../../hooks/useMessages";
 import useReactions from "../../hooks/useReactions";
 import useAttachments from "../../hooks/useAttachments";
@@ -54,6 +57,8 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
     onDeleteMessage,
     onPinMessage,
 }) => {
+    // État pour le sélecteur d'emoji
+    const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
     // Utilisation des hooks personnalisés
     console.log("ChatContainer - Appel de useMessages avec params:", {
         workspaceUuid,
@@ -85,6 +90,9 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
         addReaction: apiAddReaction,
         removeReaction: apiRemoveReaction,
         hasUserReacted,
+        getUserReaction,
+        getUniqueEmojis,
+        getReactionCount
     } = useReactions(
         workspaceUuid,
         channelUuid,
@@ -381,14 +389,6 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
                 );
 
                 if (newMessages.length > 0) {
-                    console.log(
-                        `ChatContainer - Ajout de ${newMessages.length} nouveaux messages`,
-                    );
-                    console.log(
-                        "ChatContainer - Nouveaux messages:",
-                        newMessages.map((msg) => msg.uuid),
-                    );
-
                     // Trier les messages par date
                     const combinedMessages = [...prev, ...newMessages].sort(
                         (a, b) =>
@@ -512,25 +512,39 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
         }
     };
 
-    // Handle adding reaction to a message
+    // Handle adding or removing reaction to a message
     const handleAddReaction = useCallback(
         async (messageId: UUID, emoji: string) => {
+            console.log(`ChatContainer - handleAddReaction - messageId: ${messageId}, emoji: ${emoji}`);
             setActiveMessageId(messageId);
+            
             try {
-                await apiAddReaction(emoji);
+                // Vérifier si l'utilisateur a déjà réagi avec cet emoji
+                const existingReaction = getUserReaction(emoji);
+                
+                if (existingReaction) {
+                    // Si l'utilisateur a déjà réagi avec cet emoji, on supprime la réaction
+                    console.log(`ChatContainer - handleAddReaction - Suppression de la réaction existante: ${existingReaction.uuid}`);
+                    await apiRemoveReaction(existingReaction.uuid);
+                } else {
+                    // Sinon, on ajoute la réaction
+                    console.log(`ChatContainer - handleAddReaction - Ajout d'une nouvelle réaction: ${emoji}`);
+                    await apiAddReaction(emoji);
+                }
+                
                 // Le rafraîchissement des données se fera via WebSocket ou fetchMessages
                 if (!isWebSocketConnected) {
                     await fetchMessages();
                 }
             } catch (error) {
-                console.error("Error adding reaction:", error);
+                console.error("Error managing reaction:", error);
                 Alert.alert(
                     "Error",
-                    "Failed to add reaction. Please try again.",
+                    "Failed to manage reaction. Please try again.",
                 );
             }
         },
-        [apiAddReaction, fetchMessages, isWebSocketConnected],
+        [apiAddReaction, apiRemoveReaction, getUserReaction, fetchMessages, isWebSocketConnected],
     );
 
     // Handle replying to a message
@@ -659,10 +673,19 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
                 <ChatMessage
                     message={item}
                     isCurrentUser={isCurrentUser}
+                    workspaceUuid={workspaceUuid}
+                    channelUuid={channelUuid}
+                    userUuid={userUuid}
                     onAddReaction={(messageId, emoji) =>
                         handleAddReaction(messageId, emoji)
                     }
-                    onShowEmojiPicker={() => {}}
+                    onShowEmojiPicker={() => {
+                        setActiveMessageId(item.uuid);
+                        setShowEmojiPicker(true);
+                    }}
+                    onDeleteMessage={(messageId) => handleDeleteMessage(messageId)}
+                    onReplyToMessage={(messageId) => handleReplyToMessage(messageId)}
+                    onCopyMessage={(messageId) => handleCopyMessage(messageId)}
                     onEditMessage={(messageId) => {
                         // Find the message content to edit
                         const messageToEdit = uiMessages.find(
@@ -727,6 +750,36 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
 
     return (
         <View style={styles.container}>
+            {/* Emoji Picker Modal */}
+            {showEmojiPicker && (
+                <Modal
+                    transparent={true}
+                    animationType="slide"
+                    visible={showEmojiPicker}
+                    onRequestClose={() => setShowEmojiPicker(false)}
+                >
+                    <TouchableOpacity
+                        style={styles.modalContainer}
+                        activeOpacity={1}
+                        onPress={() => setShowEmojiPicker(false)}
+                    >
+                        <View style={styles.modalContainer}>
+                            <View style={styles.emojiPickerContainer}>
+                                <EmojiPicker
+                                    onEmojiSelected={(emoji: string) => {
+                                        if (activeMessageId) {
+                                            handleAddReaction(activeMessageId, emoji);
+                                        }
+                                        setShowEmojiPicker(false);
+                                    }}
+                                    onClose={() => setShowEmojiPicker(false)}
+                                />
+                            </View>
+                        </View>
+                    </TouchableOpacity>
+                </Modal>
+            )}
+            
             {/* Messages list */}
             {messagesLoading && uiMessages.length === 0 ? (
                 <View style={[styles.container, styles.loadingContainer]}>
@@ -788,15 +841,17 @@ const styles = StyleSheet.create({
         paddingBottom: 20,
         flexGrow: 1,
     },
+    modalContainer: {
+        flex: 1,
+        justifyContent: "flex-end",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+    },
     emojiPickerContainer: {
-        position: "absolute",
-        bottom: 80,
-        left: 0,
-        right: 0,
         backgroundColor: "#2f3136",
-        borderTopWidth: 1,
-        borderTopColor: "#202225",
-        elevation: 5,
+        borderTopLeftRadius: 12,
+        borderTopRightRadius: 12,
+        overflow: "hidden",
+        maxHeight: 350,
     },
     loadingContainer: {
         justifyContent: "center",

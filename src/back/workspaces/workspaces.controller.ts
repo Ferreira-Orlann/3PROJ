@@ -23,15 +23,7 @@ import { Authorize } from "../authorization/authorization.decorator";
 export class WorkspacesController {
     constructor(private readonly workspacesService: WorkspacesService) {}
 
-    @UseGuards(HttpAuthGuard, AuthorizationGuard)
-    @Authorize((ctx) => {
-        return {
-            resource: randomUUID(),
-            // resource: "8b80c760-4d83-4ed1-9dd0-14969995a1a7",
-            domain: "0",
-            permission: "READ",
-        };
-    })
+
     @Get()
     async findAll() {
         const result = await this.workspacesService.findAll();

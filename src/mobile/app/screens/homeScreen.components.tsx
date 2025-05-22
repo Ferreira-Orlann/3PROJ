@@ -12,7 +12,7 @@ import { UUID } from "crypto";
 import { styles } from "../styles/home";
 import { Workspace, CreateWorkspaceForm } from "./homeScreen.types";
 import { Colors } from "../theme/colors";
-import useHomeScreen from "../hooks/home";
+import useHomeScreen from "../hooks/useHome";
 import { Member } from "../services/workspaces";
 import memberService from "../services/api/endpoints/members";
 

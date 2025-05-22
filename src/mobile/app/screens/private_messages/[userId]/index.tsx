@@ -39,8 +39,6 @@ export default function DirectMessageScreen() {
         error,
         currentUserUuid,
         handleSendMessage,
-        handleAddReaction,
-        handleRemoveReaction,
     } = directMessageHook;
 
     // Logs détaillés pour déboguer
@@ -239,7 +237,6 @@ export default function DirectMessageScreen() {
                         currentUser="Moi"
                         initialMessages={apiMessages} // Passer les messages convertis au format API
                         onSendMessage={handleSendMessage}
-                        onAddReaction={handleAddReaction}
                     />
                     {/* Afficher le nombre de messages pour déboguer */}
                     <View

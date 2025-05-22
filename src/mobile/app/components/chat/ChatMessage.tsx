@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Modal } from "react-native";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Modal, Alert, FlatList } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import EmojiPicker from "./EmojiPicker";
 import { UUID } from "crypto";
 import {
     Message as ApiMessage,
-    Reaction as ApiReaction,
 } from "../../services/api/endpoints/messages";
 import userService from "../../services/api/endpoints/users";
 import { Attachment as ApiAttachment } from "../../services/api/endpoints/attachments";
+import reactionService, { Reaction } from "../../services/api/endpoints/reactions";
+import { useAuth } from "../../context/AuthContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Type pour les réactions regroupées dans l'UI (nécessaire pour l'affichage)
 interface UIReaction {
@@ -20,13 +22,16 @@ interface UIReaction {
 interface ChatMessageProps {
     message: ApiMessage;
     isCurrentUser: boolean;
-    onAddReaction: (messageId: UUID, emoji: string) => void;
-    onShowEmojiPicker: () => void;
+    onAddReaction?: (messageId: UUID, emoji: string) => void;
+    onShowEmojiPicker?: () => void;
     onDeleteMessage?: (messageId: UUID) => void;
     onReplyToMessage?: (messageId: UUID) => void;
     onCopyMessage?: (messageId: UUID) => void;
     onEditMessage?: (messageId: UUID) => void;
     onPinMessage?: (messageId: UUID) => void;
+    workspaceUuid?: UUID | null;
+    channelUuid?: UUID;
+    userUuid?: UUID;
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({
@@ -39,79 +44,339 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     onCopyMessage,
     onEditMessage,
     onPinMessage,
+    workspaceUuid,
+    channelUuid,
+    userUuid,
 }) => {
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [showActionsModal, setShowActionsModal] = useState(false);
-    const [senderName, setSenderName] = useState<string>("Unknown");
-    // Convertir les réactions API en réactions UI pour l'affichage
-    const getUIReactions = (): UIReaction[] => {
-        const groupedReactions: UIReaction[] = [];
-        console.log(
-            "ChatMessage - getUIReactions - message.uuid:",
-            message.uuid,
-        );
+    const [loading, setLoading] = useState(false);
+    const [senderName, setSenderName] = useState("");
+    const [messageReactions, setMessageReactions] = useState<Reaction[]>([]);
+    const [isLoadingReactions, setIsLoadingReactions] = useState(false);
+    const [showReactionUsers, setShowReactionUsers] = useState(false);
+    const [selectedEmoji, setSelectedEmoji] = useState<string>("");
+    const [reactionUsers, setReactionUsers] = useState<{uuid: string, username: string}[]>([]);
+    const isMounted = useRef(true);
+    const { user } = useAuth();
 
-        // Vérifier si message.createdReaction existe et est un tableau
-        if (!message.createdReaction) {
-            console.log("ChatMessage - Pas de réactions pour ce message");
-            return [];
+    // Fonction pour obtenir l'UUID de l'utilisateur courant
+    const getCurrentUserUuid = useCallback(async () => {
+        if (userUuid) {
+            return userUuid;
         }
 
-        if (!Array.isArray(message.createdReaction)) {
-            console.log(
-                "ChatMessage - createdReaction n'est pas un tableau:",
-                message.createdReaction,
-            );
-            return [];
+        try {
+            const storedUser = await AsyncStorage.getItem("user");
+            if (storedUser) {
+                const parsedUser = JSON.parse(storedUser);
+                return parsedUser.uuid;
+            }
+        } catch (error) {
+            console.error("Erreur lors de la récupération de l'utilisateur:", error);
         }
 
-        console.log(
-            "ChatMessage - Nombre de réactions:",
-            message.createdReaction.length,
-        );
+        return null;
+    }, [userUuid]);
 
-        // Traiter chaque réaction et les regrouper par emoji
-        message.createdReaction.forEach((reaction) => {
-            // Vérifier que la réaction est valide
-            if (
-                !reaction ||
-                !reaction.emoji ||
-                !reaction.user ||
-                !reaction.user.uuid
-            ) {
-                console.log(
-                    "ChatMessage - Réaction invalide ignorée:",
-                    reaction,
+    // Fonction pour charger les réactions depuis l'API
+    const fetchReactions = useCallback(async () => {
+        if (!message.uuid || !channelUuid || isLoadingReactions) {
+            return;
+        }
+
+        setIsLoadingReactions(true);
+
+        try {
+            let reactions: Reaction[] = [];
+
+            // Déterminer si nous sommes dans un message direct ou un canal de workspace
+            if (workspaceUuid) {
+                // Canal de workspace
+                reactions = await reactionService.getReactions(
+                    workspaceUuid,
+                    channelUuid,
+                    message.uuid
                 );
+                
+            } else {
+                // Message direct
+                const currentUserUuid = await getCurrentUserUuid();
+                if (currentUserUuid) {
+                    reactions = await reactionService.getDirectMessageReactions(
+                        currentUserUuid,
+                        channelUuid,
+                        message.uuid
+                    );
+                }
+            }
+
+            // Vérifier que les réactions appartiennent bien à ce message
+            const filteredReactions = reactions.filter(reaction => {
+                // Vérifier si la réaction a un message et si l'UUID du message correspond
+                return reaction.message && 
+                       ((typeof reaction.message === 'object' && reaction.message.uuid === message.uuid) ||
+                        (typeof reaction.message === 'string' && reaction.message === message.uuid));
+            });
+
+            if (isMounted.current) {
+                setMessageReactions(filteredReactions);
+            }
+        } catch (error) {
+            console.error("Erreur lors du chargement des réactions:", error);
+        } finally {
+            if (isMounted.current) {
+                setIsLoadingReactions(false);
+            }
+        }
+    }, [message.uuid, channelUuid, workspaceUuid, getCurrentUserUuid, isLoadingReactions]);
+
+    // Gérer l'ajout ou la suppression d'une réaction
+    const handleReaction = useCallback(async (emoji: string) => {
+        if (!channelUuid || !message.uuid) {
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const currentUserUuid = await getCurrentUserUuid();
+            if (!currentUserUuid) {
                 return;
             }
 
+            // Vérifier si l'utilisateur a déjà réagi avec cet emoji
+            const hasReacted = hasUserReacted(emoji);
+
+            if (hasReacted) {
+                // Trouver l'UUID de la réaction à supprimer
+                const reactionToRemove = messageReactions.find(
+                    (r) => r.emoji === emoji && (
+                        (typeof r.user === 'object' && r.user.uuid === currentUserUuid) ||
+                        (typeof r.user === 'string' && r.user === currentUserUuid)
+                    ) && (
+                        // Vérifier que la réaction appartient bien à ce message
+                        (typeof r.message === 'object' && r.message.uuid === message.uuid) ||
+                        (typeof r.message === 'string' && r.message === message.uuid)
+                    )
+                );
+
+                if (reactionToRemove && reactionToRemove.uuid) {
+                    // Supprimer la réaction
+                    if (workspaceUuid) {
+                        await reactionService.removeReaction(
+                            workspaceUuid,
+                            channelUuid,
+                            message.uuid,
+                            reactionToRemove.uuid
+                        );
+                    } else {
+                        await reactionService.removeDirectMessageReaction(
+                            currentUserUuid,
+                            channelUuid,
+                            message.uuid,
+                            reactionToRemove.uuid
+                        );
+                    }
+                }
+            } else {
+                // Ajouter une nouvelle réaction
+                const data = {
+                    emoji,
+                    user_uuid: currentUserUuid,
+                    message_uuid: message.uuid,
+                };
+
+                if (workspaceUuid) {
+                    await reactionService.addReaction(
+                        workspaceUuid,
+                        channelUuid,
+                        message.uuid,
+                        data
+                    );
+                } else {
+                    await reactionService.addDirectMessageReaction(
+                        currentUserUuid,
+                        channelUuid,
+                        message.uuid,
+                        data
+                    );
+                }
+            }
+
+            // Recharger les réactions après modification
+            await fetchReactions();
+
+            // Si un gestionnaire externe est fourni, l'appeler aussi
+            if (onAddReaction) {
+                onAddReaction(message.uuid, emoji);
+            }
+        } catch (error) {
+            console.error("ChatMessage - handleReaction - Erreur:", error);
+            Alert.alert("Erreur", "Impossible de gérer la réaction. Veuillez réessayer.");
+        } finally {
+            setLoading(false);
+        }
+    }, [message.uuid, channelUuid, workspaceUuid, getCurrentUserUuid, onAddReaction, messageReactions, fetchReactions]);
+
+    // Convertir les réactions API en réactions UI pour l'affichage
+    const getUIReactions = useCallback((): UIReaction[] => {
+        const groupedReactions: UIReaction[] = [];
+
+        // Utiliser les réactions chargées depuis l'API
+        if (!messageReactions || messageReactions.length === 0) {
+            return [];
+        }
+        
+        // Traiter chaque réaction et les regrouper par emoji
+        messageReactions.forEach((reaction) => {
+            // Vérifier que la réaction est valide
+            if (!reaction || !reaction.emoji || !reaction.user) {
+                return;
+            }
+            
+            // Vérifier que la réaction appartient bien à ce message
+            const isForCurrentMessage = reaction.message && (
+                (typeof reaction.message === 'object' && reaction.message.uuid === message.uuid) ||
+                (typeof reaction.message === 'string' && reaction.message === message.uuid)
+            );
+            
+            if (!isForCurrentMessage) {
+                return;
+            }
+            
+            // Extraire l'UUID de l'utilisateur (peut être un objet ou une chaîne)
+            const userUuid = typeof reaction.user === 'object' ? reaction.user.uuid : reaction.user;
+            
             // Rechercher si cette réaction existe déjà dans notre groupe
             const existingReaction = groupedReactions.find(
-                (r) => r.emoji === reaction.emoji,
+                (r) => r.emoji === reaction.emoji
             );
-
+            
             if (existingReaction) {
                 // Incrémenter le compteur et ajouter l'utilisateur
                 existingReaction.count++;
-                existingReaction.users.push(reaction.user.uuid);
+                // Éviter les doublons d'utilisateurs dans la liste
+                if (!existingReaction.users.includes(userUuid)) {
+                    existingReaction.users.push(userUuid);
+                }
             } else {
                 // Créer une nouvelle entrée pour cette réaction
                 groupedReactions.push({
                     emoji: reaction.emoji,
                     count: 1,
-                    users: [reaction.user.uuid],
+                    users: [userUuid],
                 });
             }
         });
-
-        console.log("ChatMessage - Réactions groupées:", groupedReactions);
+        
         return groupedReactions;
-    };
+    }, [messageReactions, message.uuid]);
+    
+    // Vérifier si l'utilisateur courant a déjà réagi avec un emoji spécifique
+    const hasUserReacted = useCallback((emoji: string): boolean => {
+        if (!messageReactions || messageReactions.length === 0) {
+            return false;
+        }
+        
+        // Récupérer l'UUID de l'utilisateur courant depuis les props ou le contexte
+        const currentUserUuidValue = userUuid || 
+            (typeof user?.uuid === 'string' ? user.uuid : null);
+        
+        if (!currentUserUuidValue) {
+            return false;
+        }
+        
+        return messageReactions.some(reaction => {
+            if (!reaction || !reaction.emoji || reaction.emoji !== emoji || !reaction.user) {
+                return false;
+            }
+            
+            // Vérifier que la réaction appartient bien à ce message
+            const isForCurrentMessage = reaction.message && (
+                (typeof reaction.message === 'object' && reaction.message.uuid === message.uuid) ||
+                (typeof reaction.message === 'string' && reaction.message === message.uuid)
+            );
+            
+            if (!isForCurrentMessage) {
+                return false;
+            }
+            
+            // Vérifier si l'utilisateur de la réaction correspond à l'utilisateur courant
+            if (typeof reaction.user === 'object' && reaction.user.uuid) {
+                return reaction.user.uuid === currentUserUuidValue;
+            } else if (typeof reaction.user === 'string') {
+                return reaction.user === currentUserUuidValue;
+            }
+            
+            return false;
+        });
+    }, [messageReactions, userUuid, user, message.uuid]);
+    
+    // Afficher la liste des utilisateurs qui ont réagi avec un emoji spécifique
+    const handleShowReactionUsers = useCallback(async (emoji: string) => {
+        // Filtrer les réactions pour cet emoji et ce message
+        const filteredReactions = messageReactions.filter(reaction => 
+            reaction && reaction.emoji === emoji && (
+                // Vérifier que la réaction appartient bien à ce message
+                (typeof reaction.message === 'object' && reaction.message.uuid === message.uuid) ||
+                (typeof reaction.message === 'string' && reaction.message === message.uuid)
+            )
+        );
+        
+        // Extraire les informations des utilisateurs
+        const users: {uuid: string, username: string}[] = [];
+        
+        for (const reaction of filteredReactions) {
+            if (!reaction.user) continue;
+            
+            let userUuid: string;
+            let username: string = "Utilisateur inconnu";
+            
+            if (typeof reaction.user === 'object' && reaction.user.uuid) {
+                userUuid = reaction.user.uuid;
+                username = reaction.user.username || "Utilisateur inconnu";
+            } else if (typeof reaction.user === 'string') {
+                userUuid = reaction.user;
+                try {
+                    // Récupérer les informations de l'utilisateur si nécessaire
+                    const userInfo = await userService.getUserById(reaction.user as UUID);
+                    if (userInfo && userInfo.username) {
+                        username = userInfo.username;
+                    }
+                } catch (error) {
+                    console.error("Erreur lors de la récupération des informations utilisateur:", error);
+                }
+            } else {
+                continue; // Ignorer les réactions avec des utilisateurs invalides
+            }
+            
+            // Éviter les doublons
+            if (!users.some(u => u.uuid === userUuid)) {
+                users.push({ uuid: userUuid, username });
+            }
+        }
+        
+        setReactionUsers(users);
+        setSelectedEmoji(emoji);
+        setShowReactionUsers(true);
+    }, [messageReactions, message.uuid]);
 
     const reactions = getUIReactions();
     const timestamp = new Date(message.date).toLocaleTimeString();
 
+    // Effet pour marquer le composant comme démonté lors du nettoyage
+    useEffect(() => {
+        return () => {
+            isMounted.current = false;
+        };
+    }, []);
+    
+    // Charger les réactions au montage du composant et lorsque le message change
+    useEffect(() => {
+        fetchReactions();
+    }, [fetchReactions, message.uuid]);
+    
     // Fetch user information when the component mounts or when the message source changes
     useEffect(() => {
         const fetchUserInfo = async () => {
@@ -124,34 +389,28 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                 ) {
                     // Si c'est un objet avec un username, utiliser directement
                     setSenderName(message.source.username);
-                    console.log(
-                        "ChatMessage - Nom d'utilisateur obtenu depuis l'objet source:",
-                        message.source.username,
-                    );
                 } else if (typeof message.source === "string") {
                     // Si c'est une chaîne (UUID), récupérer les infos utilisateur
-                    console.log(
-                        "ChatMessage - Récupération des infos utilisateur pour UUID:",
-                        message.source,
-                    );
                     const user = await userService.getUserById(
                         message.source as UUID,
                     );
-                    setSenderName(user.username);
-                    console.log(
-                        "ChatMessage - Nom d'utilisateur récupéré:",
-                        user.username,
-                    );
+                    if (isMounted.current) {
+                        setSenderName(user.username);
+                    }
                 } else {
                     console.error(
                         "ChatMessage - Format de source invalide:",
                         message.source,
                     );
-                    setSenderName("Unknown");
+                    if (isMounted.current) {
+                        setSenderName("Unknown");
+                    }
                 }
             } catch (error) {
                 console.error("Error fetching user info:", error);
-                setSenderName("Unknown");
+                if (isMounted.current) {
+                    setSenderName("Unknown");
+                }
             }
         };
 
@@ -184,22 +443,30 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             {/* Reactions */}
             {reactions.length > 0 && (
                 <View style={styles.reactionsContainer}>
-                    {reactions.map((reaction, index) => (
-                        <TouchableOpacity
-                            key={index}
-                            style={styles.reaction}
-                            onPress={() =>
-                                onAddReaction(message.uuid, reaction.emoji)
-                            }
-                        >
-                            <Text style={styles.reactionEmoji}>
-                                {reaction.emoji}
-                            </Text>
-                            <Text style={styles.reactionCount}>
-                                {reaction.count}
-                            </Text>
-                        </TouchableOpacity>
-                    ))}
+                    {reactions.map((reaction, index) => {
+                        const isReactedByUser = hasUserReacted(reaction.emoji);
+                        return (
+                            <TouchableOpacity
+                                key={index}
+                                style={[
+                                    styles.reaction,
+                                    isReactedByUser && styles.reactionSelected
+                                ]}
+                                onPress={() => handleShowReactionUsers(reaction.emoji)}
+                                disabled={loading}
+                            >
+                                <Text style={styles.reactionEmoji}>
+                                    {reaction.emoji}
+                                </Text>
+                                <Text style={[
+                                    styles.reactionCount,
+                                    isReactedByUser && styles.reactionCountSelected
+                                ]}>
+                                    {reaction.count}
+                                </Text>
+                            </TouchableOpacity>
+                        );
+                    })}
                 </View>
             )}
 
@@ -207,18 +474,23 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             <View style={styles.messageActions}>
                 <TouchableOpacity
                     style={styles.actionButton}
-                    onPress={() => setShowEmojiPicker(true)}
+                    onPress={() => {
+                        setShowEmojiPicker(true);
+                        if (onShowEmojiPicker) onShowEmojiPicker();
+                    }}
+                    disabled={loading}
                 >
-                    <Ionicons name="happy-outline" size={18} color="#8e9297" />
+                    <Ionicons name="happy-outline" size={18} color={loading ? "#666" : "#8e9297"} />
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={styles.actionButton}
                     onPress={() => setShowActionsModal(true)}
+                    disabled={loading}
                 >
                     <Ionicons
                         name="ellipsis-horizontal"
                         size={18}
-                        color="#8e9297"
+                        color={loading ? "#666" : "#8e9297"}
                     />
                 </TouchableOpacity>
             </View>
@@ -239,8 +511,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                         <View style={styles.modalContainer}>
                             <View style={styles.emojiPickerContainer}>
                                 <EmojiPicker
-                                    onEmojiSelected={(emoji) => {
-                                        onAddReaction(message.uuid, emoji);
+                                    onEmojiSelected={(emoji: string) => {
+                                        handleReaction(emoji);
                                         setShowEmojiPicker(false);
                                     }}
                                     onClose={() => setShowEmojiPicker(false)}
@@ -251,6 +523,66 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                 </Modal>
             )}
 
+            {/* Reaction Users Modal */}
+            {showReactionUsers && (
+                <Modal
+                    transparent={true}
+                    animationType="fade"
+                    visible={showReactionUsers}
+                    onRequestClose={() => setShowReactionUsers(false)}
+                >
+                    <TouchableOpacity
+                        style={styles.modalContainer}
+                        activeOpacity={1}
+                        onPress={() => setShowReactionUsers(false)}
+                    >
+                        <View style={styles.reactionUsersModalContent}>
+                            <View style={styles.reactionUsersHeader}>
+                                <Text style={styles.reactionUsersTitle}>
+                                    Utilisateurs ayant réagi avec {selectedEmoji}
+                                </Text>
+                                <TouchableOpacity onPress={() => setShowReactionUsers(false)}>
+                                    <Ionicons name="close" size={24} color="#fff" />
+                                </TouchableOpacity>
+                            </View>
+                            
+                            {reactionUsers.length > 0 ? (
+                                <FlatList
+                                    data={reactionUsers}
+                                    keyExtractor={(item) => item.uuid}
+                                    renderItem={({ item }) => {
+                                        // Vérifier si c'est l'utilisateur courant
+                                        const isCurrentUser = item.uuid === userUuid || 
+                                            (typeof user?.uuid === 'string' && item.uuid === user.uuid);
+                                        
+                                        return (
+                                            <View style={styles.reactionUserItem}>
+                                                <Text style={styles.reactionUsername}>
+                                                    {item.username}
+                                                </Text>
+                                                {isCurrentUser && (
+                                                    <TouchableOpacity 
+                                                        style={styles.removeReactionButton}
+                                                        onPress={() => {
+                                                            handleReaction(selectedEmoji);
+                                                            setShowReactionUsers(false);
+                                                        }}
+                                                    >
+                                                        <Ionicons name="trash-outline" size={18} color="#ff4d4f" />
+                                                    </TouchableOpacity>
+                                                )}
+                                            </View>
+                                        );
+                                    }}
+                                />
+                            ) : (
+                                <Text style={styles.noReactionsText}>Aucun utilisateur n'a réagi avec cet emoji</Text>
+                            )}
+                        </View>
+                    </TouchableOpacity>
+                </Modal>
+            )}
+            
             {/* Actions Modal */}
             {showActionsModal && (
                 <Modal
@@ -462,6 +794,14 @@ const styles = StyleSheet.create({
         paddingVertical: 4,
         marginRight: 6,
         marginBottom: 4,
+        borderWidth: 1,
+        borderColor: "transparent",
+        minWidth: 36, // Assurer une largeur minimale pour une meilleure apparence
+        justifyContent: "center", // Centrer le contenu horizontalement
+    },
+    reactionSelected: {
+        backgroundColor: "#4f545c",
+        borderColor: "#5865f2",
     },
     reactionEmoji: {
         fontSize: 16,
@@ -470,6 +810,54 @@ const styles = StyleSheet.create({
     reactionCount: {
         color: "#dcddde",
         fontSize: 12,
+        minWidth: 12, // Assurer une largeur minimale pour le compteur
+        textAlign: "center", // Centrer le texte
+    },
+    reactionCountSelected: {
+        color: "#ffffff",
+        fontWeight: "bold",
+    },
+    reactionUsersModalContent: {
+        backgroundColor: "#36393f",
+        borderRadius: 8,
+        padding: 16,
+        width: "80%",
+        maxHeight: 300,
+        elevation: 5,
+    },
+    reactionUsersHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: "#202225",
+        paddingBottom: 8,
+    },
+    reactionUsersTitle: {
+        color: "#ffffff",
+        fontSize: 16,
+        fontWeight: "bold",
+    },
+    reactionUserItem: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingVertical: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: "#202225",
+    },
+    reactionUsername: {
+        color: "#dcddde",
+        fontSize: 14,
+    },
+    removeReactionButton: {
+        padding: 4,
+    },
+    noReactionsText: {
+        color: "#8e9297",
+        textAlign: "center",
+        marginTop: 16,
     },
     messageActions: {
         position: "absolute",

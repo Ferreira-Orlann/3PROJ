@@ -16,10 +16,8 @@ import { usePathname, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "../../theme/colors";
-import useHomeScreen from "../../hooks/home";
-import useDirectMessages, {
-    DirectMessageUser,
-} from "../../hooks/useDirectMessages";
+import useHomeScreen from "../../hooks/useHome";
+import useDirectMessages, { DirectMessageUser } from "../../hooks/useDirectMessages";
 import { UUID } from "crypto";
 import { useAuth } from "../../context/AuthContext";
 
@@ -37,7 +35,7 @@ export default function Sidebar() {
 
     // Utiliser le hook useHomeScreen pour récupérer les workspaces
     const { state, filteredWorkspaces } = useHomeScreen();
-
+    
     // Utiliser le hook useDirectMessages pour récupérer les conversations privées
     const { state: dmState, refreshDirectMessages } = useDirectMessages();
 
@@ -175,7 +173,7 @@ export default function Sidebar() {
             collapseSidebar();
         }
     };
-
+    
     // Handle direct message selection
     const handleDirectMessageSelect = (userId: UUID) => {
         // Rediriger vers la page de conversation privée
@@ -312,9 +310,7 @@ export default function Sidebar() {
                         </View>
                     ) : dmState.error ? (
                         <View style={styles.errorContainer}>
-                            <Text style={styles.errorText}>
-                                {dmState.error}
-                            </Text>
+                            <Text style={styles.errorText}>{dmState.error}</Text>
                         </View>
                     ) : dmState.users.length === 0 ? (
                         <View style={styles.emptyContainer}>
@@ -327,9 +323,7 @@ export default function Sidebar() {
                             <TouchableOpacity
                                 key={user.uuid.toString()}
                                 style={styles.directMessageItem}
-                                onPress={() =>
-                                    handleDirectMessageSelect(user.uuid)
-                                }
+                                onPress={() => handleDirectMessageSelect(user.uuid)}
                             >
                                 <View style={styles.userAvatar}>
                                     <Text style={styles.avatarText}>
@@ -342,10 +336,7 @@ export default function Sidebar() {
                                             {user.username}
                                         </Text>
                                         {user.lastMessage && (
-                                            <Text
-                                                style={styles.lastMessage}
-                                                numberOfLines={1}
-                                            >
+                                            <Text style={styles.lastMessage} numberOfLines={1}>
                                                 {user.lastMessage}
                                             </Text>
                                         )}

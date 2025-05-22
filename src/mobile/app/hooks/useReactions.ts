@@ -5,8 +5,7 @@ import reactionService, {
     CreateReactionData,
 } from "../services/api/endpoints/reactions";
 import websocketService from "../services/websocket/websocket.service";
-// import { Events } from '../../../back/events.enum';
-import { useAuth } from "../context/AuthContext"; // Supposons que ce hook existe pour récupérer l'utilisateur courant
+import { useAuth } from "../context/AuthContext";
 
 /**
  * Hook pour gérer les réactions aux messages
@@ -20,7 +19,7 @@ export const useReactions = (
     const [reactions, setReactions] = useState<Reaction[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
-    const { user } = useAuth(); // Hook hypothétique pour récupérer l'utilisateur courant
+    const { user } = useAuth();
 
     /**
      * Charge les réactions d'un message
@@ -35,14 +34,12 @@ export const useReactions = (
             let fetchedReactions: Reaction[];
 
             if (workspaceUuid) {
-                // Réactions d'un message dans un canal d'espace de travail
                 fetchedReactions = await reactionService.getReactions(
                     workspaceUuid,
                     channelUuid,
                     messageUuid,
                 );
             } else if (userUuid) {
-                // Réactions d'un message privé
                 fetchedReactions =
                     await reactionService.getDirectMessageReactions(
                         userUuid,
@@ -54,6 +51,11 @@ export const useReactions = (
                     "Soit workspaceUuid soit userUuid doit être fourni",
                 );
             }
+
+            console.log(
+                "useReactions - fetchReactions - Réactions chargées avec succès:",
+                fetchedReactions,
+            );
 
             setReactions(fetchedReactions);
         } catch (err) {
@@ -98,7 +100,6 @@ export const useReactions = (
                 let newReaction: Reaction;
 
                 if (workspaceUuid) {
-                    // Ajouter une réaction à un message dans un canal d'espace de travail
                     newReaction = await reactionService.addReaction(
                         workspaceUuid,
                         channelUuid,
@@ -106,7 +107,6 @@ export const useReactions = (
                         reactionData,
                     );
                 } else {
-                    // Ajouter une réaction à un message privé
                     newReaction =
                         await reactionService.addDirectMessageReaction(
                             userUuid,
@@ -121,9 +121,7 @@ export const useReactions = (
                     newReaction,
                 );
 
-                // Ajouter la nouvelle réaction à la liste (sera également mise à jour via WebSocket)
                 setReactions((prev) => {
-                    // Éviter les doublons
                     if (prev.some((r) => r.uuid === newReaction.uuid)) {
                         return prev;
                     }
@@ -163,7 +161,6 @@ export const useReactions = (
 
         try {
             if (workspaceUuid) {
-                // Supprimer une réaction d'un message dans un canal d'espace de travail
                 await reactionService.removeReaction(
                     workspaceUuid,
                     channelUuid,
@@ -171,7 +168,6 @@ export const useReactions = (
                     reactionUuid,
                 );
             } else if (userUuid) {
-                // Supprimer une réaction d'un message privé
                 await reactionService.removeDirectMessageReaction(
                     userUuid,
                     channelUuid,
@@ -188,7 +184,6 @@ export const useReactions = (
                 "useReactions - removeReaction - Réaction supprimée avec succès",
             );
 
-            // Supprimer la réaction de la liste (sera également mise à jour via WebSocket)
             setReactions((prev) =>
                 prev.filter((reaction) => reaction.uuid !== reactionUuid),
             );
@@ -241,7 +236,6 @@ export const useReactions = (
         [reactions, userUuid],
     );
 
-    // Charger les réactions au montage du composant
     useEffect(() => {
         if (messageUuid && channelUuid && (workspaceUuid || userUuid)) {
             console.log(
@@ -251,7 +245,6 @@ export const useReactions = (
         }
     }, [messageUuid, channelUuid, workspaceUuid, userUuid, fetchReactions]);
 
-    // S'abonner aux événements WebSocket pour les réactions
     useEffect(() => {
         if (!messageUuid || !websocketService.isConnected()) {
             return;
@@ -261,7 +254,6 @@ export const useReactions = (
             `useReactions - useEffect - Abonnement aux événements WebSocket pour le message ${messageUuid}`,
         );
 
-        // Gérer les nouvelles réactions
         const onReactionCreated = websocketService.on(
             "reaction_added",
             (data: Reaction) => {
@@ -281,7 +273,6 @@ export const useReactions = (
             },
         );
 
-        // Gérer les mises à jour de réactions
         const onReactionUpdated = websocketService.on(
             "reaction_updated",
             (data: Reaction) => {
@@ -299,7 +290,6 @@ export const useReactions = (
             },
         );
 
-        // Gérer les suppressions de réactions
         const onReactionRemoved = websocketService.on(
             "reaction_removed",
             (data: { reactionUuid: UUID }) => {
@@ -315,7 +305,6 @@ export const useReactions = (
             },
         );
 
-        // Nettoyage des abonnements
         return () => {
             console.log(
                 `useReactions - useEffect - Désabonnement des événements WebSocket pour le message ${messageUuid}`,
