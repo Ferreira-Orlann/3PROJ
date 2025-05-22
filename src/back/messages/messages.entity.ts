@@ -13,6 +13,7 @@ import { User } from "../users/users.entity";
 import { Channel } from "../channels/channels.entity";
 import { Reaction } from "../reactions/reactions.entity";
 import { Exclude, Expose, Transform } from "class-transformer";
+import { Notification } from "../notifications/notification.entity";
 
 @Entity({
     name: "messages",
@@ -64,4 +65,8 @@ export class Message {
     @Expose()
     @OneToMany(() => Reaction, (reaction) => reaction.message, { eager: true })
     createdReaction: Promise<Reaction[]>;
+
+    @Expose()
+    @OneToMany(() => Notification, (notification) => notification.message, { eager: true })
+    notifications: Promise<Notification[]>;
 }

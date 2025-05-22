@@ -12,6 +12,7 @@ import { Workspace } from "../workspaces/workspaces.entity";
 import { User } from "../users/users.entity";
 import { Message } from "../messages/messages.entity";
 import { Exclude, Expose, Transform } from "class-transformer";
+import { Notification } from "../notifications/notification.entity";
 
 @Entity({
     name: "channels",
@@ -60,4 +61,8 @@ export class Channel {
     @Exclude()
     @OneToMany(() => Message, (message) => message.destination_channel)
     createdMessage: Promise<Message[]>;
+
+    @Transform(({ value }) => null)
+    @OneToMany(() => Notification, (notification) => notification.channel)
+    notifications: Promise<Notification[]>;
 }

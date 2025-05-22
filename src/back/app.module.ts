@@ -21,6 +21,8 @@ import { Message } from "./messages/messages.entity";
 import { Session } from "./authentication/session.entity";
 import { Reaction } from "./reactions/reactions.entity";
 import { WorkspaceMember } from "./workspaces/members/workspace_members.entity";
+import { Notification } from "./notifications/notification.entity";
+import { NotificationsModule } from "./notifications/notifications.module";
 
 @Module({
     imports: [
@@ -54,6 +56,7 @@ import { WorkspaceMember } from "./workspaces/members/workspace_members.entity";
                         WorkspaceMember,
                         Session,
                         Reaction,
+                        Notification,
                     ],
                     synchronize: config.get<boolean>(
                         "DATABASE_TYPEORM_SYNCHRONISE",
@@ -71,6 +74,7 @@ import { WorkspaceMember } from "./workspaces/members/workspace_members.entity";
         WebSocketModule,
         ReactionsModule,
         FilesModule,
+        NotificationsModule,
     ],
     controllers: [AppController],
     providers: [AppService],
