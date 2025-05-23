@@ -52,11 +52,6 @@ export const useReactions = (
                 );
             }
 
-            console.log(
-                "useReactions - fetchReactions - Réactions chargées avec succès:",
-                fetchedReactions,
-            );
-
             setReactions(fetchedReactions);
         } catch (err) {
             console.error("Erreur lors du chargement des réactions:", err);
@@ -80,9 +75,6 @@ export const useReactions = (
                 return null;
             }
 
-            console.log(
-                `useReactions - addReaction - Ajout de la réaction ${emoji} au message ${messageUuid}`,
-            );
             setError(null);
 
             try {
@@ -91,11 +83,6 @@ export const useReactions = (
                     user_uuid: userUuid,
                     message_uuid: messageUuid,
                 };
-
-                console.log(
-                    "useReactions - addReaction - Données de la réaction:",
-                    reactionData,
-                );
 
                 let newReaction: Reaction;
 
@@ -115,11 +102,6 @@ export const useReactions = (
                             reactionData,
                         );
                 }
-
-                console.log(
-                    "useReactions - addReaction - Réaction ajoutée avec succès:",
-                    newReaction,
-                );
 
                 setReactions((prev) => {
                     if (prev.some((r) => r.uuid === newReaction.uuid)) {
@@ -154,9 +136,6 @@ export const useReactions = (
             return false;
         }
 
-        console.log(
-            `useReactions - removeReaction - Suppression de la réaction ${reactionUuid}`,
-        );
         setError(null);
 
         try {
@@ -179,10 +158,6 @@ export const useReactions = (
                     "Soit workspaceUuid soit userUuid doit être fourni",
                 );
             }
-
-            console.log(
-                "useReactions - removeReaction - Réaction supprimée avec succès",
-            );
 
             setReactions((prev) =>
                 prev.filter((reaction) => reaction.uuid !== reactionUuid),
@@ -238,9 +213,6 @@ export const useReactions = (
 
     useEffect(() => {
         if (messageUuid && channelUuid && (workspaceUuid || userUuid)) {
-            console.log(
-                `useReactions - useEffect - Chargement initial des réactions pour le message ${messageUuid}`,
-            );
             fetchReactions();
         }
     }, [messageUuid, channelUuid, workspaceUuid, userUuid, fetchReactions]);
@@ -250,17 +222,9 @@ export const useReactions = (
             return;
         }
 
-        console.log(
-            `useReactions - useEffect - Abonnement aux événements WebSocket pour le message ${messageUuid}`,
-        );
-
         const onReactionCreated = websocketService.on(
             "reaction_added",
             (data: Reaction) => {
-                console.log(
-                    "useReactions - WebSocket - Nouvelle réaction reçue:",
-                    data,
-                );
                 if (data.message.uuid === messageUuid) {
                     setReactions((prev) => {
                         // Éviter les doublons
@@ -276,10 +240,6 @@ export const useReactions = (
         const onReactionUpdated = websocketService.on(
             "reaction_updated",
             (data: Reaction) => {
-                console.log(
-                    "useReactions - WebSocket - Réaction mise à jour reçue:",
-                    data,
-                );
                 if (data.message.uuid === messageUuid) {
                     setReactions((prev) =>
                         prev.map((reaction) =>
@@ -293,10 +253,6 @@ export const useReactions = (
         const onReactionRemoved = websocketService.on(
             "reaction_removed",
             (data: { reactionUuid: UUID }) => {
-                console.log(
-                    "useReactions - WebSocket - Réaction supprimée reçue:",
-                    data,
-                );
                 setReactions((prev) =>
                     prev.filter(
                         (reaction) => reaction.uuid !== data.reactionUuid,
@@ -306,9 +262,6 @@ export const useReactions = (
         );
 
         return () => {
-            console.log(
-                `useReactions - useEffect - Désabonnement des événements WebSocket pour le message ${messageUuid}`,
-            );
             onReactionCreated();
             onReactionUpdated();
             onReactionRemoved();

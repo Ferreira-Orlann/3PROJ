@@ -107,8 +107,6 @@ export default function Sidebar() {
                             id = String(workspace.uuid);
                         } else if (workspace.workspaceId) {
                             id = String(workspace.workspaceId);
-                        } else if (workspace.id) {
-                            id = String(workspace.id);
                         }
 
                         // Vérifier que l'ID est défini avant de l'utiliser
@@ -179,8 +177,8 @@ export default function Sidebar() {
         // Rediriger vers la page de conversation privée
         // Utiliser un chemin existant pour le moment, nous créerons la page de messages directs plus tard
         router.push({
-            pathname: "/screens/direct-messages",
-            params: { userId: userId.toString() },
+            pathname: "/screens/private_messages/[userId]",
+            params: { userId: userId },
         });
         // Optionally collapse sidebar after selection on mobile
         if (Dimensions.get("window").width < 768) {
@@ -321,7 +319,7 @@ export default function Sidebar() {
                     ) : (
                         dmState.users.map((user) => (
                             <TouchableOpacity
-                                key={user.uuid.toString()}
+                                key={user.uuid}
                                 style={styles.directMessageItem}
                                 onPress={() => handleDirectMessageSelect(user.uuid)}
                             >
@@ -533,13 +531,6 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontSize: 14,
         fontWeight: "bold",
-    },
-    userInfo: {
-        flex: 1,
-    },
-    userName: {
-        color: "#fff",
-        fontSize: 14,
     },
     userStatus: {
         flexDirection: "row",

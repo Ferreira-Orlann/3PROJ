@@ -84,9 +84,11 @@ export class NotificationsService {
             throw new NotFoundException(`Recipient user with UUID ${dto.recipient_uuid} not found`);
         }
 
+        const created_at = new Date();
         const notification = this.notificationRepo.create({
             type: dto.type,
             recipient,
+            created_at,
         });
 
         if (dto.sender_uuid) {

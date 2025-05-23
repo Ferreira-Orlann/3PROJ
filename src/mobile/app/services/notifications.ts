@@ -1,6 +1,8 @@
+import { UUID } from "crypto";
+
 // Types pour l'écran de notifications
 export type Notification = {
-    id: string;
+    uuid: UUID;
     type: "mention" | "message" | "invitation" | "system";
     title: string;
     description: string;

@@ -41,7 +41,7 @@ export class Notification {
     @Expose()
     read: boolean;
 
-    @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+    @Column({ nullable: true })
     @Expose()
     created_at: Date;
 
