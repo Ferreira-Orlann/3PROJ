@@ -23,7 +23,10 @@ import { Reaction } from "./reactions/reactions.entity";
 import { WorkspaceMember } from "./workspaces/members/workspace_members.entity";
 import { Notification } from "./notifications/notification.entity";
 import { NotificationsModule } from "./notifications/notifications.module";
-
+import { Role } from "./roles/roles.entity";
+import { Permission } from "./roles/permissions.entity";
+import { UserRole } from "./roles/user-roles.entity";
+import { RolesModule } from "./roles/roles.module";
 @Module({
     imports: [
         ConfigModule.forRoot({
@@ -57,6 +60,9 @@ import { NotificationsModule } from "./notifications/notifications.module";
                         Session,
                         Reaction,
                         Notification,
+                        Role,
+                        Permission,
+                        UserRole,
                     ],
                     synchronize: config.get<boolean>(
                         "DATABASE_TYPEORM_SYNCHRONISE",
@@ -75,6 +81,7 @@ import { NotificationsModule } from "./notifications/notifications.module";
         ReactionsModule,
         FilesModule,
         NotificationsModule,
+        RolesModule,
     ],
     controllers: [AppController],
     providers: [AppService],
