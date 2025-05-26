@@ -154,21 +154,6 @@ export default function ChannelScreen() {
         [sendMessage],
     );
 
-    const handleAddReaction = useCallback(
-        async (messageId: string, emoji: string) => {
-            // Cette fonction devrait utiliser un service d'API pour ajouter des réactions
-            console.log(
-                "ChannelScreen - handleAddReaction - Début avec params:",
-                { messageId, emoji },
-            );
-            console.log(
-                "ChannelScreen - handleAddReaction - Implémentation à compléter avec l'API appropriée",
-            );
-            // Implémentation à compléter avec l'API appropriée
-        },
-        [],
-    );
-
     // Si les données sont en cours de chargement ou si le canal n'est pas trouvé
     if (isLoading || !channel) {
         return (
@@ -278,14 +263,11 @@ export default function ChannelScreen() {
 
                     <ChatContainer
                         workspaceUuid={workspaceId as UUID}
-                        userUuid={
-                            user?.uuid as UUID
-                        } /* Utiliser workspaceId comme userUuid temporairement */
+                        userUuid={user?.uuid as UUID}
                         channelUuid={channelId as UUID}
                         channelName={channel.name}
-                        currentUser={user?.uuid as UUID}
+                        currentUser={user?.username || ""}
                         onSendMessage={handleSendMessage}
-                        onAddReaction={handleAddReaction}
                     />
                 </View>
             </KeyboardAvoidingView>

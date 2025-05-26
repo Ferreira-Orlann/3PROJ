@@ -24,7 +24,10 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "permissions": ["INTERNET", "ACCESS_NETWORK_STATE"]
+      "permissions": [
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -45,6 +48,10 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "hostUri": "10.188.61.41"
+    },
+    "hostUri": "10.188.61.41:8081"
   }
 }

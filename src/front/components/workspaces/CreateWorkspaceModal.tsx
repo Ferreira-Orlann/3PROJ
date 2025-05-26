@@ -1,30 +1,49 @@
-// src/front/components/workspaces/CreateWorkspaceModal.tsx
-
 import React, { useState } from "react";
 import styles from "../../styles/workspacesPage.module.css";
+import authService from "../../services/auth.service";
+import workspacesService from "../../services/workspaces.service";
 
 interface CreateWorkspaceModalProps {
     onClose: () => void;
-    onCreate: (name: string, description: string, visibility: string) => void;
+    onWorkspaceCreated: () => void;
 }
 
 const CreateWorkspaceModal = ({
     onClose,
-    onCreate,
+    onWorkspaceCreated,
 }: CreateWorkspaceModalProps) => {
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [visibility, setVisibility] = useState("public");
+    const [error, setError] = useState("");
 
-    const handleCreate = () => {
-        onCreate(name, description, visibility); // Appeler la fonction de création
-        onClose(); // Fermer le modal après la création
+    const handleCreate = async () => {
+        if (!name || !description) {
+            setError("Tous les champs sont requis.");
+            return;
+        }
+
+        try {
+            const data = workspacesService.create(
+                name,
+                description,
+                visibility == "public",
+            );
+            console.log("Workspace créé:", data);
+
+            onWorkspaceCreated();
+            onClose();
+        } catch (err: any) {
+            setError(err.message || "Erreur inconnue");
+        }
     };
 
     return (
         <div className={styles.modalOverlay}>
             <div className={styles.modalContent}>
                 <h2>Créer un nouvel espace de travail</h2>
+
+                {error && <p className={styles.error}>{error}</p>}
 
                 <input
                     type="text"

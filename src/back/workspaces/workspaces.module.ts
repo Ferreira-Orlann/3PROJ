@@ -14,5 +14,6 @@ import { AuthModule } from "../authentication/authentication.module";
     ],
     controllers: [WorkspacesController],
     providers: [WorkspacesService],
+    exports: [WorkspacesService, TypeOrmModule],
 })
 export class WorkspacesModule {}

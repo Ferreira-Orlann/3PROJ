@@ -1,6 +1,10 @@
 import { NestFactory, Reflector } from "@nestjs/core";
 import { AppModule } from "./app.module";
-import { ClassSerializerInterceptor, ConsoleLogger } from "@nestjs/common";
+import {
+    ClassSerializerInterceptor,
+    ConsoleLogger,
+    ValidationPipe,
+} from "@nestjs/common";
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 
 async function bootstrap() {
@@ -9,9 +13,10 @@ async function bootstrap() {
     });
     app.enableCors({
         origin: "*", // Ou tu peux spécifier une liste d'origines, ex : ['http://192.168.1.102', 'http://tonAppMobile']
-        methods: ["GET", "POST", "PUT", "DELETE"],
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         allowedHeaders: ["Content-Type", "Authorization"],
         exposedHeaders: ["Content-Type", "Authorization"],
+        credentials: true, // Si tu utilises des cookies de session
     });
 
     const config = new DocumentBuilder()
@@ -28,6 +33,8 @@ async function bootstrap() {
             excludeExtraneousValues: true,
         }),
     );
+
+    app.useGlobalPipes(new ValidationPipe());
 
     await app.listen(process.env.PORT ?? 3000, "0.0.0.0");
 }

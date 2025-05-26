@@ -14,7 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 
 // Importation des fichiers séparés
-import { useProfileManagement } from "../../hooks/profils";
+import { useProfileManagement } from "../../hooks/useProfils";
 import { styles } from "../../styles/profils";
 
 export default function ProfileScreen() {

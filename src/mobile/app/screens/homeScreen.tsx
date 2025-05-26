@@ -14,7 +14,7 @@ import {
     CreateWorkspaceModal,
     WorkspaceListContainer,
 } from "./homeScreen.components";
-import useWorkspaceScreen from "../hooks/workspaces";
+import useWorkspaceScreen from "../hooks/useWorkspaces";
 
 export default function HomeScreen() {
     const insets = useSafeAreaInsets();

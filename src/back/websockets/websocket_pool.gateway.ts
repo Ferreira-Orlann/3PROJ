@@ -104,10 +104,50 @@ export class WebSocketPool implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     sendEvent(socket: Socket, event: Events, payload: any) {
-        socket.emit("message_sent", {
-            timestamp: Math.floor(Date.now() / 1000),
+        // Utiliser le bon événement en fonction du type d'événement
+        let eventName = "message";
+
+        if (event === Events.MESSAGE_CREATED) {
+            eventName = "message_received";
+        } else if (event === Events.MESSAGE_UPDATED) {
+            eventName = "message_updated";
+        } else if (event === Events.MESSAGE_REMOVED) {
+            eventName = "message_removed";
+        } else if (event === Events.REACTION_CREATED) {
+            eventName = "reaction_received";
+        } else if (event === Events.REACTION_UPDATED) {
+            eventName = "reaction_updated";
+        } else if (event === Events.REACTION_REMOVED) {
+            eventName = "reaction_removed";
+        } else if (event === Events.WORKSPACE_MEMBER_ADDED) {
+            eventName = "workspace_member.added";
+        } else if (event === Events.WORKSPACE_MEMBER_REMOVED) {
+            eventName = "workspace_member.removed";
+        } else if (event === Events.WORKSPACE_CREATED) {
+            eventName = "workspace_added";
+        } else if (event === Events.WORKSPACE_UPDATED) {
+            eventName = "workspace_updated";
+        } else if (event === Events.WORKSPACE_REMOVED) {
+            eventName = "workspace_removed";
+        } else if (event === Events.CHANNEL_CREATED) {
+            eventName = "channel_reaction";
+        } else if (event === Events.CHANNEL_REMOVED) {
+            eventName = "channel_reaction";
+        } else if (event === Events.NOTIFICATION_CREATED) {
+            eventName = "notification";
+        } else if (event === Events.NOTIFICATION_READ) {
+            eventName = "notification_updated";
+        }
+
+        console.log(`Sending ${eventName} event to socket:`, {
             event: event,
-            payload: payload,
+            eventName: eventName,
+            payloadType: payload ? typeof payload : "null",
+        });
+
+        socket.emit(eventName, {
+            message: event,
+            data: payload,
         });
     }
 }

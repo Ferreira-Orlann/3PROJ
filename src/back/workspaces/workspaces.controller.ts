@@ -13,10 +13,12 @@ import { WorkspacesService } from "./workspaces.service";
 import { CreateWorkspaceDto } from "./workspaces.dto";
 import { Workspace } from "./workspaces.entity";
 import { UUID } from "crypto";
+import { HttpAuthGuard } from "../authentication/http.authentication.guard";
 
 @Controller("workspaces")
 export class WorkspacesController {
     constructor(private readonly workspacesService: WorkspacesService) {}
+
 
     @Get()
     async findAll() {
