@@ -1,6 +1,7 @@
 // src/types/auth.ts
+import { UUID } from "crypto";
 export type User = {
-  uuid: string;
+  uuid: UUID;
   username: string;
   email: string;
 };

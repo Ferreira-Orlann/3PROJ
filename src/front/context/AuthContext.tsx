@@ -1,14 +1,15 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import authService from "../services/auth.service";
+import { UUID } from "crypto";
 
 type User = {
-  uuid: string;
+  uuid: UUID;
 };
 
 type Session = {
   token: string;
   owner: {
-    uuid: string;
+    uuid: UUID;
   };
 };
 
@@ -40,11 +41,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const stockageSession = authService.getSession();
+    console.log("stok",stockageSession)
     if (stockageSession != null) {
-      setUser({ uuid: stockageSession.uuid });
+      setUser({ uuid: stockageSession.owner });
       setToken(stockageSession.token);
     }
+    console.log("users",user)
   }, []);
+
 
   const session: Session | null =
     user && token
@@ -60,6 +64,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     </AuthContext.Provider>
   );
 };
+
+
 
 export const useAuth = () => {
   const ctx = useContext(AuthContext);

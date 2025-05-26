@@ -48,12 +48,16 @@ export default function MessageList({
 
           return (
             <div
-              key={msg.uuid}
+            key={
+              msg.uuid?.toString() ??
+              `${msg.source_uuid ?? "src"}-${msg.date ?? Date.now()}-${Math.random()}`
+            }
+            
               className={`${styles.messageBubble} ${
                 isMine ? styles.sent : styles.received
               }`}
             >
-              {repliedMsg && (
+              {repliedMsg?.message && (
                 <div className={styles.replyPreview}>
                   <small>
                     Réponse à:{" "}
@@ -63,9 +67,12 @@ export default function MessageList({
                   </small>
                 </div>
               )}
+
               <p>
-                {msg.message}
-                {msg.edited && <span className={styles.editedTag}> (modifié)</span>}
+                {msg.message ?? ""}
+                {msg.edited && (
+                  <span className={styles.editedTag}> (modifié)</span>
+                )}
               </p>
 
               {msg.file_url && (
@@ -79,18 +86,22 @@ export default function MessageList({
                 </a>
               )}
 
-            <div className={styles.messageActions}>
-            { (
+              <div className={styles.messageActions}>
                 <button
-                className={styles.actionButton}
-                onClick={() => onEdit(msg)}
-                title="Modifier"
+                  className={styles.actionButton}
+                  onClick={() => onEdit(msg)}
+                  title="Modifier"
                 >
-                ✏️
+                  ✏️
                 </button>
-  )}
-</div>
-
+                <button
+                  className={styles.actionButton}
+                  onClick={() => onReply(msg)}
+                  title="Répondre"
+                >
+                  🔁
+                </button>
+              </div>
             </div>
           );
         })
