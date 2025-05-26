@@ -1,9 +1,10 @@
-// src/services/channel.service.ts
 import authService from './auth.service';  // Correctement importé
 
+
 export const channelService = {
+    // Récupérer tous les canaux
     getAll: async () => {
-        const token = authService.getSession().token; // Utilisation correcte de authService
+        const token = authService.getSession().token;
         if (!token) {
             throw new Error("Token non trouvé");
         }
@@ -22,6 +23,21 @@ export const channelService = {
         return await response.json();
     },
 
+    // Récupérer les canaux filtrés par workspaceUuid
+    getAllFiltered: async (workspaceUuid: string) => {
+        const allChannels = await channelService.getAll();
+    
+        // Optionnel : debug pour voir ce qui arrive
+        console.log("Filtrage des canaux", allChannels.map(c => ({
+            name: c.name,
+            workspace: c.workspace
+        })));
+    
+        return allChannels.filter((channel: { workspace: string }) =>
+            channel.workspace === workspaceUuid
+        );
+    },
+        
     create: async (workspaceUuid: string, name: string) => {
         const token = authService.getSession().token;
         if (!token) {

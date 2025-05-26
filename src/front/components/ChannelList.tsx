@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 type Channel = {
   id: string;
   name: string;
-  // tu peux ajouter d'autres champs si ton Channel en contient
 };
 
 export default function ChannelList() {

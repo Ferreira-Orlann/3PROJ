@@ -46,14 +46,15 @@ const WorkspaceDetailPage = () => {
     // Charger les canaux si l'onglet "channels" est actif
     useEffect(() => {
         if (activeTab === "channels") {
-            channelService.getAll()
+            channelService.getAllFiltered(uuid!)
                 .then(setChannels)
                 .catch((err) => {
                     console.error("Erreur fetch channels:", err);
                     setMessage(err.message || "Erreur lors du chargement des canaux");
                 });
         }
-    }, [activeTab]);
+    }, [activeTab, uuid]);
+    
 
     useEffect(() => {
         setMessage("");
@@ -93,10 +94,11 @@ const WorkspaceDetailPage = () => {
     };
 
     const handleCreateChannel = async () => {
-        if (!workspace || !newChannelName.trim()) return;
-
+        if (!uuid || !newChannelName.trim()) return;
+        console.log("Création canal pour workspace UUID:", uuid);
+    
         try {
-            const newChannel = await channelService.create(workspace.uuid, newChannelName.trim());
+            const newChannel = await channelService.create(uuid, newChannelName.trim());
             setChannels([...channels, newChannel]);
             setMessage("Canal créé avec succès !");
             setNewChannelName("");
@@ -104,7 +106,9 @@ const WorkspaceDetailPage = () => {
             setMessage(error.message || "Erreur lors de la création du canal");
         }
     };
-
+    
+    
+    
     return (
         <>
             <div className={styles.headerBar}>

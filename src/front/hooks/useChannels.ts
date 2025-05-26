@@ -1,28 +1,32 @@
-// hooks/useChannels.ts
 import { useState, useEffect } from "react";
-import { channelService } from "../services/channel.service";  // Assure-toi que ce service existe
-import { Channel } from "../types/channel";  // Définis le type Channel si ce n'est pas déjà fait
+import channelService from "../services/channel.service";
 
-export const useChannels = (workspaceUuid: string) => {
-  const [channels, setChannels] = useState<Channel[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string>("");
+const useChannelsByWorkspace = (workspaceUuid: string | null) => {
+  const [channels, setChannels] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchChannels = async () => {
-      try {
-        setLoading(true);
-        const fetchedChannels = await channelService.getByWorkspaceUuid(workspaceUuid);
-        setChannels(fetchedChannels);
-      } catch (err: any) {
-        setError("Erreur lors de la récupération des canaux.");
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (!workspaceUuid) {
+      setChannels([]);
+      return;
+    }
 
-    fetchChannels();
+    setLoading(true);
+    setError(null);
+
+    channelService.getAll()
+      .then(allChannels => {
+        const filtered = allChannels.filter(
+          (channel: any) => channel.workspaceUuid === workspaceUuid
+        );
+        setChannels(filtered);
+      })
+      .catch(err => setError(err.message || "Erreur lors du chargement des channels"))
+      .finally(() => setLoading(false));
   }, [workspaceUuid]);
 
   return { channels, loading, error };
 };
+
+export default useChannelsByWorkspace;
