@@ -1,0 +1,310 @@
+/* ===== CONTENEUR PRINCIPAL ===== */
+.chatContainer {
+  display: flex;
+  height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #1e1f25;
+  color: white;
+}
+
+/* ===== SIDEBAR UTILISATEURS ===== */
+.userSidebar {
+  width: 280px;
+  background-color: #2b2d35;
+  padding: 20px;
+  overflow-y: auto;
+  border-right: 1px solid #1e1f25;
+  box-sizing: border-box;
+}
+
+.userSidebar h2 {
+  margin-bottom: 20px;
+  font-size: 20px;
+  color: white;
+}
+
+/* Liste des utilisateurs */
+.userList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.userItem {
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.userItem:hover {
+  transform: scale(1.02);
+}
+
+.activeUser .userCard {
+  background-color: #6c47ff !important;
+}
+.messageList {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  scroll-behavior: smooth;
+}
+
+
+/* Carte utilisateur */
+.userCard {
+  display: flex;
+  align-items: center;
+  background-color: #3a3b45;
+  padding: 10px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.userCard:hover {
+  background-color: #4c4d59;
+}
+
+.avatar {
+  background-color: #6c47ff;
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 12px;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.username {
+  font-weight: bold;
+  font-size: 15px;
+  color: white;
+}
+
+.status {
+  font-size: 12px;
+  color: #bbb;
+}
+
+/* ===== ZONE DE CHAT ===== */
+.chatMain {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh; 
+}
+
+
+/* En-tête du chat */
+.chatHeader {
+  padding: 20px;
+  font-size: 18px;
+  font-weight: bold;
+  border-bottom: 1px solid #444;
+}
+
+/* Liste des messages */
+.messageScroll {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  scroll-behavior: smooth;
+  padding-bottom: 100px;
+}
+
+/* Bulle de message */
+.messageBubble {
+  max-width: 60%;
+  padding: 10px 15px;
+  border-radius: 18px;
+  font-size: 14px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.sent {
+  background-color: #6c47ff;
+  color: white;
+  align-self: flex-end;
+}
+
+.received {
+  background-color: #3a3b45;
+  color: #ddd;
+  align-self: flex-start;
+}
+.messageActions {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  display: flex;
+  gap: 8px;
+  /* autres styles */
+}
+
+.messageBubble:hover .messageActions {
+  opacity: 1;
+}
+
+/* Barre d’entrée de message */
+.inputBar {
+  display: flex;
+  padding: 16px 20px;
+  border-top: 1px solid #444;
+  background-color: #1e1f25;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+}
+
+.inputBar input {
+  flex: 1;
+  padding: 12px 16px;
+  border-radius: 20px;
+  border: none;
+  background-color: #3a3b45;
+  color: white;
+  font-size: 14px;
+  outline: none;
+}
+
+.inputBar button {
+  margin-left: 10px;
+  background-color: #6c47ff;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+}
+
+.inputBar button:hover {
+  background-color: #5a3ddb;
+}
+
+/* Aucune discussion sélectionnée */
+.emptyChatMessage {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 16px;
+  color: #888;
+  text-align: center;
+  padding: 20px;
+}
+
+/* Messages ou erreurs vides */
+.empty {
+  color: #aaa;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.error {
+  color: #ff4f4f;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+
+/* Barre de recherche dans la sidebar */
+.searchInput {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: none;
+  margin-bottom: 15px;
+  font-size: 14px;
+  outline: none;
+  background-color: #3a3b45;
+  color: white;
+  box-sizing: border-box;
+  transition: background-color 0.2s ease;
+}
+
+.searchInput::placeholder {
+  color: #bbb;
+}
+
+.searchInput:focus {
+  background-color: #4c4d59;
+}
+.replyPreviewBox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #f1f1f1;
+  padding: 10px 12px;
+  border-left: 4px solid #007bff;
+  border-radius: 8px;
+  margin: 8px 0;
+  position: relative;
+}
+
+.replyIndicator {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  flex: 1;
+}
+
+.replyLine {
+  width: 3px;
+  background-color: #007bff;
+  border-radius: 1px;
+  margin-right: 10px;
+}
+
+.replyContent {
+  display: flex;
+  flex-direction: column;
+  word-break: break-word;
+}
+
+.replyLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 2px;
+}
+
+.replyMessage {
+  font-size: 0.9rem;
+  color: #333;
+  margin: 0;
+}
+
+.cancelReplyButton {
+  background: none;
+  border: none;
+  color: #777;
+  font-size: 1.2rem;
+  cursor: pointer;
+  margin-left: 10px;
+  transition: color 0.2s ease;
+}
+
+.cancelReplyButton:hover {
+  color: #ff4d4f;
+}
+.editedTag {
+  font-size: 0.8rem;
+  color: #888;
+  margin-left: 4px;
+}
+

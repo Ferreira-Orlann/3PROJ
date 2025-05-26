@@ -1,17 +1,21 @@
 .sidebar {
-  width: 250px;
+  width: 260px;
   background-color: #1e1e2f;
   color: white;
   padding: 20px;
   display: flex;
   flex-direction: column;
+  height: 100vh;
+  overflow-y: auto;
+  border-right: 1px solid #2f2f48;
 }
 
 .logo {
-  font-size: 1.5rem;
-  margin-bottom: 30px;
-  text-align: center;
+  font-size: 1.8rem;
+  font-weight: bold;
   color: #00bfa6;
+  text-align: center;
+  margin-bottom: 2rem;
 }
 
 .chatList {
@@ -20,28 +24,69 @@
   margin: 0;
 }
 
+.sectionTitle {
+  margin: 1.5rem 0 0.5rem;
+  padding-left: 0.5rem;
+  color: #bbbbbb;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #2f2f48;
+  padding-bottom: 0.3rem;
+}
+
 .chatItem {
   display: flex;
   align-items: center;
-  padding: 10px;
-  margin-bottom: 10px;
-  border-radius: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s ease;
+  gap: 10px;
 }
 
 .chatItem:hover {
-  background-color: #2f2f48; 
+  background-color: #2f2f48;
 }
 
 .avatar {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   background-color: #00bfa6;
   color: #fff;
   border-radius: 50%;
   text-align: center;
-  line-height: 32px;
-  margin-right: 10px;
+  line-height: 36px;
   font-weight: bold;
+  flex-shrink: 0;
+  font-size: 1rem;
+}
+
+.username {
+  flex-grow: 1;
+  font-size: 1rem;
+  color: white;
+}
+
+.statusOnline,
+.statusOffline {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-left: auto;
+}
+
+.statusOnline {
+  background-color: #4caf50;
+}
+
+.statusOffline {
+  background-color: #888;
+}
+
+.emptyState {
+  color: #777;
+  font-style: italic;
+  padding: 8px 12px;
+  font-size: 0.9rem;
 }

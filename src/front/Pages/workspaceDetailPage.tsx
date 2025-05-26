@@ -1,399 +1,185 @@
-import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
-import { MessageSquare, Users, Settings as SettingsIcon } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import styles from "../styles/workspaceDetailPage.module.css";
-import Channel from "../components/workspaces/Channel";
+import authService from "../services/auth.service";
 import Member from "../components/workspaces/Member";
-import InviteMemberModal from "../components/workspaces/InviteMemberModal";
+import { channelService } from "../services/channel.service";
+import CreateChannelModal from "../components/workspaces/CreateChannelModal";
+import { Workspace } from "../types/workspace";
+import workspacesService from "../services/workspaces.service";
+import { UUID } from "crypto";
 
 const WorkspaceDetailPage = () => {
-    const { state } = useLocation();
-    const workspace = state;
+    const { uuid } = useParams();
+    const location = useLocation();
+    const navigate = useNavigate();
 
-    const [activeTab, setActiveTab] = useState<
-        "channels" | "members" | "settings"
-    >("channels");
-    const [activeChannel, setActiveChannel] = useState<string | null>(null); // Canal actif sélectionné
-    const [messages, setMessages] = useState<{ [channel: string]: any[] }>({}); // Messages par canal
-    const [newMessage, setNewMessage] = useState<string>(""); // Message à envoyer
-    const [file, setFile] = useState<File | null>(null); // Fichier à envoyer
-    const [showInviteModal, setShowInviteModal] = useState<boolean>(false);
-    const [activeChannels, setActiveChannels] = useState<{
-        [channel: string]: boolean;
-    }>({}); // Etat des canaux ouverts/fermés
-    const [showEmojiPopup, setShowEmojiPopup] = useState<boolean>(false); // Pour contrôler la pop-up des emojis
-    const [currentMessageIndex, setCurrentMessageIndex] = useState<
-        number | null
-    >(null); // Message sélectionné pour la réaction
+    const [workspace, setWorkspace] = useState<Workspace | null>(location.state || null);
+    const [newName, setNewName] = useState(workspace?.name || "");
+    const [message, setMessage] = useState("");
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [editing, setEditing] = useState(false);
+    const [activeTab, setActiveTab] = useState("members");
+    const [members, setMembers] = useState<string[]>([]);
 
-    // Fonction pour gérer l'ouverture/fermeture d'un canal
-    const toggleChannel = (channel: string) => {
-        setActiveChannels((prev) => ({
-            ...prev,
-            [channel]: !prev[channel], // Si ouvert, ferme; si fermé, ouvre
-        }));
-        setActiveChannel(channel); // Mettre à jour le canal actif
+    const token = authService.getSession().token;
+    const headers: any = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
     };
 
-    // Fonction pour envoyer un message
-    const handleSendMessage = () => {
-        if (!activeChannel || newMessage.trim() === "") return;
+    useEffect(() => {
+        if (!workspace) {
+            workspacesService.getByUUID(uuid as UUID).then((ws) => {
+                setWorkspace(ws);
+                setNewName(ws.name);
+            });
+        }
+    }, [uuid, workspace]);
 
-        // Ajout du message au canal actif
-        setMessages((prevMessages) => ({
-            ...prevMessages,
-            [activeChannel]: [
-                ...(prevMessages[activeChannel] || []),
-                { text: newMessage, user: "Moi", reactions: [], type: "text" },
-            ],
-        }));
+    useEffect(() => {
+        if (activeTab === "members") {
+            setMembers(["Alice", "Bob", "Charlie"]); // Remplace par appel API réel si besoin
+        }
+    }, [activeTab]);
 
-        // Réinitialisation du champ de message
-        setNewMessage("");
+    const handleRename = async () => {
+        if (!workspace || newName === workspace.name) {
+            setEditing(false);
+            return;
+        }
+
+        try {
+            await workspacesService.update({ uuid: workspace.uuid, name: newName });
+            setMessage("Nom mis à jour !");
+            setWorkspace({ ...workspace, name: newName });
+        } catch (error) {
+            setMessage(error instanceof Error ? error.message : "Erreur inconnue");
+        } finally {
+            setEditing(false);
+        }
     };
 
-    // Fonction pour envoyer un fichier
-    const handleSendFile = () => {
-        if (!activeChannel || !file) return;
+    const handleDelete = async () => {
+        if (!workspace || !window.confirm("Confirmer la suppression ?")) return;
+        setIsDeleting(true);
+        setMessage("");
 
-        // Ajout du fichier au canal actif
-        setMessages((prevMessages) => ({
-            ...prevMessages,
-            [activeChannel]: [
-                ...(prevMessages[activeChannel] || []),
-                {
-                    text: `Fichier envoyé: ${file.name}`,
-                    user: "Moi",
-                    reactions: [],
-                    type: "file",
-                },
-            ],
-        }));
-
-        // Réinitialisation du fichier
-        setFile(null);
-    };
-
-    // Fonction pour ajouter une réaction à un message
-    const handleReactToMessage = (
-        channel: string,
-        messageIndex: number,
-        reaction: string,
-    ) => {
-        setMessages((prevMessages) => {
-            const updatedMessages = [...(prevMessages[channel] || [])];
-            const message = updatedMessages[messageIndex];
-            if (!message.reactions) message.reactions = [];
-
-            message.reactions.push(reaction);
-
-            return {
-                ...prevMessages,
-                [channel]: updatedMessages,
-            };
-        });
-        setShowEmojiPopup(false); // Ferme la pop-up après avoir réagi
-    };
-
-    const renderContent = () => {
-        switch (activeTab) {
-            case "channels":
-                return (
-                    <div className={styles.contentList}>
-                        {workspace.channels.map(
-                            (channel: string, index: number) => (
-                                <div key={index}>
-                                    <div
-                                        className={styles.channelItem}
-                                        onClick={() => toggleChannel(channel)} // Cliquer pour ouvrir/fermer
-                                    >
-                                        <Channel name={channel} />
-                                    </div>
-
-                                    {/* Affichage du chat si le canal est ouvert */}
-                                    {activeChannels[channel] &&
-                                        activeChannel === channel && (
-                                            <div className={styles.chatBox}>
-                                                <h3>
-                                                    Chat du canal : {channel}
-                                                </h3>
-                                                <div
-                                                    className={
-                                                        styles.messagesContainer
-                                                    }
-                                                >
-                                                    {/* Messages fictifs */}
-                                                    {[
-                                                        {
-                                                            text: "Bonjour à tous!",
-                                                            user: "Alice",
-                                                            reactions: ["👍"],
-                                                            type: "text",
-                                                        },
-                                                        {
-                                                            text: "Comment ça va ?",
-                                                            user: "Bob",
-                                                            reactions: ["❤️"],
-                                                            type: "text",
-                                                        },
-                                                        {
-                                                            text: "Voici un fichier important.",
-                                                            user: "Moi",
-                                                            reactions: [],
-                                                            type: "file",
-                                                        },
-                                                    ]
-                                                        .concat(
-                                                            messages[channel] ||
-                                                                [],
-                                                        )
-                                                        .map(
-                                                            (
-                                                                message,
-                                                                index,
-                                                            ) => (
-                                                                <div
-                                                                    key={index}
-                                                                    className={
-                                                                        styles.message
-                                                                    }
-                                                                    onMouseEnter={() =>
-                                                                        setCurrentMessageIndex(
-                                                                            index,
-                                                                        )
-                                                                    } // Montrer pop-up au survol
-                                                                    onMouseLeave={() =>
-                                                                        setCurrentMessageIndex(
-                                                                            null,
-                                                                        )
-                                                                    } // Cacher la pop-up après le survol
-                                                                >
-                                                                    <div>
-                                                                        <strong>
-                                                                            {
-                                                                                message.user
-                                                                            }
-                                                                        </strong>
-                                                                        :{" "}
-                                                                        {message.type ===
-                                                                        "file" ? (
-                                                                            <i>
-                                                                                {
-                                                                                    message.text
-                                                                                }
-                                                                            </i>
-                                                                        ) : (
-                                                                            <p>
-                                                                                {
-                                                                                    message.text
-                                                                                }
-                                                                            </p>
-                                                                        )}
-                                                                    </div>
-
-                                                                    {/* Affichage des réactions */}
-                                                                    {currentMessageIndex ===
-                                                                        index && (
-                                                                        <div
-                                                                            className={
-                                                                                styles.reactionsPopup
-                                                                            }
-                                                                        >
-                                                                            {[
-                                                                                "👍",
-                                                                                "❤️",
-                                                                                "😂",
-                                                                            ].map(
-                                                                                (
-                                                                                    reaction,
-                                                                                ) => (
-                                                                                    <span
-                                                                                        key={
-                                                                                            reaction
-                                                                                        }
-                                                                                        className={
-                                                                                            styles.reactionButton
-                                                                                        }
-                                                                                        onClick={() =>
-                                                                                            handleReactToMessage(
-                                                                                                activeChannel,
-                                                                                                index,
-                                                                                                reaction,
-                                                                                            )
-                                                                                        }
-                                                                                    >
-                                                                                        {
-                                                                                            reaction
-                                                                                        }
-                                                                                    </span>
-                                                                                ),
-                                                                            )}
-                                                                        </div>
-                                                                    )}
-
-                                                                    <div
-                                                                        className={
-                                                                            styles.reactionsList
-                                                                        }
-                                                                    >
-                                                                        {message.reactions &&
-                                                                            message.reactions.join(
-                                                                                " ",
-                                                                            )}
-                                                                    </div>
-                                                                </div>
-                                                            ),
-                                                        )}
-                                                </div>
-
-                                                {/* Barre de saisie unique */}
-                                                <div
-                                                    className={
-                                                        styles.inputContainer
-                                                    }
-                                                >
-                                                    <textarea
-                                                        value={newMessage}
-                                                        onChange={(e) =>
-                                                            setNewMessage(
-                                                                e.target.value,
-                                                            )
-                                                        }
-                                                        className={styles.input}
-                                                        placeholder="Tapez un message..."
-                                                    />
-                                                    <div
-                                                        className={
-                                                            styles.inputActions
-                                                        }
-                                                    >
-                                                        <input
-                                                            type="file"
-                                                            onChange={(e) =>
-                                                                setFile(
-                                                                    e.target
-                                                                        .files
-                                                                        ? e
-                                                                              .target
-                                                                              .files[0]
-                                                                        : null,
-                                                                )
-                                                            }
-                                                            className={
-                                                                styles.fileInput
-                                                            }
-                                                        />
-                                                        <button
-                                                            onClick={
-                                                                handleSendMessage
-                                                            }
-                                                            className={
-                                                                styles.sendButton
-                                                            }
-                                                        >
-                                                            Envoyer
-                                                        </button>
-                                                        <button
-                                                            onClick={
-                                                                handleSendFile
-                                                            }
-                                                            className={
-                                                                styles.sendFileButton
-                                                            }
-                                                        >
-                                                            Envoyer un fichier
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )}
-                                </div>
-                            ),
-                        )}
-                    </div>
-                );
-            case "members":
-                return (
-                    <div className={styles.contentList}>
-                        {/* Ici tu devrais afficher les vrais membres du workspace */}
-                        <Member name="Jean Dupont" />
-                        <Member name="Marie Martin" />
-                    </div>
-                );
-            case "settings":
-                return (
-                    <div className={styles.settingsContent}>
-                        <form>
-                            <div className={styles.formGroup}>
-                                <label>Nom</label>
-                                <input
-                                    type="text"
-                                    defaultValue={workspace.name}
-                                />
-                            </div>
-                            <div className={styles.formGroup}>
-                                <label>Description</label>
-                                <textarea
-                                    defaultValue={workspace.description}
-                                ></textarea>
-                            </div>
-                            <div className={styles.formGroup}>
-                                <label>Visibilité</label>
-                                <select defaultValue={workspace.visibility}>
-                                    <option value="Public">Public</option>
-                                    <option value="Privé">Privé</option>
-                                </select>
-                            </div>
-                        </form>
-                    </div>
-                );
-            default:
-                return null;
+        try {
+            await workspacesService.delete(workspace);
+            setMessage("Workspace supprimé !");
+            setTimeout(() => navigate("/workspaces"), 1000);
+        } catch (error) {
+            setMessage(error instanceof Error ? error.message : "Erreur inconnue");
+        } finally {
+            setIsDeleting(false);
         }
     };
 
     return (
-        <div className={styles.container}>
-            {/* Header workspace */}
-            <div className={styles.header}>
-                <div className={styles.workspaceIcon}>{workspace.icon}</div>
-                <h1>{workspace.name}</h1>
-                <p>{workspace.description}</p>
+        <>
+            <div className={styles.headerBar}>
+                <div className={styles.leftSection}>
+                    <div className={styles.logo}>
+                        <span>{workspace ? workspace.name?.charAt(0).toUpperCase() : "?"}</span>
+                    </div>
+
+                    <div className={styles.nameContainer}>
+                        {editing ? (
+                            <input
+                                className={styles.nameInput}
+                                value={newName}
+                                onChange={(e) => setNewName(e.target.value)}
+                                onBlur={handleRename}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") handleRename();
+                                    if (e.key === "Escape") setEditing(false);
+                                }}
+                                autoFocus
+                            />
+                        ) : (
+                            <span className={styles.name} onClick={() => setEditing(true)}>
+                                {newName}
+                            </span>
+                        )}
+                        <span className={styles.uuid}>UUID: {workspace?.uuid || uuid}</span>
+                    </div>
+
+                    <div className={styles.tabBar}>
+                        <button className={styles.tabButton} onClick={() => setActiveTab("channels")}>Canaux</button>
+                        <button className={styles.tabButton} onClick={() => setActiveTab("members")}>Membres</button>
+                        <button className={styles.tabButton} onClick={() => setActiveTab("settings")}>Paramètres</button>
+                    </div>
+                </div>
+
+                <div className={styles.actions}>
+                    <button
+                        className={styles.deleteBtn}
+                        onClick={handleDelete}
+                        disabled={isDeleting}
+                    >
+                        {isDeleting ? "Suppression..." : "Supprimer"}
+                    </button>
+                </div>
             </div>
 
-            {/* Tabs */}
-            <div className={styles.tabs}>
-                <button
-                    onClick={() => setActiveTab("channels")}
-                    className={activeTab === "channels" ? styles.activeTab : ""}
-                >
-                    <MessageSquare /> Canaux
-                </button>
-                <button
-                    onClick={() => setActiveTab("members")}
-                    className={activeTab === "members" ? styles.activeTab : ""}
-                >
-                    <Users /> Membres
-                </button>
-                <button
-                    onClick={() => setActiveTab("settings")}
-                    className={activeTab === "settings" ? styles.activeTab : ""}
-                >
-                    <SettingsIcon /> Paramètres
-                </button>
+            {message && <p className={styles.message}>{message}</p>}
+
+            <div className={styles.tabContent}>
+                {activeTab === "members" && (
+                    <div>
+                        <h2>Membres du workspace</h2>
+                        {members.map((name, index) => (
+                            <Member key={index} name={name} />
+                        ))}
+                    </div>
+                )}
+
+                {activeTab === "channels" && (
+                    <div>
+                        <h2>Créer un canal</h2>
+                        <form
+                            onSubmit={async (e) => {
+                                e.preventDefault();
+                                const form = e.target as HTMLFormElement;
+                                const input = form.elements.namedItem("channelName") as HTMLInputElement;
+                                const name = input.value.trim();
+                                if (!name || !workspace) return;
+
+                                try {
+                                    const response = await fetch(`http://localhost:3000/workspaces/${workspace.uuid}/channels`, {
+                                        method: "POST",
+                                        headers,
+                                        body: JSON.stringify({ name, workspaceUuid: workspace.uuid }),
+                                    });
+
+                                    if (!response.ok) {
+                                        const errorText = await response.text();
+                                        throw new Error(errorText);
+                                    }
+
+                                    setMessage("Canal créé !");
+                                    input.value = "";
+                                } catch (error: any) {
+                                    console.error("Erreur :", error);
+                                    setMessage(error.message || "Erreur inconnue");
+                                }
+                            }}
+                        >
+                            <input type="text" name="channelName" placeholder="Nom du canal" required />
+                            <button type="submit">Créer</button>
+                        </form>
+                    </div>
+                )}
+
+                {activeTab === "settings" && (
+                    <div>
+                        <h2>Paramètres</h2>
+                        <p>Configuration du workspace à venir…</p>
+                    </div>
+                )}
             </div>
-
-            {/* Content */}
-            <div className={styles.tabContent}>{renderContent()}</div>
-
-            {/* Modal d'invitation */}
-            {showInviteModal && (
-                <InviteMemberModal
-                    onClose={() => setShowInviteModal(false)}
-                    onInvite={(email) => console.log("Invité :", email)}
-                />
-            )}
-        </div>
+        </>
     );
 };
 

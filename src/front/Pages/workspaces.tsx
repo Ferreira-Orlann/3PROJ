@@ -1,133 +1,102 @@
 // src/front/pages/WorkspacesPage.tsx
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Home, Bell, User, Settings } from "lucide-react";
 import styles from "../styles/workspacesPage.module.css";
+
+import Sidebar from "../components/layout/Sidebar";
 import CreateWorkspaceModal from "../components/workspaces/CreateWorkspaceModal";
+import PrivateChatList from "../chat/PrivateChat";
+import NotificationsSettings from "../components/settings/NotificationsSettings";
+import workspaceService from "../services/workspaces.service";
 
 const WorkspacesPage = () => {
-    const [showModal, setShowModal] = useState(false);
-    const navigate = useNavigate();
-    const [workspaces, setWorkspaces] = useState([
-        {
-            id: "1",
-            name: "Marketing",
-            description: "Marketing team",
-            visibility: "Public",
-            icon: "M",
-            channels: ["Général", "Projets"],
-        },
-        {
-            id: "2",
-            name: "Développement",
-            description: "Dev team",
-            visibility: "Public",
-            icon: "D",
-            channels: ["Frontend", "Backend"],
-        },
-        {
-            id: "3",
-            name: "RH",
-            description: "Human resources",
-            visibility: "Privé",
-            icon: "R",
-            channels: ["Recrutement", "Paie"],
-        },
-        {
-            id: "4",
-            name: "Direction",
-            description: "Direction générale",
-            visibility: "Privé",
-            icon: "D",
-            channels: ["Stratégie"],
-        },
-    ]);
+  const [showModal, setShowModal] = useState(false);
+  const [workspaces, setWorkspaces] = useState([]);
+  const [error, setError] = useState("");
+  const [activeTab, setActiveTab] = useState("workspaces");
 
-    const handleCreateWorkspace = (
-        name: string,
-        description: string,
-        visibility: string,
-    ) => {
-        const newWorkspace = {
-            id: (workspaces.length + 1).toString(),
-            name,
-            description,
-            visibility,
-            icon: name.charAt(0).toUpperCase(),
-            channels: [],
-        };
-        setWorkspaces([newWorkspace, ...workspaces]);
-    };
+  const navigate = useNavigate();
 
-    const goToWorkspace = (workspace: any) => {
-        navigate(`/workspace/${workspace.id}`, { state: workspace });
-    };
+  const fetchWorkspaces = async () => {
+    try {
+      const data = await workspaceService.getAll();
+      setWorkspaces(data);
+    } catch (err: any) {
+      console.error("Erreur lors de la récupération des workspaces:", err);
+      setError(err.message || "Erreur inconnue");
+    }
+  };
+ 
+  useEffect(() => {
+    fetchWorkspaces();
+  }, []);
 
-    return (
-        <div className={styles.container}>
-            {/* Sidebar */}
-            <aside className={styles.sidebar}>
-                <h2 className={styles.sidebarTitle}>ESPACES DE TRAVAIL</h2>
-                <div className={styles.workspaceList}>
-                    {workspaces.map((workspace) => (
-                        <div
-                            key={workspace.id}
-                            className={styles.workspaceItem}
-                            onClick={() => goToWorkspace(workspace)}
-                            style={{ cursor: "pointer" }}
-                        >
-                            <div className={styles.workspaceIcon}>
-                                {workspace.icon}
-                            </div>
-                            <div className={styles.workspaceInfo}>
-                                <p>{workspace.name}</p>
-                                <span>{workspace.visibility}</span>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-                {/* autres sections */}
-            </aside>
+  // Redirige vers un workspace spécifique
+  const goToWorkspace = (workspace: any) => {
+    navigate(`/workspace/${workspace.uuid}`, { state: workspace });
+  };
 
-            {/* Main Content */}
-            <main className={styles.main}>
-                <div className={styles.mainHeader}>
-                    <h1>Vos espaces de travail</h1>
-                    <button
-                        className={styles.createButton}
-                        onClick={() => setShowModal(true)}
-                    >
-                        Créer un espace de travail
-                    </button>
-                </div>
+  return (
+    <div className={styles.container}>
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-                {/* Liste cartes */}
-                <div className={styles.workspaceCards}>
-                    {workspaces.map((workspace) => (
-                        <div
-                            key={workspace.id}
-                            className={styles.workspaceCard}
-                            onClick={() => goToWorkspace(workspace)}
-                        >
-                            <div className={styles.workspaceAvatar}>
-                                {workspace.icon}
-                            </div>
-                            <p>{workspace.name}</p>
-                        </div>
-                    ))}
-                </div>
-            </main>
-
-            {/* Modal */}
-            {showModal && (
-                <CreateWorkspaceModal
-                    onClose={() => setShowModal(false)}
-                    onCreate={handleCreateWorkspace}
-                />
-            )}
+      <main className={styles.main}>
+        <div className={styles.mainHeader}>
+          <h1>Vos espaces de travail</h1>
+          <button
+            className={styles.createButton}
+            onClick={() => setShowModal(true)}
+          >
+            Créer un espace de travail
+          </button>
         </div>
-    );
+
+        {error && <p className={styles.error}>{error}</p>}
+
+        {/* Contenu dynamique selon l'onglet sélectionné */}
+        {activeTab === "workspaces" && (
+          <div className={styles.workspaceCards}>
+            {workspaces.map((workspace: any) => (
+              <div
+                key={workspace.uuid}
+                className={styles.workspaceCard}
+                onClick={() => goToWorkspace(workspace)}
+              >
+                <div className={styles.workspaceAvatar}>
+                  {workspace.name.charAt(0).toUpperCase()}
+                </div>
+                <p>{workspace.name}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {activeTab === "chats" && <PrivateChatList />}
+        {activeTab === "settings" && <NotificationsSettings />}
+      </main>
+
+      {showModal && (
+        <CreateWorkspaceModal
+        onClose={() => setShowModal(false)}
+        onCreate={async (name, description, visibility) => {
+          try {
+            const isPublic = visibility === "public"; // conversion string → boolean
+            await workspaceService.create(name, description, isPublic);
+            setShowModal(false);
+            const updated = await workspaceService.getAll();
+            setWorkspaces(updated);
+          } catch (error) {
+            console.error("Erreur lors de la création du workspace :", error);
+            setError("Erreur lors de la création du workspace");
+          }
+        }}
+      />      
+
+      )}
+    </div>
+  );
 };
 
 export default WorkspacesPage;
