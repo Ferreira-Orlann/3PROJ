@@ -16,10 +16,8 @@ import { usePathname, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "../../theme/colors";
-import useHomeScreen from "../../hooks/home";
-import useDirectMessages, {
-    DirectMessageUser,
-} from "../../hooks/useDirectMessages";
+import useHomeScreen from "../../hooks/useHome";
+import useDirectMessages, { DirectMessageUser } from "../../hooks/useDirectMessages";
 import { UUID } from "crypto";
 import { useAuth } from "../../context/AuthContext";
 
@@ -37,7 +35,7 @@ export default function Sidebar() {
 
     // Utiliser le hook useHomeScreen pour récupérer les workspaces
     const { state, filteredWorkspaces } = useHomeScreen();
-
+    
     // Utiliser le hook useDirectMessages pour récupérer les conversations privées
     const { state: dmState, refreshDirectMessages } = useDirectMessages();
 
@@ -109,8 +107,6 @@ export default function Sidebar() {
                             id = String(workspace.uuid);
                         } else if (workspace.workspaceId) {
                             id = String(workspace.workspaceId);
-                        } else if (workspace.id) {
-                            id = String(workspace.id);
                         }
 
                         // Vérifier que l'ID est défini avant de l'utiliser
@@ -175,14 +171,14 @@ export default function Sidebar() {
             collapseSidebar();
         }
     };
-
+    
     // Handle direct message selection
     const handleDirectMessageSelect = (userId: UUID) => {
         // Rediriger vers la page de conversation privée
         // Utiliser un chemin existant pour le moment, nous créerons la page de messages directs plus tard
         router.push({
-            pathname: "/screens/direct-messages",
-            params: { userId: userId.toString() },
+            pathname: "/screens/private_messages/[userId]",
+            params: { userId: userId },
         });
         // Optionally collapse sidebar after selection on mobile
         if (Dimensions.get("window").width < 768) {
@@ -312,9 +308,7 @@ export default function Sidebar() {
                         </View>
                     ) : dmState.error ? (
                         <View style={styles.errorContainer}>
-                            <Text style={styles.errorText}>
-                                {dmState.error}
-                            </Text>
+                            <Text style={styles.errorText}>{dmState.error}</Text>
                         </View>
                     ) : dmState.users.length === 0 ? (
                         <View style={styles.emptyContainer}>
@@ -325,11 +319,9 @@ export default function Sidebar() {
                     ) : (
                         dmState.users.map((user) => (
                             <TouchableOpacity
-                                key={user.uuid.toString()}
+                                key={user.uuid}
                                 style={styles.directMessageItem}
-                                onPress={() =>
-                                    handleDirectMessageSelect(user.uuid)
-                                }
+                                onPress={() => handleDirectMessageSelect(user.uuid)}
                             >
                                 <View style={styles.userAvatar}>
                                     <Text style={styles.avatarText}>
@@ -342,10 +334,7 @@ export default function Sidebar() {
                                             {user.username}
                                         </Text>
                                         {user.lastMessage && (
-                                            <Text
-                                                style={styles.lastMessage}
-                                                numberOfLines={1}
-                                            >
+                                            <Text style={styles.lastMessage} numberOfLines={1}>
                                                 {user.lastMessage}
                                             </Text>
                                         )}
@@ -542,13 +531,6 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontSize: 14,
         fontWeight: "bold",
-    },
-    userInfo: {
-        flex: 1,
-    },
-    userName: {
-        color: "#fff",
-        fontSize: 14,
     },
     userStatus: {
         flexDirection: "row",

@@ -21,7 +21,7 @@ import { HttpAuthGuard } from "../authentication/http.authentication.guard";
 export class WorkspacesController {
     constructor(private readonly workspacesService: WorkspacesService) {}
 
-    // Retire les gardes HttpAuthGuard et AuthorizationGuard
+
     @Get()
     async findAll() {
         const result = await this.workspacesService.findAll();

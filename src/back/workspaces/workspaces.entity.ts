@@ -13,6 +13,7 @@ import { WorkspaceMember } from "./members/workspace_members.entity";
 import { User } from "../users/users.entity";
 import { Transform } from "class-transformer";
 import { Expose } from "class-transformer";
+import { Notification } from "../notifications/notification.entity";
 import { ApiProperty, ApiSchema } from "@nestjs/swagger";
 import { OmitType } from "@nestjs/mapped-types";
 
@@ -72,4 +73,8 @@ export class Workspace {
     @Transform(({ value }) => null)
     @OneToMany(() => WorkspaceMember, (member) => member.workspace)
     members: Promise<WorkspaceMember[]>;
+
+    @Transform(({ value }) => null)
+    @OneToMany(() => Notification, (notification) => notification.workspace)
+    notifications: Promise<Notification[]>;
 }

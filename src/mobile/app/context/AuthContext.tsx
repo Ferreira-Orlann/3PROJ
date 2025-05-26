@@ -50,12 +50,26 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
             console.log("Stored user:", storedUser);
 
             if (storedToken && storedUser) {
+                // Configurer le client API avec le token
+                apiClient.defaults.headers.common["Authorization"] = `Bearer ${storedToken}`;
+                
+                // Mettre à jour l'état
                 setToken(storedToken);
                 setUser(JSON.parse(storedUser));
-                router.replace("/screens/homeScreen");
+                
+                // Ne pas rediriger automatiquement si l'utilisateur est déjà sur une page protégée
+                const currentPath = window.location.pathname;
+                if (currentPath === "/" || currentPath.includes("/auth/")) {
+                    router.replace("/screens/homeScreen");
+                }
             }
         } catch (error) {
             console.error("Error restoring token:", error);
+            // En cas d'erreur, effacer les données de session pour éviter des problèmes
+            await AsyncStorage.removeItem("userToken");
+            await AsyncStorage.removeItem("userData");
+            setToken(null);
+            setUser(null);
         } finally {
             setIsLoading(false);
         }
@@ -111,6 +125,9 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
                             | "offline") || "online",
                 };
 
+                // Configurer le client API avec le token
+                apiClient.defaults.headers.common["Authorization"] = `Bearer ${authToken}`;
+                
                 // Stocker les données de session
                 await AsyncStorage.setItem("userToken", authToken);
                 await AsyncStorage.setItem(
@@ -137,7 +154,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
             setIsLoading(false);
         }
     };
-    console.log("useDirectMessage - Utilisateur courant (de useAuth):", user);
+    // Supprimer le log de debug qui pollue la console
 
     const register = async (
         username: string,

@@ -12,25 +12,60 @@ enum Events {
     REACTION_CREATED = "reaction.created",
     REACTION_UPDATED = "reaction.updated",
     REACTION_REMOVED = "reaction.removed",
+    NOTIFICATION_CREATED = "notification.created",
+    NOTIFICATION_READ = "notification.read",
+    WORKSPACE_MEMBER_ADDED = "workspace_member.added",
+    WORKSPACE_MEMBER_REMOVED = "workspace_member.removed",
+    WORKSPACE_CREATED = "workspace_added",
+    WORKSPACE_UPDATED = "workspace_updated",
+    WORKSPACE_REMOVED = "workspace_removed",
+    CHANNEL_CREATED = "channel_added",
+    CHANNEL_REMOVED = "channel_removed",
 }
 
 // Mapping des événements backend vers les événements mobile
-const EVENT_MAPPING: { [key: string]: string } = {
-    // Backend events -> Mobile events
+// Mapping des événements backend vers les événements mobile (direction backend -> mobile)
+const BACKEND_TO_MOBILE_EVENTS: { [key: string]: string } = {
     [Events.MESSAGE_CREATED]: "message_sent",
     [Events.MESSAGE_UPDATED]: "message_updated",
     [Events.MESSAGE_REMOVED]: "message_removed",
     [Events.REACTION_CREATED]: "reaction_added",
     [Events.REACTION_UPDATED]: "reaction_updated",
     [Events.REACTION_REMOVED]: "reaction_removed",
+    [Events.NOTIFICATION_CREATED]: "notification_received",
+    [Events.NOTIFICATION_READ]: "notification_read",
+    [Events.WORKSPACE_MEMBER_ADDED]: "workspace_member_added",
+    [Events.WORKSPACE_MEMBER_REMOVED]: "workspace_member_removed",
+    [Events.WORKSPACE_CREATED]: "workspace_created",
+    [Events.WORKSPACE_UPDATED]: "workspace_updated",
+    [Events.WORKSPACE_REMOVED]: "workspace_removed",
+    [Events.CHANNEL_CREATED]: "channel_created",
+    [Events.CHANNEL_REMOVED]: "channel_removed",
+};
 
-    // Mobile events -> Backend events (inverse mapping)
-    message_sent: Events.MESSAGE_CREATED,
-    message_updated: Events.MESSAGE_UPDATED,
-    message_removed: Events.MESSAGE_REMOVED,
-    reaction_added: Events.REACTION_CREATED,
-    reaction_updated: Events.REACTION_UPDATED,
-    reaction_removed: Events.REACTION_REMOVED,
+// Mapping des événements mobile vers les événements backend (direction mobile -> backend)
+const MOBILE_TO_BACKEND_EVENTS: { [key: string]: string } = {
+    "message_sent": Events.MESSAGE_CREATED,
+    "message_updated": Events.MESSAGE_UPDATED,
+    "message_removed": Events.MESSAGE_REMOVED,
+    "reaction_added": Events.REACTION_CREATED,
+    "reaction_updated": Events.REACTION_UPDATED,
+    "reaction_removed": Events.REACTION_REMOVED,
+    "notification_received": Events.NOTIFICATION_CREATED,
+    "notification_read": Events.NOTIFICATION_READ,
+    "workspace_member_added": Events.WORKSPACE_MEMBER_ADDED,
+    "workspace_member_removed": Events.WORKSPACE_MEMBER_REMOVED,
+    "workspace_created": Events.WORKSPACE_CREATED,
+    "workspace_updated": Events.WORKSPACE_UPDATED,
+    "workspace_removed": Events.WORKSPACE_REMOVED,
+    "channel_created": Events.CHANNEL_CREATED,
+    "channel_removed": Events.CHANNEL_REMOVED,
+};
+
+// Mapping combiné pour la compatibilité avec le code existant
+const EVENT_MAPPING: { [key: string]: string } = {
+    ...BACKEND_TO_MOBILE_EVENTS,
+    ...MOBILE_TO_BACKEND_EVENTS
 };
 
 type EventCallback = (data: any) => void;
@@ -51,6 +86,42 @@ class WebSocketService {
      */
     isConnected(): boolean {
         return this.socket !== null && this.socket.connected;
+    }
+    
+    /**
+     * Récupère l'instance Socket.IO
+     */
+    getSocket(): Socket | null {
+        return this.socket;
+    }
+    
+    /**
+     * Envoie un événement via le WebSocket
+     */
+    sendEvent(socket: Socket, event: string, payload: any): void {
+        if (!socket) {
+            console.warn("WebSocket - Impossible d'envoyer un événement: socket non disponible");
+            return;
+        }
+
+        // Utiliser le bon événement en fonction du type d'événement
+        let eventName = event;
+        
+        // Convertir l'événement si nécessaire
+        if (BACKEND_TO_MOBILE_EVENTS[event]) {
+            eventName = BACKEND_TO_MOBILE_EVENTS[event];
+        }
+
+        console.log(`WebSocket - Envoi de l'événement ${eventName}:`, {
+            event: event,
+            eventName: eventName,
+            payloadType: payload ? typeof payload : "null",
+        });
+
+        socket.emit(eventName, {
+            message: event,
+            data: payload,
+        });
     }
 
     /**
@@ -196,6 +267,44 @@ class WebSocketService {
             this.socket.on("reaction_removed", (data) => {
                 console.log("WebSocket - Réaction supprimée reçue:", data);
                 this.handleEvent("reaction_removed", data);
+            });
+            
+            // Écouter les événements de notification
+            this.socket.on("notification", (data) => {
+                console.log("WebSocket - Notification reçue:", data);
+                this.handleEvent("notification_received", data);
+            });
+            
+            this.socket.on("notification.created", (data) => {
+                console.log("WebSocket - Nouvelle notification créée:", data);
+                this.handleEvent("notification_received", data);
+            });
+            
+            this.socket.on("notification.read", (data) => {
+                console.log("WebSocket - Notification lue:", data);
+                this.handleEvent("notification_read", data);
+            });
+            
+            // Écouter les événements de workspace
+            this.socket.on("workspace_member.added", (data) => {
+                console.log("WebSocket - Membre ajouté à l'espace de travail:", data);
+                this.handleEvent("workspace_member_added", data);
+            });
+            
+            this.socket.on("workspace_member.removed", (data) => {
+                console.log("WebSocket - Membre retiré de l'espace de travail:", data);
+                this.handleEvent("workspace_member_removed", data);
+            });
+            
+            // Écouter les événements de channel
+            this.socket.on("channel_added", (data) => {
+                console.log("WebSocket - Canal ajouté:", data);
+                this.handleEvent("channel_created", data);
+            });
+            
+            this.socket.on("channel_removed", (data) => {
+                console.log("WebSocket - Canal supprimé:", data);
+                this.handleEvent("channel_removed", data);
             });
         });
     }

@@ -114,11 +114,29 @@ export class WebSocketPool implements OnGatewayConnection, OnGatewayDisconnect {
         } else if (event === Events.MESSAGE_REMOVED) {
             eventName = "message_removed";
         } else if (event === Events.REACTION_CREATED) {
-            eventName = "reaction";
+            eventName = "reaction_received";
         } else if (event === Events.REACTION_UPDATED) {
             eventName = "reaction_updated";
         } else if (event === Events.REACTION_REMOVED) {
             eventName = "reaction_removed";
+        } else if (event === Events.WORKSPACE_MEMBER_ADDED) {
+            eventName = "workspace_member.added";
+        } else if (event === Events.WORKSPACE_MEMBER_REMOVED) {
+            eventName = "workspace_member.removed";
+        } else if (event === Events.WORKSPACE_CREATED) {
+            eventName = "workspace_added";
+        } else if (event === Events.WORKSPACE_UPDATED) {
+            eventName = "workspace_updated";
+        } else if (event === Events.WORKSPACE_REMOVED) {
+            eventName = "workspace_removed";
+        } else if (event === Events.CHANNEL_CREATED) {
+            eventName = "channel_reaction";
+        } else if (event === Events.CHANNEL_REMOVED) {
+            eventName = "channel_reaction";
+        } else if (event === Events.NOTIFICATION_CREATED) {
+            eventName = "notification";
+        } else if (event === Events.NOTIFICATION_READ) {
+            eventName = "notification_updated";
         }
 
         console.log(`Sending ${eventName} event to socket:`, {
