@@ -1,267 +1,301 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import styles from "../styles/workspaceDetailPage.module.css";
-import authService from "../services/auth.service";
 import Member from "../components/workspaces/Member";
 import { channelService } from "../services/channel.service";
 import { Workspace } from "../types/workspace";
 import workspacesService from "../services/workspaces.service";
+import {useRenameWorkspace} from "../hooks/useRenameWorkspace";
 import { UUID } from "crypto";
 import { useWorkspaceMembers } from "../hooks/useWorkspaceMembers";
-import { useAddWorkspaceMember } from "../hooks/useAddWorkspaceMember";
-import { useDeleteWorkspace } from "../hooks/useDeleteWorkspace";
-
-
+import { AddMemberForm } from "../components/workspaces/addMembre";
 
 const WorkspaceDetailPage = () => {
-    const { uuid } = useParams();
-    const location = useLocation();
-    const navigate = useNavigate();
+  const { uuid } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
 
-    const [workspace, setWorkspace] = useState<Workspace | null>(location.state || null);
-    const [newName, setNewName] = useState(workspace?.name || "");
-    const [message, setMessage] = useState("");
-    const [isDeleting, setIsDeleting] = useState(false);
-    const [editing, setEditing] = useState(false);
-    const [activeTab, setActiveTab] = useState<"members" | "channels" | "settings">("members");
+  const [workspace, setWorkspace] = useState<Workspace | null>(location.state || null);
+  const [message, setMessage] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [activeTab, setActiveTab] = useState<"members" | "channels" | "settings">("members");
 
-    const { members, loading, error } = useWorkspaceMembers(uuid!);
-    const [channels, setChannels] = useState<{ uuid: string; name: string }[]>([]);
-    const [newChannelName, setNewChannelName] = useState("");
+  const { members, loading, error } = useWorkspaceMembers(uuid!);
+  const [channels, setChannels] = useState<{ uuid: string; name: string }[]>([]);
+  const [newChannelName, setNewChannelName] = useState("");
 
-    // Charger le workspace si non fourni
-    useEffect(() => {
-        if (!workspace) {
-            workspacesService.getByUUID(uuid as UUID)
-                .then(ws => {
-                    setWorkspace(ws);
-                    setNewName(ws.name);
-                })
-                .catch(() => {
-                    setMessage("Erreur lors du chargement du workspace");
-                });
-        }
-    }, [uuid, workspace]);
+  // Pour renommage dans paramètres
+  const [editName, setEditName] = useState("");
+  const [isEditingName, setIsEditingName] = useState(false);
 
-    // Charger les canaux si l'onglet "channels" est actif
-    useEffect(() => {
-        if (activeTab === "channels") {
-            channelService.getAllFiltered(uuid!)
-                .then(setChannels)
-                .catch((err) => {
-                    console.error("Erreur fetch channels:", err);
-                    setMessage(err.message || "Erreur lors du chargement des canaux");
-                });
-        }
-    }, [activeTab, uuid]);
-    
+  // Charger le workspace si non fourni via la navigation
+  useEffect(() => {
+    if (!workspace && uuid) {
+      workspacesService.getByUUID(uuid as UUID)
+        .then(ws => {
+          setWorkspace(ws);
+          setEditName(ws.name);
+        })
+        .catch(() => {
+          setMessage("Erreur lors du chargement du workspace");
+        });
+    } else if (workspace) {
+      setEditName(workspace.name);
+    }
+  }, [uuid, workspace]);
 
-    useEffect(() => {
-        setMessage("");
-    }, [activeTab]);
+  // Charger les canaux quand l’onglet "channels" est actif
+  useEffect(() => {
+    if (activeTab === "channels" && uuid) {
+      channelService.getAllFiltered(uuid)
+        .then(setChannels)
+        .catch((err) => {
+          console.error("Erreur fetch channels:", err);
+          setMessage(err.message || "Erreur lors du chargement des canaux");
+        });
+    }
+  }, [activeTab, uuid]);
 
-    const handleRename = async () => {
-        if (!workspace || newName === workspace.name) {
-            setEditing(false);
-            return;
-        }
+  useEffect(() => {
+    setMessage("");
+  }, [activeTab]);
 
-        try {
-            await workspacesService.update({ uuid: workspace.uuid, name: newName });
-            setWorkspace({ ...workspace, name: newName });
-            setMessage("Nom mis à jour !");
-        } catch (error) {
-            setMessage(error instanceof Error ? error.message : "Erreur inconnue");
-        } finally {
-            setEditing(false);
-        }
-    };
 
-    const handleDelete = async () => {
-        if (!workspace || !window.confirm("Confirmer la suppression ?")) return;
-        setIsDeleting(true);
-        setMessage("");
+  const { rename} = useRenameWorkspace();
 
-        try {
-            await workspacesService.delete(workspace);
-            setMessage("Workspace supprimé !");
-            setTimeout(() => navigate("/workspaces"), 1000);
-        } catch (error) {
-            setMessage(error instanceof Error ? error.message : "Erreur inconnue");
-        } finally {
-            setIsDeleting(false);
-        }
-    };
+  // Fonction pour renommer le workspace
+  const handleRename = async () => {
+    if (!workspace) return;
 
-    const handleCreateChannel = async () => {
-        if (!uuid || !newChannelName.trim()) return;
-        console.log("Création canal pour workspace UUID:", uuid);
-    
-        try {
-            const newChannel = await channelService.create(uuid, newChannelName.trim());
-            setChannels([...channels, newChannel]);
-            setMessage("Canal créé avec succès !");
-            setNewChannelName("");
-        } catch (error: any) {
-            setMessage(error.message || "Erreur lors de la création du canal");
-        }
-    };
-    
-    
-    
-    return (
-        <>
-            <div className={styles.headerBar}>
-                <div className={styles.leftSection}>
-                    <div className={styles.logo}>
-                        <span>{workspace?.name?.charAt(0).toUpperCase() || "?"}</span>
-                    </div>
+    const trimmedName = editName.trim();
+    if (trimmedName === "") {
+      setMessage("Le nom ne peut pas être vide.");
+      return;
+    }
 
-                    <div className={styles.nameContainer}>
-                        {editing ? (
-                            <input
-                                className={styles.nameInput}
-                                value={newName}
-                                onChange={(e) => setNewName(e.target.value)}
-                                onBlur={handleRename}
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter") handleRename();
-                                    if (e.key === "Escape") setEditing(false);
-                                }}
-                                autoFocus
-                            />
-                        ) : (
-                            <span className={styles.name} onClick={() => setEditing(true)}>
-                                {newName}
-                            </span>
-                        )}
-                        <span className={styles.uuid}>UUID: {workspace?.uuid || uuid}</span>
-                    </div>
+    if (trimmedName === workspace.name) {
+      setIsEditingName(false);
+      return;
+    }
 
-                    <div className={styles.tabBar}>
-                        <button
-                            className={`${styles.tabButton} ${activeTab === "channels" ? styles.active : ""}`}
-                            onClick={() => setActiveTab("channels")}
-                        >
-                            Canaux
-                        </button>
-                        <button
-                            className={`${styles.tabButton} ${activeTab === "members" ? styles.active : ""}`}
-                            onClick={() => setActiveTab("members")}
-                        >
-                            Membres
-                        </button>
-                        <button
-                            className={`${styles.tabButton} ${activeTab === "settings" ? styles.active : ""}`}
-                            onClick={() => setActiveTab("settings")}
-                        >
-                            Paramètres
-                        </button>
-                    </div>
-                </div>
+    try {
+       rename(  workspace.uuid,  trimmedName );
+      setWorkspace({ ...workspace, name: trimmedName });
+      setMessage("Nom mis à jour !");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Erreur inconnue");
+    } finally {
+      setIsEditingName(false);
+    }
+  };
 
-                <div className={styles.actions}>
-                    <button
-                        className={styles.deleteBtn}
-                        onClick={handleDelete}
-                        disabled={isDeleting}
-                    >
-                        {isDeleting ? "Suppression..." : "Supprimer"}
-                    </button>
-                </div>
-            </div>
+  // Suppression du workspace
+  const handleDelete = async () => {
+    if (!workspace || !window.confirm("Confirmer la suppression ?")) return;
+    setIsDeleting(true);
+    setMessage("");
 
-            {message && <p className={styles.message}>{message}</p>}
+    try {
+      await workspacesService.delete(workspace);
+      setMessage("Workspace supprimé !");
+      setTimeout(() => navigate("/workspaces"), 1000);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Erreur inconnue");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
-            <div className={styles.tabContent}>
-                {activeTab === "members" && (
-                    <div>
-                        <h2>Membres du workspace</h2>
-                        {loading && <p>Chargement des membres...</p>}
-                        {error && <p>Erreur : {error}</p>}
-                        {!loading && !error && (
-                            <>
-                                {members.length === 0 ? (
-                                    <p>Aucun membre trouvé.</p>
-                                ) : (
-                                    members.map((member) => (
-                                        <Member
-                                            key={member.uuid}
-                                            name={member.user?.username || "Utilisateur inconnu"}
-                                        />
-                                    ))
-                                )}
-                            </>
-                        )}
-                    </div>
-                    
-                )}
+  // Création d’un nouveau canal
+  const handleCreateChannel = async () => {
+    if (!uuid || !newChannelName.trim()) return;
 
-                {activeTab === "channels" && (
-                    <div>
-                        <h2>Canaux</h2>
-                        <div className={styles.channelList}>
-                            {channels.map((channel) => (
-                                <div
-                                    key={channel.uuid}
-                                    className={styles.channelCard}
-                                    onClick={() => navigate(`/workspace/${uuid}/channel/${channel.uuid}`)}
-                                >
-                                    <h3>{channel.name}</h3>
-                                    <p>UUID: {channel.uuid}</p>
-                                </div>
-                            ))}
-                        </div>
+    try {
+      const newChannel = await channelService.create(uuid, newChannelName.trim());
+      setChannels([...channels, newChannel]);
+      setMessage("Canal créé avec succès !");
+      setNewChannelName("");
+    } catch (error: any) {
+      setMessage(error.message || "Erreur lors de la création du canal");
+    }
+  };
 
-                        <h3>Créer un canal</h3>
-                        <form
-                            onSubmit={(e) => {
-                                e.preventDefault();
-                                handleCreateChannel();
-                            }}
-                        >
-                            <input
-                                type="text"
-                                name="channelName"
-                                placeholder="Nom du canal"
-                                value={newChannelName}
-                                onChange={(e) => setNewChannelName(e.target.value)}
-                                required
-                            />
-                            <button type="submit">Créer</button>
-                        </form>
-                    </div>
-                )}
+  return (
+    <>
+      <div className={styles.headerBar}>
+        <div className={styles.leftSection}>
+          <div className={styles.logo}>
+            <span>{workspace?.name?.charAt(0).toUpperCase() || "?"}</span>
+          </div>
 
-{activeTab === "settings" && workspace && (
-    <div className={styles.settingsTab}>
-        <h2>Paramètres du workspace</h2>
+          <div className={styles.nameContainer}>
+            <span className={styles.name}>
+              {workspace?.name || "Chargement..."}
+            </span>
+            <span className={styles.uuid}>UUID: {workspace?.uuid || uuid}</span>
+          </div>
 
-        <p>
-            <strong>Nom :</strong> {workspace.name}
-        </p>
-        <p>
-            <strong>UUID :</strong> {workspace.uuid}
-        </p>
+          <div className={styles.tabBar}>
+            <button
+              className={`${styles.tabButton} ${activeTab === "channels" ? styles.active : ""}`}
+              onClick={() => setActiveTab("channels")}
+            >
+              Canaux
+            </button>
+            <button
+              className={`${styles.tabButton} ${activeTab === "members" ? styles.active : ""}`}
+              onClick={() => setActiveTab("members")}
+            >
+              Membres
+            </button>
+            <button
+              className={`${styles.tabButton} ${activeTab === "settings" ? styles.active : ""}`}
+              onClick={() => setActiveTab("settings")}
+            >
+              Paramètres
+            </button>
+          </div>
+        </div>
 
-        <hr style={{ margin: "1rem 0" }} />
-
-        <h3 style={{ color: "red" }}>Danger Zone</h3>
-        <p>La suppression du workspace est irréversible. Tous les canaux et données associées seront perdus.</p>
-
-        <button
+        <div className={styles.actions}>
+          <button
             className={styles.deleteBtn}
             onClick={handleDelete}
             disabled={isDeleting}
-        >
-            {isDeleting ? "Suppression en cours..." : "Supprimer le workspace"}
-        </button>
-    </div>
-)}
+          >
+            {isDeleting ? "Suppression..." : "Supprimer"}
+          </button>
+        </div>
+      </div>
 
+      {message && <p className={styles.message}>{message}</p>}
+
+      <div className={styles.tabContent}>
+        {activeTab === "members" && (
+          <div>
+            <h2>Membres du workspace</h2>
+            {loading && <p>Chargement des membres...</p>}
+            {error && <p>Erreur : {error}</p>}
+            {!loading && !error && (
+              <>
+                {members.length === 0 ? (
+                  <p>Aucun membre trouvé.</p>
+                ) : (
+                  members.map((member) => (
+                    <Member
+                      key={member.uuid}
+                      name={member.user?.username || "Utilisateur inconnu"}
+                    />
+                  ))
+                )}
+              </>
+            )}
+          </div>
+        )}
+
+        {activeTab === "channels" && (
+          <div>
+            <h2>Canaux</h2>
+            <div className={styles.channelList}>
+              {channels.map((channel) => (
+                <div
+                  key={channel.uuid}
+                  className={styles.channelCard}
+                  onClick={() => navigate(`/workspace/${uuid}/channel/${channel.uuid}`)}
+                >
+                  <h3>{channel.name}</h3>
+                  <p>UUID: {channel.uuid}</p>
+                </div>
+              ))}
             </div>
-        </>
-    );
+
+            <h3>Créer un canal</h3>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleCreateChannel();
+              }}
+            >
+              <input
+                type="text"
+                name="channelName"
+                placeholder="Nom du canal"
+                value={newChannelName}
+                onChange={(e) => setNewChannelName(e.target.value)}
+                required
+              />
+              <button type="submit">Créer</button>
+            </form>
+          </div>
+        )}
+
+        {activeTab === "settings" && workspace && (
+          <div className={styles.settingsTab}>
+            <h2>Paramètres du workspace</h2>
+
+                <AddMemberForm workspaceId={workspace.uuid} />
+
+
+            {/* Renommage */}
+            <div>
+              <label htmlFor="renameInput"><strong>Renommer le workspace :</strong></label>
+              {isEditingName ? (
+                <>
+                  <input
+                    id="renameInput"
+                    type="text"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleRename();
+                      if (e.key === "Escape") {
+                        setEditName(workspace.name);
+                        setIsEditingName(false);
+                        setMessage("");
+                      }
+                    }}
+                    autoFocus
+                  />
+                  <button
+                    onClick={handleRename}
+                    disabled={editName.trim() === "" || editName === workspace.name}
+                  >
+                    Valider
+                  </button>
+                  <button
+                    onClick={() => {
+                      setEditName(workspace.name);
+                      setIsEditingName(false);
+                      setMessage("");
+                    }}
+                  >
+                    Annuler
+                  </button>
+                </>
+              ) : (
+                <button onClick={() => setIsEditingName(true)}>
+                  Modifier le nom
+                </button>
+              )}
+            </div>
+
+            <hr style={{ margin: "1rem 0" }} />
+
+            <h3 style={{ color: "red" }}>Danger Zone</h3>
+            <p>La suppression du workspace est irréversible. Tous les canaux et données associées seront perdus.</p>
+
+            <button
+              className={styles.deleteBtn}
+              onClick={handleDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Suppression en cours..." : "Supprimer le workspace"}
+            </button>
+          </div>
+        )}
+      </div>
+    </>
+  );
 };
 
 export default WorkspaceDetailPage;

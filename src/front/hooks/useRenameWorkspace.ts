@@ -1,23 +1,21 @@
 import { useState } from "react";
-import workspaceService from "../services/parametreWorkspacesService";
+import { renameWorkspace } from "../services/renameWorkspace";
 
-export function useUpdateWorkspaceName() {
-  const [isLoading, setIsLoading] = useState(false);
+export  const useRenameWorkspace = () => {
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const updateName = async (token: string, workspaceId: string, name: string) => {
-    setIsLoading(true);
-    setError(null);
+  const rename = async (id: string, newName: string) => {
     try {
-      const updatedWorkspace = await workspaceService.updateName(token, workspaceId, name);
-      setIsLoading(false);
-      return updatedWorkspace;
+      const updated = await renameWorkspace(id, newName);
+      return updated;
     } catch (err: any) {
-      setError(err.message || "Erreur inconnue");
-      setIsLoading(false);
+      setError(err.message);
       throw err;
+    } finally {
+      setLoading(false);
     }
   };
 
-  return { updateName, isLoading, error };
-}
+  return { rename, loading, error };
+};
