@@ -5,7 +5,7 @@ import {
     Navigate,
 } from "react-router-dom";
 import HomePage from "../front/Pages/index";
-import NotificationsPage from "../front/Pages/notifications";
+import NotificationsPage from "../front/Pages/NotificationsPage";
 import WorkspacesPage from "./Pages/Workspaces";
 import WorkspaceDetailPage from "./Pages/WorkspaceDetailPage";
 import { AuthProvider } from "./context/AuthContext";
@@ -24,6 +24,8 @@ const App = () => {
                     <Route path="/workspaces" element={<WorkspacesPage />} />
                     <Route path="/workspace/:uuid" element={<WorkspaceDetailPage />} />
                     <Route path="/workspace/:uuid/channel/:channelId" element={<ChannelPage />} />
+                    <Route path="/notifications" element={<NotificationsPage />} />
+
                     {/* Ajoute d'autres routes ici */}
                 </Routes>
             </AuthProvider>
