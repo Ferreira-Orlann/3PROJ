@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import styles from "../styles/workspacesPage.module.css";
 import CreateWorkspaceModal from "../components/workspaces/CreateWorkspaceModal";
 import workspaceService from "../services/workspaces.service"; // ← bon service
+import {workspaceMembersService} from "../services/workspaceMembers.service"; // ← service pour les membres
 
 const WorkspacesPage = () => {
   const [showModal, setShowModal] = useState(false);
@@ -11,7 +12,10 @@ const WorkspacesPage = () => {
   const navigate = useNavigate();
 
   const fetchWorkspaces = async () => {
+    
     try {
+      const member = workspaceMembersService.getAll("9287b2db-d596-4938-a4c6-10031ad3c327");
+      
       const data = await workspaceService.getAll();
       setWorkspaces(data);
     } catch (err: any) {

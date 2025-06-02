@@ -185,6 +185,7 @@ const WorkspaceDetailPage = () => {
                     <Member
                       key={member.uuid}
                       name={member.user?.username || "Utilisateur inconnu"}
+                      uuid={member.uuid}
                     />
                   ))
                 )}
