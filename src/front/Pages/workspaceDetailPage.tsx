@@ -230,70 +230,83 @@ const WorkspaceDetailPage = () => {
           </div>
         )}
 
-        {activeTab === "settings" && workspace && (
-          <div className={styles.settingsTab}>
-            <h2>Paramètres du workspace</h2>
+{activeTab === "settings" && workspace && (
+  <div className={styles.settingsTab}>
+    <h2 className={styles.sectionTitle}>Paramètres du workspace</h2>
 
-                <AddMemberForm workspaceId={workspace.uuid} />
+    {/* Ajout de membres */}
+    <section className={styles.section}>
+      <h3 className={styles.subTitle}>Ajouter un membre</h3>
+      <AddMemberForm workspaceId={workspace.uuid} />
+    </section>
 
-
-            {/* Renommage */}
-            <div>
-              <label htmlFor="renameInput"><strong>Renommer le workspace :</strong></label>
-              {isEditingName ? (
-                <>
-                  <input
-                    id="renameInput"
-                    type="text"
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") handleRename();
-                      if (e.key === "Escape") {
-                        setEditName(workspace.name);
-                        setIsEditingName(false);
-                        setMessage("");
-                      }
-                    }}
-                    autoFocus
-                  />
-                  <button
-                    onClick={handleRename}
-                    disabled={editName.trim() === "" || editName === workspace.name}
-                  >
-                    Valider
-                  </button>
-                  <button
-                    onClick={() => {
-                      setEditName(workspace.name);
-                      setIsEditingName(false);
-                      setMessage("");
-                    }}
-                  >
-                    Annuler
-                  </button>
-                </>
-              ) : (
-                <button onClick={() => setIsEditingName(true)}>
-                  Modifier le nom
-                </button>
-              )}
-            </div>
-
-            <hr style={{ margin: "1rem 0" }} />
-
-            <h3 style={{ color: "red" }}>Danger Zone</h3>
-            <p>La suppression du workspace est irréversible. Tous les canaux et données associées seront perdus.</p>
-
+    {/* Renommage */}
+    <section className={styles.section}>
+      <h3 className={styles.subTitle}>Renommer le workspace</h3>
+      {isEditingName ? (
+        <div className={styles.renameForm}>
+          <input
+            id="renameInput"
+            type="text"
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleRename();
+              if (e.key === "Escape") {
+                setEditName(workspace.name);
+                setIsEditingName(false);
+                setMessage("");
+              }
+            }}
+            autoFocus
+            className={styles.input}
+          />
+          <div className={styles.buttonGroup}>
             <button
-              className={styles.deleteBtn}
-              onClick={handleDelete}
-              disabled={isDeleting}
+              className={styles.primaryBtn}
+              onClick={handleRename}
+              disabled={editName.trim() === "" || editName === workspace.name}
             >
-              {isDeleting ? "Suppression en cours..." : "Supprimer le workspace"}
+              Valider
+            </button>
+            <button
+              className={styles.secondaryBtn}
+              onClick={() => {
+                setEditName(workspace.name);
+                setIsEditingName(false);
+                setMessage("");
+              }}
+            >
+              Annuler
             </button>
           </div>
-        )}
+        </div>
+      ) : (
+        <button
+          className={styles.primaryBtn}
+          onClick={() => setIsEditingName(true)}
+        >
+          Modifier le nom
+        </button>
+      )}
+    </section>
+
+    <hr className={styles.divider} />
+
+    {/* Danger Zone */}
+    <section className={styles.dangerZone}>
+      <h3>Danger Zone</h3>
+      <p>La suppression du workspace est <strong>irréversible</strong>. Tous les canaux et données associées seront perdus.</p>
+      <button
+        className={styles.deleteBtn}
+        onClick={handleDelete}
+        disabled={isDeleting}
+      >
+        {isDeleting ? "Suppression en cours..." : "Supprimer le workspace"}
+      </button>
+    </section>
+  </div>
+)}
       </div>
     </>
   );

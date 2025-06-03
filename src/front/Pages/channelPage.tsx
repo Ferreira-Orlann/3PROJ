@@ -3,10 +3,14 @@ import { useParams } from "react-router-dom";
 import { useMessages } from "../hooks/useMessages";
 import MessageList from "../components/MessageList";
 import MessageInput from "../components/MessageInput";
+import authService from "../services/auth.service";
 
 const ChannelPage = () => {
   const { uuid: workspaceUuid, channelId } = useParams();
   const { messages, loading, error, sendMessage } = useMessages(workspaceUuid!, channelId!);
+  const session = authService.getSession();
+  const userUuid = session?.owner;
+  console.log("User UUID channelpage:", userUuid);
 
   return (
     <div

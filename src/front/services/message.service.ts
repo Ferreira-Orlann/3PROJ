@@ -3,14 +3,22 @@ import authService from './auth.service';
 
 export const messageService = {
   sendMessage: async (workspaceUuid: string, channelUuid: string, content: string) => {
+  const session = authService.getSession();
+  console.log("Session récupérée :", session);
+
+
     const token = authService.getSession().token;
+    console.log("Session :", session);
+    const userUuid = session?.owner;
+    console.log("User UUID :", userUuid);
+
     const response = await fetch(`http://localhost:3000/workspaces/${workspaceUuid}/channels/${channelUuid}/messages`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ message: content }),
+      body: JSON.stringify({ message: content, source_uuid: userUuid }),
     });
 
     if (!response.ok) {
