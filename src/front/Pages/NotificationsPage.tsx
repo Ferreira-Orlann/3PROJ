@@ -8,6 +8,7 @@ const NotificationsPage = () => {
   if (!session) return <p>Utilisateur non connecté</p>;
 
   const userUuid = session.owner;
+  console.log("User UUID:", userUuid);
   const { notifications, loading, error, setNotifications } = useNotifications(userUuid);
 
   const handleDelete = async (notificationUuid: string) => {
