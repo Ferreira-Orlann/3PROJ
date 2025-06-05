@@ -24,6 +24,8 @@ const WorkspacesPage = () => {
     const allWorkspaces = await workspaceService.getAll();
 
     const filteredWorkspaces = [];
+    console.log("Workspaces récupérés:", filteredWorkspaces);
+
 
     for (const workspace of allWorkspaces) {
       try {
@@ -35,6 +37,7 @@ const WorkspacesPage = () => {
 
         if (isMember) {
           filteredWorkspaces.push(workspace);
+          console.log(workspace)
         }
       } catch (err) {
         console.warn(`Erreur pour les membres de ${workspace.name}`, err);
@@ -47,6 +50,7 @@ const WorkspacesPage = () => {
     console.error("Erreur lors de la récupération des workspaces:", err);
     setError(err.message || "Erreur inconnue");
   }
+
 };
 
 

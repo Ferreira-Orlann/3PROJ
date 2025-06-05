@@ -68,6 +68,7 @@ export class WorkspacesService {
             description: dto.description,
             owner_uuid: dto.owner_uuid,
             createdAt: dto.createdAt,
+            is_public: dto.is_public,
         });
         await this.workspaceMembersService.add(dto.owner_uuid, workspace.uuid, dto.owner_uuid);
         

@@ -19,26 +19,30 @@ const CreateWorkspaceModal = ({
 
     console.log("workspacesService dans le composant", workspacesService);
 
-    const handleCreate = async () => {
-        if (!name || !description) {
-            setError("Tous les champs sont requis.");
-            return;
-        }
+const handleCreate = async () => {
+    if (!name || !description) {
+        setError("Tous les champs sont requis.");
+        return;
+    }
 
-        try {
-            const data = workspacesService.create(
-                name,
-                description,
-                visibility == "public",
-            );
-            console.log("Workspace créé:", data);
+    const isPublic = visibility === "public"; // ✅ conversion claire et explicite
+    console.log("is_public envoyé au service:", isPublic); // ✅ log important ici
 
-            onWorkspaceCreated();
-            onClose();
-        } catch (err: any) {
-            setError(err.message || "Erreur inconnue");
-        }
-    };
+    try {
+        const data = await workspacesService.create(
+            name,
+            description,
+            isPublic, // ✅ valeur claire et vérifiée
+        );
+
+        console.log("Workspace créé:", data);
+
+        onWorkspaceCreated();
+        onClose();
+    } catch (err: any) {
+        setError(err.message || "Erreur inconnue");
+    }
+};
 
     return (
         <div className={styles.modalOverlay}>

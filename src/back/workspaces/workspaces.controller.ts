@@ -40,6 +40,7 @@ export class WorkspacesController {
 
     @Post()
     async create(@Req() request: any, @Body() dto: CreateWorkspaceDto) {
+        console.log("Creating workspace with DTO:", dto);
         const user = request.user;
  
         if (!user || !user.uuid) {
@@ -50,6 +51,7 @@ export class WorkspacesController {
             name: dto.name,
             description: dto.description,
             owner_uuid: user.uuid,
+            is_public: dto.is_public,
             createdAt: dto.createdAt ?? new Date(),
         });
  
