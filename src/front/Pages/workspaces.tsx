@@ -1,48 +1,16 @@
-// src/front/pages/WorkspacesPage.tsx
-
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Home, Bell, User, Settings } from "lucide-react";
 import styles from "../styles/workspacesPage.module.css";
 import CreateWorkspaceModal from "../components/workspaces/CreateWorkspaceModal";
+import authService from "../services/auth.service";
 
 const WorkspacesPage = () => {
     const [showModal, setShowModal] = useState(false);
+    const [workspaces, setWorkspaces] = useState([]);
+    const [error, setError] = useState("");
     const navigate = useNavigate();
-    const [workspaces, setWorkspaces] = useState([
-        {
-            id: "1",
-            name: "Marketing",
-            description: "Marketing team",
-            visibility: "Public",
-            icon: "M",
-            channels: ["Général", "Projets"],
-        },
-        {
-            id: "2",
-            name: "Développement",
-            description: "Dev team",
-            visibility: "Public",
-            icon: "D",
-            channels: ["Frontend", "Backend"],
-        },
-        {
-            id: "3",
-            name: "RH",
-            description: "Human resources",
-            visibility: "Privé",
-            icon: "R",
-            channels: ["Recrutement", "Paie"],
-        },
-        {
-            id: "4",
-            name: "Direction",
-            description: "Direction générale",
-            visibility: "Privé",
-            icon: "D",
-            channels: ["Stratégie"],
-        },
-    ]);
+
+    console.log("Session:", authService.getSession());
 
     const handleCreateWorkspace = (
         name: string,
@@ -58,76 +26,107 @@ const WorkspacesPage = () => {
             channels: [],
         };
         setWorkspaces([newWorkspace, ...workspaces]);
-    };
 
-    const goToWorkspace = (workspace: any) => {
-        navigate(`/workspace/${workspace.id}`, { state: workspace });
-    };
+        const fetchWorkspaces = async () => {
+            try {
+                const token = authService.getSession().token;
+                console.log("Token récupéré :", token);
 
-    return (
-        <div className={styles.container}>
-            {/* Sidebar */}
-            <aside className={styles.sidebar}>
-                <h2 className={styles.sidebarTitle}>ESPACES DE TRAVAIL</h2>
-                <div className={styles.workspaceList}>
-                    {workspaces.map((workspace) => (
-                        <div
-                            key={workspace.id}
-                            className={styles.workspaceItem}
-                            onClick={() => goToWorkspace(workspace)}
-                            style={{ cursor: "pointer" }}
-                        >
-                            <div className={styles.workspaceIcon}>
-                                {workspace.icon}
+                const response = await fetch(
+                    "http://localhost:3000/workspaces",
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    },
+                );
+
+                if (!response.ok) {
+                    throw new Error("Erreur lors du chargement des workspaces");
+                }
+
+                const data = await response.json();
+                console.log("Workspaces chargés :", data);
+                setWorkspaces(data);
+            } catch (err: any) {
+                setError(err.message || "Erreur inconnue");
+            }
+        };
+
+        useEffect(() => {
+            fetchWorkspaces();
+        }, []);
+
+        const goToWorkspace = (workspace: any) => {
+            navigate(`/workspace/${workspace.uuid}`, { state: workspace });
+        };
+
+        return (
+            <div className={styles.container}>
+                <aside className={styles.sidebar}>
+                    <h2 className={styles.sidebarTitle}>ESPACES DE TRAVAIL</h2>
+                    <div className={styles.workspaceList}>
+                        {workspaces.map((workspace: any) => (
+                            <div
+                                key={workspace.uuid}
+                                className={styles.workspaceItem}
+                                onClick={() => goToWorkspace(workspace)}
+                                style={{ cursor: "pointer" }}
+                            >
+                                <div className={styles.workspaceIcon}>
+                                    {workspace.name.charAt(0).toUpperCase()}
+                                </div>
+                                <div className={styles.workspaceInfo}>
+                                    <p>{workspace.name}</p>
+                                    <span>
+                                        {workspace.is_public
+                                            ? "Public"
+                                            : "Privé"}
+                                    </span>
+                                </div>
                             </div>
-                            <div className={styles.workspaceInfo}>
+                        ))}
+                    </div>
+                </aside>
+
+                <main className={styles.main}>
+                    <div className={styles.mainHeader}>
+                        <h1>Vos espaces de travail</h1>
+                        <button
+                            className={styles.createButton}
+                            onClick={() => setShowModal(true)}
+                        >
+                            Créer un espace de travail
+                        </button>
+                    </div>
+
+                    {error && <p className={styles.error}>{error}</p>}
+
+                    <div className={styles.workspaceCards}>
+                        {workspaces.map((workspace: any) => (
+                            <div
+                                key={workspace.uuid}
+                                className={styles.workspaceCard}
+                                onClick={() => goToWorkspace(workspace)}
+                            >
+                                <div className={styles.workspaceAvatar}>
+                                    {workspace.name.charAt(0).toUpperCase()}
+                                </div>
                                 <p>{workspace.name}</p>
-                                <span>{workspace.visibility}</span>
                             </div>
-                        </div>
-                    ))}
-                </div>
-                {/* autres sections */}
-            </aside>
+                        ))}
+                    </div>
+                </main>
 
-            {/* Main Content */}
-            <main className={styles.main}>
-                <div className={styles.mainHeader}>
-                    <h1>Vos espaces de travail</h1>
-                    <button
-                        className={styles.createButton}
-                        onClick={() => setShowModal(true)}
-                    >
-                        Créer un espace de travail
-                    </button>
-                </div>
-
-                {/* Liste cartes */}
-                <div className={styles.workspaceCards}>
-                    {workspaces.map((workspace) => (
-                        <div
-                            key={workspace.id}
-                            className={styles.workspaceCard}
-                            onClick={() => goToWorkspace(workspace)}
-                        >
-                            <div className={styles.workspaceAvatar}>
-                                {workspace.icon}
-                            </div>
-                            <p>{workspace.name}</p>
-                        </div>
-                    ))}
-                </div>
-            </main>
-
-            {/* Modal */}
-            {showModal && (
-                <CreateWorkspaceModal
-                    onClose={() => setShowModal(false)}
-                    onCreate={handleCreateWorkspace}
-                />
-            )}
-        </div>
-    );
+                {showModal && (
+                    <CreateWorkspaceModal
+                        onClose={() => setShowModal(false)}
+                        onWorkspaceCreated={fetchWorkspaces}
+                    />
+                )}
+            </div>
+        );
+    };
 };
 
 export default WorkspacesPage;

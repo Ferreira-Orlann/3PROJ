@@ -14,10 +14,14 @@ import { router } from "expo-router";
 
 // Importation des fichiers séparés
 import { Notification } from "../../services/notifications";
-import useNotifications from "../../hooks/notifications";
+import useNotificationsApi from "../../hooks/useNotifications";
+import useWebSocket from "../../hooks/useWebSocket";
 import { styles } from "../../styles/Notifications";
 
 export default function NotificationsScreen() {
+    // Utilisation du hook WebSocket pour la connexion en temps réel
+    const { socket } = useWebSocket();
+    
     // Utilisation du hook personnalisé pour la gestion des notifications
     const {
         notifications,
@@ -29,14 +33,27 @@ export default function NotificationsScreen() {
         markAsRead,
         markAllAsRead,
         getIcon,
-    } = useNotifications();
+        refreshNotifications
+    } = useNotificationsApi(socket);
+    
+    // Rafraîchir les notifications quand l'écran est affiché
+    React.useEffect(() => {
+        refreshNotifications();
+        
+        // Configurer un intervalle pour rafraîchir périodiquement les notifications
+        const refreshInterval = setInterval(() => {
+            refreshNotifications();
+        }, 5000); // Rafraîchir toutes les 5 secondes
+        
+        return () => clearInterval(refreshInterval);
+    }, [refreshNotifications]);
 
     const renderNotification = ({ item }: { item: Notification }) => (
         <TouchableOpacity
             style={[styles.notification, !item.read && styles.unread]}
             onPress={() => {
                 // Marquer la notification comme lue
-                markAsRead(item.id);
+                markAsRead(item.uuid);
 
                 // Naviguer vers la source de la notification
                 if (
@@ -45,7 +62,7 @@ export default function NotificationsScreen() {
                     item.channelId
                 ) {
                     router.push(
-                        `/workspace/${item.workspaceId}/channel/${item.channelId}`,
+                        `/screens/workspaces/${item.workspaceId}/channels/${item.channelId}`,
                     );
                 } else if (item.sourceType === "directMessage" && item.userId) {
                     router.push({
@@ -56,7 +73,7 @@ export default function NotificationsScreen() {
                     item.sourceType === "workspace" &&
                     item.workspaceId
                 ) {
-                    router.push(`/workspace/${item.workspaceId}`);
+                    router.push(`/screens/workspaces/${item.workspaceId}`);
                 }
             }}
         >
@@ -361,7 +378,7 @@ export default function NotificationsScreen() {
             <FlatList
                 data={notifications}
                 renderItem={renderNotification}
-                keyExtractor={(item) => item.id}
+                keyExtractor={(item) => item.uuid}
                 contentContainerStyle={styles.list}
                 getItemLayout={(data, index) => ({
                     length: 92, // height of notification item + marginBottom (82 + 10)

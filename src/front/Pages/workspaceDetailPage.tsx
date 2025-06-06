@@ -1,222 +1,129 @@
 // src/pages/WorkspaceDetailPage.tsx
 import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
-import { MessageSquare, Users, Settings as SettingsIcon } from "lucide-react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import styles from "../styles/workspaceDetailPage.module.css";
-import Channel from "../components/workspaces/Channel";
-import Member from "../components/workspaces/Member";
-import InviteMemberModal from "../components/workspaces/InviteMemberModal";
+import authService from "../services/auth.service";
 
 const WorkspaceDetailPage = () => {
-    const { state } = useLocation();
-    const workspace = state;
+    const { uuid } = useParams();
+    const location = useLocation();
+    const navigate = useNavigate();
+    const workspace = location.state;
 
-    const [activeTab, setActiveTab] = useState<"channels" | "members" | "settings">("channels");
-    const [activeChannel, setActiveChannel] = useState<string | null>(null);
-    const [messages, setMessages] = useState<{ [channel: string]: any[] }>({});
-    const [newMessage, setNewMessage] = useState<string>("");
-    const [file, setFile] = useState<File | null>(null);
-    const [showInviteModal, setShowInviteModal] = useState<boolean>(false);
-    const [currentMessageIndex, setCurrentMessageIndex] = useState<number | null>(null);
+    const [newName, setNewName] = useState(workspace?.name || "");
+    const [message, setMessage] = useState("");
+    const [isDeleting, setIsDeleting] = useState(false);
 
-    const handleChannelClick = (channel: string) => {
-        setActiveChannel(channel);
+    const token = authService.getSession().token;
+
+    const headers: any = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
     };
 
-    const handleSendMessage = () => {
-        if (!activeChannel || newMessage.trim() === "") return;
-
-        setMessages((prev) => ({
-            ...prev,
-            [activeChannel]: [
-                ...(prev[activeChannel] || []),
-                { text: newMessage, user: "Moi", reactions: [], type: "text" },
-            ],
-        }));
-        setNewMessage("");
-    };
-
-    const handleSendFile = () => {
-        if (!activeChannel || !file) return;
-
-        setMessages((prev) => ({
-            ...prev,
-            [activeChannel]: [
-                ...(prev[activeChannel] || []),
+    const handleRename = async () => {
+        try {
+            const response = await fetch(
+                `http://localhost:3000/workspaces/${uuid}`,
                 {
-                    text: `Fichier envoyé: ${file.name}`,
-                    user: "Moi",
-                    reactions: [],
-                    type: "file",
+                    method: "PUT",
+                    headers,
+                    body: JSON.stringify({ name: newName }),
                 },
-            ],
-        }));
+            );
 
-        setFile(null);
-    };
+            if (!response.ok) {
+                const error = await response.text();
+                throw new Error(error || "Échec du renommage");
+            }
 
-    const handleReactToMessage = (channel: string, index: number, reaction: string) => {
-        setMessages((prev) => {
-            const updated = [...(prev[channel] || [])];
-            const msg = updated[index];
-            msg.reactions = [...(msg.reactions || []), reaction];
-            return { ...prev, [channel]: updated };
-        });
-    };
-
-    const renderChannels = () => (
-        <div className={styles.sidebar}>
-            {workspace.channels.map((channel: string, index: number) => (
-                <div key={index} onClick={() => handleChannelClick(channel)} className={styles.channelItem}>
-                    <Channel name={channel} />
-                </div>
-            ))}
-        </div>
-    );
-
-    const renderChat = () => {
-        if (!activeChannel) {
-            return <div className={styles.chatPlaceholder}>Sélectionnez un canal pour discuter</div>;
+            setMessage("Nom mis à jour avec succès !");
+        } catch (error) {
+            setMessage(
+                error instanceof Error
+                    ? error.message
+                    : "Une erreur inconnue s'est produite.",
+            );
         }
-
-        const allMessages = [
-            { text: "Bonjour à tous!", user: "Alice", reactions: ["👍"], type: "text" },
-            { text: "Comment ça va ?", user: "Bob", reactions: ["❤️"], type: "text" },
-            { text: "Voici un fichier important.", user: "Moi", reactions: [], type: "file" },
-            ...(messages[activeChannel] || []),
-        ];
-
-        return (
-            <div className={styles.chatBox}>
-                <h3>Canal : {activeChannel}</h3>
-                <div className={styles.messagesContainer}>
-                    {allMessages.map((msg, index) => (
-                        <div
-                            key={index}
-                            className={styles.message}
-                            onMouseEnter={() => setCurrentMessageIndex(index)}
-                            onMouseLeave={() => setCurrentMessageIndex(null)}
-                        >
-                            <div>
-                                <strong>{msg.user}</strong>:{" "}
-                                {msg.type === "file" ? <i>{msg.text}</i> : <p>{msg.text}</p>}
-                            </div>
-                            {currentMessageIndex === index && (
-                                <div className={styles.reactionsPopup}>
-                                    {["👍", "❤️", "😂"].map((emoji) => (
-                                        <span
-                                            key={emoji}
-                                            className={styles.reactionButton}
-                                            onClick={() => handleReactToMessage(activeChannel, index, emoji)}
-                                        >
-                                            {emoji}
-                                        </span>
-                                    ))}
-                                </div>
-                            )}
-                            <div className={styles.reactionsList}>
-                                {msg.reactions && msg.reactions.join(" ")}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-
-                <div className={styles.inputContainer}>
-                    <textarea
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        className={styles.input}
-                        placeholder="Tapez un message..."
-                    />
-                    <div className={styles.inputActions}>
-                        <input
-                            type="file"
-                            onChange={(e) => setFile(e.target.files?.[0] || null)}
-                            className={styles.fileInput}
-                        />
-                        <button onClick={handleSendMessage} className={styles.sendButton}>
-                            Envoyer
-                        </button>
-                        <button onClick={handleSendFile} className={styles.sendFileButton}>
-                            Envoyer un fichier
-                        </button>
-                    </div>
-                </div>
-            </div>
-        );
     };
 
-    const renderContent = () => {
-        switch (activeTab) {
-            case "channels":
-                return (
-                    <div className={styles.mainContent}>
-                        {renderChannels()}
-                        {renderChat()}
-                    </div>
-                );
-            case "members":
-                return (
-                    <div className={styles.contentList}>
-                        <Member name="Jean Dupont" />
-                        <Member name="Marie Martin" />
-                    </div>
-                );
-            case "settings":
-                return (
-                    <div className={styles.settingsContent}>
-                        <form>
-                            <div className={styles.formGroup}>
-                                <label>Nom</label>
-                                <input type="text" defaultValue={workspace.name} />
-                            </div>
-                            <div className={styles.formGroup}>
-                                <label>Description</label>
-                                <textarea defaultValue={workspace.description}></textarea>
-                            </div>
-                            <div className={styles.formGroup}>
-                                <label>Visibilité</label>
-                                <select defaultValue={workspace.visibility}>
-                                    <option value="Public">Public</option>
-                                    <option value="Privé">Privé</option>
-                                </select>
-                            </div>
-                        </form>
-                    </div>
-                );
-            default:
-                return null;
+    const handleDelete = async () => {
+        const confirmDelete = window.confirm(
+            "Es-tu sûr de vouloir supprimer ce workspace ?",
+        );
+        if (!confirmDelete) return;
+
+        setIsDeleting(true);
+        setMessage("");
+
+        try {
+            const response = await fetch(
+                `http://localhost:3000/workspaces/${uuid}`,
+                {
+                    method: "DELETE",
+                    headers,
+                },
+            );
+
+            if (!response.ok) {
+                const error = await response.text();
+                throw new Error(error || "Échec de la suppression");
+            }
+
+            setMessage("Workspace supprimé avec succès !");
+            setTimeout(() => {
+                navigate("/workspaces");
+            }, 1000);
+        } catch (error) {
+            setMessage(
+                error instanceof Error
+                    ? error.message
+                    : "Une erreur inconnue s'est produite.",
+            );
+        } finally {
+            setIsDeleting(false);
         }
     };
 
     return (
         <div className={styles.container}>
-            <div className={styles.header}>
-                <div className={styles.workspaceIcon}>{workspace.icon}</div>
-                <h1>{workspace.name}</h1>
-                <p>{workspace.description}</p>
+            <div className={styles.card}>
+                <div className={styles.header}>
+                    <div className={styles.logo}>
+                        <span>{workspace?.name?.charAt(0).toUpperCase()}</span>
+                    </div>
+                    <div>
+                        <h2 className={styles.name}>{workspace?.name}</h2>
+                        <p className={styles.uuid}>UUID : {workspace?.uuid}</p>
+                    </div>
+                </div>
+
+                <div className={styles.form}>
+                    <input
+                        type="text"
+                        value={newName}
+                        onChange={(e) => setNewName(e.target.value)}
+                        placeholder="Nouveau nom"
+                        className={styles.input}
+                    />
+                    <button className={styles.renameBtn} onClick={handleRename}>
+                        Renommer
+                    </button>
+                </div>
+
+                <div className={styles.actions}>
+                    <button
+                        className={styles.deleteBtn}
+                        onClick={handleDelete}
+                        disabled={isDeleting}
+                    >
+                        {isDeleting ? "Suppression..." : "Supprimer"}
+                    </button>
+                    <button className={styles.chatBtn}>Tchat</button>
+                </div>
+
+                {message && <p className={styles.message}>{message}</p>}
             </div>
-
-            <div className={styles.tabs}>
-                <button onClick={() => setActiveTab("channels")} className={activeTab === "channels" ? styles.activeTab : ""}>
-                    <MessageSquare /> Canaux
-                </button>
-                <button onClick={() => setActiveTab("members")} className={activeTab === "members" ? styles.activeTab : ""}>
-                    <Users /> Membres
-                </button>
-                <button onClick={() => setActiveTab("settings")} className={activeTab === "settings" ? styles.activeTab : ""}>
-                    <SettingsIcon /> Paramètres
-                </button>
-            </div>
-
-            <div className={styles.tabContent}>{renderContent()}</div>
-
-            {showInviteModal && (
-                <InviteMemberModal
-                    onClose={() => setShowInviteModal(false)}
-                    onInvite={(email) => console.log("Invité :", email)}
-                />
-            )}
         </div>
     );
 };

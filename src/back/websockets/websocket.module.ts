@@ -1,31 +1,25 @@
-import { Module, OnApplicationBootstrap } from "@nestjs/common";
+import { Module } from "@nestjs/common";
 import { WebSocketPool } from "./websocket_pool.gateway";
-import { WebSocketAuth } from "./forwarder.gateway";
 import { MessagesListener } from "./listeners/messages";
-import { Test } from "./test";
-import { SupGatewayService } from "./supgateway.service";
 import { MessagesModule } from "../messages/messages.module";
 import { AuthModule } from "../authentication/authentication.module";
 import { ReactionsModule } from "../reactions/reactions.module";
 import { ReactionsListener } from "./listeners/reactions";
 import { MessageHandler } from "./handlers/message.handler";
+import { NotificationsListener } from "./listeners/notifications";
+import { WorkspaceMembersListener } from "./listeners/workspace_members";
+import { NotificationsModule } from "../notifications/notifications.module";
+import { WorkspacesModule } from "../workspaces/workspaces.module";
 @Module({
-    imports: [AuthModule, MessagesModule, ReactionsModule],
+    imports: [AuthModule, MessagesModule, ReactionsModule, NotificationsModule, WorkspacesModule],
     controllers: [],
     providers: [
-        SupGatewayService,
         WebSocketPool,
-        WebSocketAuth,
         MessagesListener,
         ReactionsListener,
         MessageHandler,
-        Test,
+        NotificationsListener,
+        WorkspaceMembersListener,
     ],
 })
-export class WebSocketModule implements OnApplicationBootstrap {
-    constructor(private readonly supGatewayService: SupGatewayService) {}
-
-    onApplicationBootstrap() {
-        this.supGatewayService.explore();
-    }
-}
+export class WebSocketModule {}

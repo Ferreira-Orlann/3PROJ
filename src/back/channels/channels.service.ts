@@ -7,6 +7,8 @@ import { Workspace } from "../workspaces/workspaces.entity";
 import { randomUUID, UUID } from "crypto";
 import { User } from "../users/users.entity";
 import { WorkspaceMember } from "../workspaces/members/workspace_members.entity";
+import { EventEmitter2 } from "@nestjs/event-emitter";
+import { Events } from "../events.enum";
 
 @Injectable()
 export class ChannelsService {
@@ -22,6 +24,8 @@ export class ChannelsService {
 
         @InjectRepository(WorkspaceMember)
         private readonly workspaceMembersRepo: Repository<WorkspaceMember>,
+        
+        private readonly eventEmitter: EventEmitter2,
     ) {}
 
     findAll(): Promise<Channel[]> {
@@ -38,7 +42,14 @@ export class ChannelsService {
     }
 
     async remove(uuid: UUID): Promise<void> {
-        this.channelsRepo.delete(uuid);
+        // Récupérer le channel avant de le supprimer pour pouvoir émettre l'événement
+        const channel = await this.findOneByUuid(uuid);
+        if (channel) {
+            await this.channelsRepo.delete(uuid);
+            
+            // Émettre l'événement de suppression
+            this.eventEmitter.emit(Events.CHANNEL_REMOVED, channel);
+        }
     }
 
     async add(dto: CreateChannelDto): Promise<Channel> {
@@ -98,6 +109,11 @@ export class ChannelsService {
             creator,
         });
 
-        return this.channelsRepo.save(newChannel);
+        const savedChannel = await this.channelsRepo.save(newChannel);
+        
+        // Émettre l'événement de création
+        this.eventEmitter.emit(Events.CHANNEL_CREATED, savedChannel);
+        
+        return savedChannel;
     }
 }

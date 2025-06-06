@@ -12,12 +12,8 @@ import {
 } from "../services/Profile";
 import userService, { UpdateUserData } from "../services/api/endpoints/users";
 
-// Hook personnalisé pour la gestion du profil utilisateur
 export const useProfileManagement = () => {
-    // Obtenir l'utilisateur authentifié depuis le contexte d'authentification
     const { user } = useAuth();
-
-    // Informations utilisateur - initialiser avec des valeurs vides
     const [userProfile, setUserProfile] = useState<UserProfile>({
         username: "",
         firstName: "",
@@ -27,10 +23,8 @@ export const useProfileManagement = () => {
         status: "Hors ligne",
     });
 
-    // État de chargement pour les données utilisateur
     const [isLoading, setIsLoading] = useState(true);
 
-    // Gestion du mot de passe
     const [passwordInfo, setPasswordInfo] = useState<PasswordChangeInfo>({
         currentPassword: "",
         newPassword: "",
@@ -38,12 +32,9 @@ export const useProfileManagement = () => {
     });
     const [showPasswordModal, setShowPasswordModal] = useState(false);
 
-    // Préférences utilisateur
     const [preferences, setPreferences] = useState<UserPreferences>({
         isDarkTheme: true,
     });
-
-    // Connexions OAuth
     const [connectedProviders, setConnectedProviders] =
         useState<OAuthConnections>({
             google: false,
@@ -51,15 +42,12 @@ export const useProfileManagement = () => {
             microsoft: false,
         });
 
-    // État d'exportation des données
     const [isExporting, setIsExporting] = useState(false);
 
-    // Charger les données utilisateur au démarrage
     useEffect(() => {
         const loadUserData = async () => {
             setIsLoading(true);
             try {
-                // Charger les préférences de thème (toujours depuis AsyncStorage)
                 const themePreference =
                     await AsyncStorage.getItem("themePreference");
                 if (themePreference) {
@@ -69,16 +57,13 @@ export const useProfileManagement = () => {
                     }));
                 }
 
-                // Utiliser l'utilisateur authentifié depuis le contexte d'authentification
                 console.log(
                     "Utilisation des données utilisateur depuis le contexte d'authentification:",
                     user,
                 );
-                const userData = user; // Utiliser l'utilisateur du contexte au lieu d'appeler l'API
+                const userData = user;
 
                 if (userData) {
-                    // Extraire le prénom et le nom à partir du nom d'utilisateur
-                    // Dans AuthContext, username est au format "prénom nom"
                     const nameParts = userData.username
                         ? userData.username.split(" ")
                         : ["", ""];
@@ -88,14 +73,12 @@ export const useProfileManagement = () => {
                             ? nameParts.slice(1).join(" ")
                             : "";
 
-                    // Convertir les données de l'utilisateur authentifié au format attendu par notre application
                     setUserProfile({
                         username: userData.username || "",
                         firstName: firstName,
                         lastName: lastName,
                         email: userData.email || "",
-                        bio: "Développeur passionné", // Valeur par défaut car bio n'existe pas dans l'API
-                        // Convertir le statut de l'utilisateur authentifié au format de l'application
+                        bio: "Développeur passionné",
                         status:
                             userData.status === "online"
                                 ? "En ligne"
@@ -109,7 +92,6 @@ export const useProfileManagement = () => {
                     );
                 }
 
-                // Charger les connexions OAuth (toujours depuis AsyncStorage)
                 const savedConnections =
                     await AsyncStorage.getItem("oauthConnections");
                 if (savedConnections) {
@@ -125,7 +107,6 @@ export const useProfileManagement = () => {
                     "Impossible de charger votre profil. Vérifiez votre connexion internet.",
                 );
 
-                // En cas d'erreur avec l'API, essayer de charger depuis le stockage local
                 try {
                     const savedProfile =
                         await AsyncStorage.getItem("userProfile");
@@ -149,7 +130,6 @@ export const useProfileManagement = () => {
         loadUserData();
     }, []);
 
-    // Mettre à jour le profil utilisateur
     const updateProfile = (field: keyof UserProfile, value: string) => {
         setUserProfile((prev) => ({
             ...prev,
@@ -157,7 +137,6 @@ export const useProfileManagement = () => {
         }));
     };
 
-    // Mettre à jour les informations de mot de passe
     const updatePasswordInfo = (
         field: keyof PasswordChangeInfo,
         value: string,
@@ -168,7 +147,6 @@ export const useProfileManagement = () => {
         }));
     };
 
-    // Réinitialiser les informations de mot de passe
     const resetPasswordInfo = () => {
         setPasswordInfo({
             currentPassword: "",
@@ -177,11 +155,9 @@ export const useProfileManagement = () => {
         });
     };
 
-    // Valider et changer le mot de passe
     const changePassword = async () => {
         const { currentPassword, newPassword, confirmPassword } = passwordInfo;
 
-        // Validation des champs
         if (!currentPassword || !newPassword || !confirmPassword) {
             Alert.alert("Erreur", "Veuillez remplir tous les champs");
             return false;
@@ -193,7 +169,6 @@ export const useProfileManagement = () => {
         }
 
         try {
-            // Utiliser le service API pour changer le mot de passe
             await userService.changePassword(currentPassword, newPassword);
 
             Alert.alert(
@@ -213,10 +188,8 @@ export const useProfileManagement = () => {
         }
     };
 
-    // Sauvegarder les modifications du profil
     const saveProfile = async () => {
         try {
-            // Préparer les données pour l'API
             const userData: UpdateUserData = {
                 username: userProfile.username,
                 fullName: `${userProfile.firstName} ${userProfile.lastName}`,
@@ -234,14 +207,12 @@ export const useProfileManagement = () => {
                 userData,
             );
 
-            // Mettre à jour le profil utilisateur via l'API
             const updatedUser = await userService.updateProfile(userData);
             console.log(
                 "Profil utilisateur mis à jour avec succès:",
                 updatedUser,
             );
 
-            // Sauvegarder les préférences localement (ces données ne sont pas gérées par l'API)
             await AsyncStorage.setItem(
                 "themePreference",
                 preferences.isDarkTheme ? "dark" : "light",
@@ -251,7 +222,6 @@ export const useProfileManagement = () => {
                 JSON.stringify(connectedProviders),
             );
 
-            // Sauvegarder également une copie locale du profil pour le mode hors ligne
             await AsyncStorage.setItem(
                 "userProfile",
                 JSON.stringify(userProfile),
@@ -271,16 +241,13 @@ export const useProfileManagement = () => {
         }
     };
 
-    // Gérer les connexions OAuth
     const toggleOAuthConnection = async (provider: keyof OAuthConnections) => {
         if (connectedProviders[provider]) {
-            // Déconnexion
             setConnectedProviders({
                 ...connectedProviders,
                 [provider]: false,
             });
         } else {
-            // Connexion - ouvrir le flux OAuth
             let authUrl = "";
 
             switch (provider) {
@@ -299,8 +266,6 @@ export const useProfileManagement = () => {
             if (authUrl) {
                 try {
                     await WebBrowser.openBrowserAsync(authUrl);
-                    // Dans une application réelle, nous gérerions le callback OAuth ici
-                    // Pour le moment, nous simulons simplement un succès
                     setConnectedProviders({
                         ...connectedProviders,
                         [provider]: true,
@@ -319,15 +284,11 @@ export const useProfileManagement = () => {
         }
     };
 
-    // Exporter les données utilisateur
     const exportUserData = async () => {
         try {
             setIsExporting(true);
-
-            // Simuler un délai de traitement
             await new Promise((resolve) => setTimeout(resolve, 1500));
 
-            // Créer un objet JSON avec les données utilisateur
             const userData = {
                 ...userProfile,
                 preferences,
@@ -335,8 +296,6 @@ export const useProfileManagement = () => {
                 exportDate: new Date().toISOString(),
             };
 
-            // Dans une implémentation réelle, nous utiliserions FileSystem et Sharing
-            // Pour le moment, nous sauvegardons simplement dans AsyncStorage
             await AsyncStorage.setItem("userData", JSON.stringify(userData));
 
             Alert.alert(

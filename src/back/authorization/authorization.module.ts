@@ -1,7 +1,9 @@
-import { Module, NotAcceptableException } from "@nestjs/common";
+import { Global, Module, NotAcceptableException } from "@nestjs/common";
 import { AuthZModule } from "nest-authz";
 import TypeORMAdapter from "typeorm-adapter";
 import { AuthorizationGuard } from "./authorization.guard";
+import { AuthorizationService } from "./authorization.service";
+import { AuthorizationController } from "./authorization.controller";
 
 @Module({
     imports: [
@@ -31,8 +33,9 @@ import { AuthorizationGuard } from "./authorization.guard";
             },
         }),
     ],
-    controllers: [],
-    providers: [AuthorizationGuard],
-    exports: [AuthorizationGuard],
+    controllers: [AuthorizationController],
+    providers: [AuthorizationGuard, AuthorizationService],
+    exports: [AuthorizationService, AuthorizationGuard],
 })
+@Global()
 export class AuthorizationModule {}

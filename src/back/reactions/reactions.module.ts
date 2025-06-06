@@ -14,5 +14,6 @@ import { MessagesModule } from "../messages/messages.module";
     ],
     controllers: [ReactionsController],
     providers: [ReactionsService],
+    exports: [ReactionsService, TypeOrmModule],
 })
 export class ReactionsModule {}

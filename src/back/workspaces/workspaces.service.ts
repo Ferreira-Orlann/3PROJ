@@ -5,6 +5,8 @@ import { Repository } from "typeorm";
 import { WorkspacesMembersService } from "./members/workspace_members.service";
 import { UUID } from "crypto";
 import { CreateWorkspaceDto } from "./workspaces.dto";
+import { EventEmitter2 } from "@nestjs/event-emitter";
+import { Events } from "../events.enum";
 
 @Injectable()
 export class WorkspacesService {
@@ -12,6 +14,7 @@ export class WorkspacesService {
         @InjectRepository(Workspace)
         private readonly workspacesRepo: Repository<Workspace>,
         private readonly workspaceMembersService: WorkspacesMembersService,
+        private readonly eventEmitter: EventEmitter2,
     ) {}
 
     async findAll(): Promise<Workspace[]> {
@@ -40,7 +43,23 @@ export class WorkspacesService {
     }
 
     async remove(uuid: UUID): Promise<void> {
-        this.workspacesRepo.delete(uuid);
+        // Récupérer le workspace avant de le supprimer pour pouvoir émettre l'événement
+        const workspace = await this.findOne(uuid);
+        if (!workspace) {
+            throw new NotFoundException(
+                `Le workspace avec l'UUID ${uuid} n'existe pas`,
+            );
+        }
+        
+        const result = await this.workspacesRepo.delete(uuid);
+        if (result.affected === 0) {
+            throw new NotFoundException(
+                `Le workspace avec l'UUID ${uuid} n'existe pas`,
+            );
+        }
+        
+        // Émettre l'événement de suppression
+        this.eventEmitter.emit(Events.WORKSPACE_REMOVED, workspace);
     }
 
     async add(dto: CreateWorkspaceDto): Promise<Workspace> {
@@ -50,7 +69,10 @@ export class WorkspacesService {
             owner_uuid: dto.owner_uuid,
             createdAt: dto.createdAt,
         });
-        await this.workspaceMembersService.add(dto.owner_uuid, workspace.uuid);
+        await this.workspaceMembersService.add(dto.owner_uuid, workspace.uuid, dto.owner_uuid);
+        
+        // Émettre l'événement de création
+        this.eventEmitter.emit(Events.WORKSPACE_CREATED, workspace);
 
         return workspace;
     }
@@ -60,6 +82,7 @@ export class WorkspacesService {
         name?: string,
         is_public?: boolean,
     ): Promise<Workspace | null> {
+        console.log("Workspace to update:", uuid);
         const workspace = await this.workspacesRepo.findOneBy({ uuid });
         if (!workspace) {
             throw new NotFoundException(`Workspace with ID ${uuid} not found`);
@@ -72,7 +95,12 @@ export class WorkspacesService {
         if (is_public !== undefined) {
             workspace.is_public = is_public;
         }
-
-        return this.workspacesRepo.save(workspace);
+        
+        const updatedWorkspace = await this.workspacesRepo.save(workspace);
+        
+        // Émettre l'événement de mise à jour
+        this.eventEmitter.emit(Events.WORKSPACE_UPDATED, updatedWorkspace);
+        
+        return updatedWorkspace;
     }
 }

@@ -11,7 +11,6 @@ import {
     UseGuards,
 } from "@nestjs/common";
 import { UsersService } from "./users.service";
-import { CreateUserDto } from "./users.dto";
 import { UUID } from "crypto";
 import {
     HttpAuthGuard,
@@ -19,7 +18,7 @@ import {
 } from "../authentication/http.authentication.guard";
 import { ConfigService } from "@nestjs/config";
 import { ApiParam, ApiQuery, ApiResponse } from "@nestjs/swagger";
-import { User, BasicUser } from "./users.entity";
+import { User, BasicUser, CreateUserDto } from "./users.entity";
 import { plainToInstance } from "class-transformer";
 
 @Controller("users")
@@ -54,19 +53,6 @@ export class UsersController {
         @Query("pageSize") pageSize: number = 10,
         @Query("basic") basic: boolean = false,
     ): Promise<User[] | BasicUser[]> {
-        console.log("Get Users");
-        // const en = await this.authzService.enforce(
-        //     req.user?.uuid,
-        //     "test",
-        //     "message",
-        //     "CREATE",
-        // );
-        // console.log("Bool:", en);
-        // console.log(await this.authzService.getAllSubjects());
-        // console.log(await this.authzService.getAllRoles());
-        // console.log(await this.authzService.getAllObjects());
-        // console.log(await this.authzService.getAllActions());
-        // console.log(await this.authzService.getUsersForRole("admin", "test"));
         if (basic) {
             pageSize = Math.min(
                 pageSize,
@@ -90,14 +76,19 @@ export class UsersController {
         }
     }
 
-    @Get(":mail")
+    @Get("all")
     findAll() {
         return this.usersService.findAll();
     }
 
-    @Get(":id")
+    @Get(":email")
+    findOneByEmail(@Param("email") email: string) {
+        return this.usersService.findOneByEmail(email);
+    }
+
+    @Get("uuid/:uuid")
     @ApiParam({
-        name: "id",
+        name: "uuid",
         required: true,
         type: String,
         description: "User UUID",
@@ -105,11 +96,14 @@ export class UsersController {
     @ApiResponse({
         type: User,
     })
-    async getById(@Param("id") id: UUID) {
-        const user = await this.usersService.findOneByUuid(id);
+    async getById(@Param("uuid") uuid: UUID) {
+        console.log("Recherche de l'utilisateur avec UUID:", uuid);
+        const user = await this.usersService.findOneByUuid(uuid);
         if (!user) {
+            console.log("Aucun utilisateur trouvé avec UUID:", uuid);
             return null;
         }
+        console.log("Utilisateur trouvé:", user.username);
         return user;
     }
 
