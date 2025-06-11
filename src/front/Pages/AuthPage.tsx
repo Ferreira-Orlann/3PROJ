@@ -38,7 +38,7 @@ const AuthPage = () => {
             const session = await authService.loginWithGoogle(credentialResponse.credential);
 
             localStorage.setItem(SESSION_LOCALSTORE_NAME, JSON.stringify(session));
-            window.location.href = "/workspaces";
+            //window.location.href = "/workspaces";
         } catch (err: any) {
             setError(err.message || "Erreur lors de la connexion Google");
         }

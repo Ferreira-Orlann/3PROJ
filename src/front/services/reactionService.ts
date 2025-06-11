@@ -1,67 +1,32 @@
+// src/services/reactions.service.ts
 import axios from "axios";
 
-export interface Reaction {
-  uuid: string;
-  emoji: string;
-  count: number;
-  reactedByUser: boolean; // Pour savoir si l'user a déjà réagi avec cet emoji
-}
+const BASE_URL = "http://localhost:3000"; // remplace si besoin
 
-interface GetReactionsParams {
-  workspaceUuid?: string;
-  userUuid?: string;
-  channelUuid: string;
+const addReaction = async ({
+  messageUuid,
+  emoji,
+  userUuid,
+}: {
   messageUuid: string;
-}
-
-interface AddReactionDto {
   emoji: string;
   userUuid: string;
-}
+}) => {
+  const res = await axios.post(
+    `${BASE_URL}/users/${userUuid}/channels/1/messages/${messageUuid}/reactions`, // adapte `channels/1`
+    {
+      emoji,
+    },
+  );
+  return res.data;
+};
 
-interface AddReactionParams extends GetReactionsParams {
-  dto: AddReactionDto;
-}
+const getAllReactions = async () => {
+  const res = await axios.get(`${BASE_URL}/reactions`);
+  return res.data; // assure-toi que c'est bien un tableau de réactions
+};
 
-interface RemoveReactionParams extends GetReactionsParams {
-  reactionUuid: string;
-}
-
-const baseUrl = "http://localhost:3000"; // adapte selon ton serveur
-
-export const ReactionsService = {
-  async getReactions(params: GetReactionsParams): Promise<Reaction[]> {
-    const { workspaceUuid, userUuid, channelUuid, messageUuid } = params;
-    const prefix = workspaceUuid
-      ? `/workspaces/${workspaceUuid}`
-      : userUuid
-      ? `/users/${userUuid}`
-      : "";
-    const url = `${baseUrl}${prefix}/channels/${channelUuid}/messages/${messageUuid}/reactions`;
-    const res = await axios.get(url);
-    return res.data;
-  },
-
-  async addReaction(params: AddReactionParams): Promise<Reaction> {
-    const { workspaceUuid, userUuid, channelUuid, messageUuid, dto } = params;
-    const prefix = workspaceUuid
-      ? `/workspaces/${workspaceUuid}`
-      : userUuid
-      ? `/users/${userUuid}`
-      : "";
-    const url = `${baseUrl}${prefix}/channels/${channelUuid}/messages/${messageUuid}/reactions`;
-    const res = await axios.post(url, dto);
-    return res.data;
-  },
-
-  async removeReaction(params: RemoveReactionParams): Promise<void> {
-    const { workspaceUuid, userUuid, channelUuid, messageUuid, reactionUuid } = params;
-    const prefix = workspaceUuid
-      ? `/workspaces/${workspaceUuid}`
-      : userUuid
-      ? `/users/${userUuid}`
-      : "";
-    const url = `${baseUrl}${prefix}/channels/${channelUuid}/messages/${messageUuid}/reactions/${reactionUuid}`;
-    await axios.delete(url);
-  },
+export default {
+  addReaction,
+  getAllReactions, // N'oublie pas d'exporter la fonction
 };

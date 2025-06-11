@@ -47,4 +47,15 @@ export class UsersService {
     async update(uuid: UUID, dto: CreateUserDto): Promise<User> {
         return this.usersRepo.save({ ...dto, uuid });
     }
+
+    //kenan google
+   async addGoogleUser(userData: Partial<User>): Promise<User> {
+    if (!userData.address) {
+        userData.address = ''; // valeur par défaut non nulle
+  }
+    const user = this.usersRepo.create(userData); // crée une entité User à partir des données partielles
+    return await this.usersRepo.save(user); // persiste en base
+}
+
+
 }

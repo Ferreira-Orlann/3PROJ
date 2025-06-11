@@ -18,30 +18,25 @@ class AuthService {
         return true;
     }
 
-    public async loginWithGoogle(googleToken: string): Promise<boolean> {
-        try {
-            const res = await axios.post<Session>(
-                "http://localhost:3000/auth/google",
-                {},
-                {
-                    headers: {
-                        Authorization: `Bearer ${googleToken}`,
-                    },
-                }
-            );
+public async loginWithGoogle(googleToken: string): Promise<boolean> {
+    try {
+        const res = await axios.post<Session>(
+            "http://localhost:3000/auth/google",
+            { token: googleToken }, // <-- ici dans le body, pas dans les headers
+        );
 
-            if (res.status !== 201 && res.status !== 200) {
-                return false;
-            }
-
-            this.session = res.data;
-            localStorage.setItem(SESSION_LOCALSTORE_NAME, JSON.stringify(this.session));
-            return true;
-        } catch (err) {
-            console.error("Erreur login Google", err);
+        if (res.status !== 201 && res.status !== 200) {
             return false;
         }
+
+        this.session = res.data;
+        localStorage.setItem(SESSION_LOCALSTORE_NAME, JSON.stringify(this.session));
+        return true;
+    } catch (err) {
+        console.error("Erreur login Google", err);
+        return false;
     }
+}
 
     public getSession(): Session | null {
         if (!this.session) {

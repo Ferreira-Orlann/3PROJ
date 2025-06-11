@@ -132,7 +132,7 @@ const WorkspaceDetailPage = () => {
             <span className={styles.name}>
               {workspace?.name || "Chargement..."}
             </span>
-            <span className={styles.uuid}>UUID: {workspace?.uuid || uuid}</span>
+            {/* <span className={styles.uuid}>UUID: {workspace?.uuid || uuid}</span> */}
           </div>
 
           <div className={styles.tabBar}>
@@ -205,7 +205,7 @@ const WorkspaceDetailPage = () => {
                   onClick={() => navigate(`/workspace/${uuid}/channel/${channel.uuid}`)}
                 >
                   <h3>{channel.name}</h3>
-                  <p>UUID: {channel.uuid}</p>
+                  {/* <p>UUID: {channel.uuid}</p> */}
                 </div>
               ))}
             </div>
