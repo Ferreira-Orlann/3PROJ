@@ -9,7 +9,7 @@ console.log("API URL:", API_BASE_URL);
 
 const apiClient = axios.create({
     baseURL: API_BASE_URL,
-    timeout: DEFAULT_TIMEOUT,
+    
     headers: DEFAULT_HEADERS,
 });
 
@@ -76,9 +76,7 @@ apiClient.interceptors.response.use(
                 "Erreur réseau - Aucune réponse reçue:",
                 error.request,
             );
-            console.log("URL de la requête:", error.config?.url);
-            console.log("Méthode:", error.config?.method);
-            console.log("Timeout:", error.config?.timeout);
+
         } else {
             console.error(
                 "Erreur lors de la configuration de la requête:",

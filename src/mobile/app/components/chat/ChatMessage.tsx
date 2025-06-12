@@ -363,7 +363,22 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     }, [messageReactions, message.uuid]);
 
     const reactions = getUIReactions();
-    const timestamp = new Date(message.date).toLocaleTimeString();
+    
+    // Format timestamp correctly with proper error handling
+    let timestamp = "";
+    try {
+        // Vérifier si la date est valide
+        if (message.date && !isNaN(new Date(message.date).getTime())) {
+            const date = new Date(message.date);
+            timestamp = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        } else {
+            console.warn("Date invalide dans le message:", message.date);
+            timestamp = "";
+        }
+    } catch (error) {
+        console.error("Erreur lors du formatage de la date:", error);
+        timestamp = "";
+    }
 
     // Effet pour marquer le composant comme démonté lors du nettoyage
     useEffect(() => {
@@ -391,31 +406,45 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                     setSenderName(message.source.username);
                 } else if (typeof message.source === "string") {
                     // Si c'est une chaîne (UUID), récupérer les infos utilisateur
-                    const user = await userService.getUserById(
-                        message.source as UUID,
-                    );
-                    if (isMounted.current) {
-                        setSenderName(user.username);
+                    try {
+                        const user = await userService.getUserById(
+                            message.source as UUID,
+                        );
+                        if (isMounted.current && user && user.username) {
+                            setSenderName(user.username);
+                        } else {
+                            // Si l'utilisateur n'a pas de nom d'utilisateur valide
+                            setSenderName(isCurrentUser ? "Vous" : "Utilisateur");
+                        }
+                    } catch (userError) {
+                        console.warn("Impossible de récupérer les infos utilisateur:", userError);
+                        // Utiliser un nom par défaut plus convivial
+                        setSenderName(isCurrentUser ? "Vous" : "Utilisateur");
                     }
+                } else if (message.uuid && (typeof message.uuid === 'string' ? message.uuid.startsWith('temp-') : String(message.uuid).startsWith('temp-'))) {
+                    // Pour les messages temporaires, utiliser un nom par défaut
+                    setSenderName(isCurrentUser ? "Vous" : "Utilisateur");
                 } else {
-                    console.error(
+                    console.warn(
                         "ChatMessage - Format de source invalide:",
                         message.source,
                     );
                     if (isMounted.current) {
-                        setSenderName("Unknown");
+                        // Utiliser un nom par défaut plus convivial
+                        setSenderName(isCurrentUser ? "Vous" : "Utilisateur");
                     }
                 }
             } catch (error) {
                 console.error("Error fetching user info:", error);
                 if (isMounted.current) {
-                    setSenderName("Unknown");
+                    // Utiliser un nom par défaut plus convivial
+                    setSenderName(isCurrentUser ? "Vous" : "Utilisateur");
                 }
             }
         };
 
         fetchUserInfo();
-    }, [message.source]);
+    }, [message.source, isCurrentUser, message.uuid]);
 
     return (
         <View

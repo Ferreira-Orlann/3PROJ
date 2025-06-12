@@ -11,7 +11,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BottomBar from "@/app/components/layout/bottomBar";
 import { ChatContainer } from "@/app/components/chat";
-import Message from "@/app/components/chat";
 
 // Importation des fichiers séparés
 import useMessages from "@/app/hooks/useMessages";
@@ -56,6 +55,9 @@ export default function ChannelScreen() {
     const [channel, setChannel] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
 
+    // S'assurer que l'UUID de l'utilisateur est disponible
+    const currentUserUuid = user?.uuid || ('' as unknown as UUID);
+    
     // Utiliser le hook useMessages pour gérer les messages
     const {
         messages,
@@ -65,7 +67,12 @@ export default function ChannelScreen() {
         sendMessage,
         editMessage,
         deleteMessage,
-    } = useMessages(workspaceId as UUID, channelId as UUID);
+    } = useMessages(
+        workspaceId as UUID,
+        channelId as UUID,
+        null as unknown as UUID, // userUuid (null pour les messages de canal)
+        currentUserUuid // Utiliser la variable locale qui ne sera jamais undefined
+    );
 
     // Charger les informations du workspace et du channel
     useEffect(() => {
@@ -129,7 +136,7 @@ export default function ChannelScreen() {
                 "ChannelScreen - workspaceId ou channelId manquant, pas de chargement des messages",
             );
         }
-    }, [workspaceId, channelId, fetchMessages]);
+    }, [workspaceId, channelId]); // Retirer fetchMessages de la dépendance pour éviter les rechargements multiples
 
     // Fonctions de gestion des messages et réactions
     const handleSendMessage = useCallback(
@@ -246,21 +253,6 @@ export default function ChannelScreen() {
                     </View>
 
                     {/* Chat Container */}
-                    {/* Log des props avant le rendu du ChatContainer */}
-                    {(() => {
-                        console.log(
-                            "ChannelScreen - ChatContainer rendu avec props:",
-                            {
-                                workspaceUuid: workspaceId,
-                                userUuid:
-                                    workspaceId /* Utiliser workspaceId comme userUuid temporairement */,
-                                channelUuid: channelId,
-                                channelName: channel.name,
-                            },
-                        );
-                        return null;
-                    })()}
-
                     <ChatContainer
                         workspaceUuid={workspaceId as UUID}
                         userUuid={user?.uuid as UUID}
@@ -268,6 +260,9 @@ export default function ChannelScreen() {
                         channelName={channel.name}
                         currentUser={user?.username || ""}
                         onSendMessage={handleSendMessage}
+                        initialMessages={messages}
+                        externalFetchMessages={fetchMessages}
+                        disableInternalFetchMessages={true}
                     />
                 </View>
             </KeyboardAvoidingView>

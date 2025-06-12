@@ -214,7 +214,8 @@ export const useMessages = (
                 return null;
             }
 
-            if (!currentUser?.uuid) {
+            // Vérifier si l'UUID de l'utilisateur est disponible
+            if (!currentUser || !currentUser.uuid) {
                 console.error(
                     "useMessages - sendMessage - Erreur: UUID utilisateur manquant",
                 );
