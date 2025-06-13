@@ -1,63 +1,74 @@
+// src/services/messagesService.ts
 import axios from "axios";
-import { UUID } from "crypto";
+
+export interface MessageDTO {
+  uuid: string;
+  message: string;
+  source: { uuid: string } | string;
+  destination_user: { uuid: string } | string;
+  is_public: boolean;
+  date: string;
+  file_url?: string;
+  reply_to_uuid?: string;
+  edited?: boolean;
+}
+
 
 const API_BASE = "http://localhost:3000";
 
-// Récupérer les messages privés d’un user
-export async function getPrivateMessages(userUuid: string, token?: string) {
+export async function getPrivateMessages(
+  userUuid: string,
+  token?: string
+): Promise<MessageDTO[]> {
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
-  const url = `${API_BASE}/users/${userUuid}/messages`;
-  const response = await axios.get(url, { headers });
-
-  console.log("data",response.data)
-  return response.data;
+  const resp = await axios.get(`${API_BASE}/users/${userUuid}/messages`, { headers });
+  return resp.data;
 }
 
 export async function sendPrivateMessage(
-  messageData: {
+  data: {
     message: string;
+    destination_uuid: string;
+    source_uuid: string;
     is_public: boolean;
-    source_uuid: UUID;
-    destination_uuid: UUID;
-    
     file_url?: string;
+    reply_to_uuid?: string;
   },
   token?: string
-) {
+): Promise<MessageDTO> {
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
+  const payload: any = {
+    message: data.message,
+    is_public: data.is_public,
+    source_uuid: data.source_uuid,
+    destination_uuid: data.destination_uuid,
+  };
 
-  console.log("message", messageData)
+  if (data.file_url) {
+    payload.file_url = data.file_url;
+  }
 
-  const response = await axios.post(
-    `${API_BASE}/users/${messageData.destination_uuid}/messages`,
-    messageData,
+  if (data.reply_to_uuid) {
+    payload.reply_to_uuid = data.reply_to_uuid;
+  }
+
+  const resp = await axios.post(
+    `${API_BASE}/users/${data.destination_uuid}/messages`,
+    payload,
     { headers }
   );
 
-  return response.data;
+  return resp.data;
 }
 
-// Modifier un message privé
-export async function updatePrivateMessage(
-  userUuid: string,
-  messageUuid: string,
-  newContent: string,
-  token?: string
-) {
-  const headers = token ? { Authorization: `Bearer ${token}` } : {};
-  const url = `${API_BASE}/users/${userUuid}/messages/${messageUuid}`;
-  const response = await axios.put(url, { message: newContent }, { headers });
-  return response.data;
-}
 
-// Upload de fichier (optionnel)
 export async function uploadFile(file: File, token?: string): Promise<string> {
-  const formData = new FormData();
-  formData.append("file", file);
+  const form = new FormData();
+  form.append("file", file);
   const headers = token
     ? { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" }
     : {};
-  const response = await axios.post(`${API_BASE}/upload`, formData, { headers });
-  return response.data.fileUrl;
+  const resp = await axios.post(`${API_BASE}/files/upload`, form, { headers });
+  return resp.data.fileUrl;
 }

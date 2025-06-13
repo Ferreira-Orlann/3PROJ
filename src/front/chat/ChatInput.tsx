@@ -1,68 +1,76 @@
-// ChatInput.tsx
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import { Paperclip, X } from "lucide-react";
 import styles from "../styles/privateChat.module.css";
 
-interface Message {
-  uuid: string;
-  message: string;
-}
+const ChatInput = ({ onSend }) => {
+  const [message, setMessage] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-interface Props {
-  onSend: (messageText: string, file: File | null) => void;
-  replyTo: Message | null;
-  messageToEdit: Message | null;
-  onCancelEdit: () => void;
-}
-
-export default function ChatInput({
-  onSend,
-  replyTo,
-  messageToEdit,
-  onCancelEdit,
-}: Props) {
-  const [text, setText] = useState("");
-  const [file, setFile] = useState<File | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (messageToEdit) {
-      setText(messageToEdit.message);
+  const handleSend = () => {
+    if (message.trim() || selectedFile) {
+      onSend(message.trim(), selectedFile);
+      setMessage("");
+      setSelectedFile(null);
     }
-  }, [messageToEdit]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSend(text, file);
-    setText("");
-    setFile(null);
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) setSelectedFile(file);
+  };
+
+  const cancelFile = () => setSelectedFile(null);
+
   return (
-    <form onSubmit={handleSubmit} className={styles.inputBar}>
+    <div className={styles.inputBar}>
       <input
-        ref={inputRef}
         type="text"
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder={
-          messageToEdit ? "Modifier le message..." : replyTo ? "Répondre..." : "Écrire un message..."
-        }
+        placeholder="Écrire un message..."
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
       />
-      <input
-        type="file"
-        onChange={(e) => setFile(e.target.files?.[0] || null)}
-        style={{ display: "none" }}
-        id="fileInput"
-      />
-      <label htmlFor="fileInput" className={styles.actionButton}>
-        📎
-      </label>
-      {messageToEdit && (
-        <button type="button" onClick={onCancelEdit} className={styles.actionButton}>
-          ❌
+
+      {/* Bouton fichier violet avec icône */}
+      <div className={styles.fileInputWrapper}>
+        <button
+          className={styles.fileButton}
+          onClick={() => fileInputRef.current?.click()}
+          title="Ajouter une pièce jointe"
+        >
+          <Paperclip size={18} />
         </button>
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          className={styles.hiddenFileInput} // ← tu peux aussi créer ça si tu veux cacher le bouton nativement
+        />
+      </div>
+
+      <button className={styles.sendButton} onClick={handleSend}>
+        Envoyer
+      </button>
+
+      {/* Affichage de prévisualisation du fichier */}
+      {selectedFile && (
+        <div className={styles.selectedFilePreview}>
+          {selectedFile.type.startsWith("image/") ? (
+            <img
+              src={URL.createObjectURL(selectedFile)}
+              alt="Aperçu"
+              className={styles.imageAttachment}
+            />
+          ) : (
+            <span className={styles.selectedFileName}>{selectedFile.name}</span>
+          )}
+          <button className={styles.cancelReplyButton} onClick={cancelFile}>
+            <X size={16} />
+          </button>
+        </div>
       )}
-      <button type="submit">Envoyer</button>
-    </form>
+    </div>
   );
-}
+};
+
+export default ChatInput;

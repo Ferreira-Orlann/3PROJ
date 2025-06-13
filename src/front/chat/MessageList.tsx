@@ -1,4 +1,3 @@
-// MessageList.tsx
 import { useEffect, useRef } from "react";
 import styles from "../styles/privateChat.module.css";
 
@@ -16,11 +15,12 @@ interface Message {
 
 interface Props {
   messages: Message[];
-  sessionUserUUID?: string;
-  onReply: (msg: Message) => void;
-  onEdit: (msg: Message) => void;
   allMessages: Message[];
+  sessionUserUUID: string;
+  onReply: (m: Message) => void;
+  onEdit: (m: Message) => void;
 }
+
 
 export default function MessageList({
   messages,
@@ -38,7 +38,7 @@ export default function MessageList({
   return (
     <div className={styles.messageScroll}>
       {messages.length === 0 ? (
-        <p className={styles.empty}>Aucun message correspondant</p>
+        <p className={styles.empty}>Aucun message</p>
       ) : (
         messages.map((msg) => {
           const isMine = msg.source_uuid === sessionUserUUID;
@@ -46,21 +46,20 @@ export default function MessageList({
             ? allMessages.find((m) => m.uuid === msg.reply_to_uuid)
             : null;
 
+          const key = msg.uuid || `${msg.source_uuid}-${msg.date}`;
+
           return (
             <div
-            key={
-              msg.uuid?.toString() ??
-              `${msg.source_uuid ?? "src"}-${msg.date ?? Date.now()}-${Math.random()}`
-            }
-            
+              key={key}
               className={`${styles.messageBubble} ${
                 isMine ? styles.sent : styles.received
               }`}
             >
-              {repliedMsg?.message && (
+              {/* Réponse à un autre message */}
+              {repliedMsg && (
                 <div className={styles.replyPreview}>
                   <small>
-                    Réponse à:{" "}
+                    Réponse à :{" "}
                     {repliedMsg.message.length > 50
                       ? repliedMsg.message.slice(0, 50) + "..."
                       : repliedMsg.message}
@@ -68,24 +67,47 @@ export default function MessageList({
                 </div>
               )}
 
-              <p>
-                {msg.message ?? ""}
-                {msg.edited && (
-                  <span className={styles.editedTag}> (modifié)</span>
-                )}
-              </p>
-
-              {msg.file_url && (
-                <a
-                  href={msg.file_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.fileLink}
-                >
-                  📎 Fichier joint
-                </a>
+              {/* Corps du message */}
+              {msg.message && (
+                <p>
+                  {msg.message}
+                  {msg.edited && (
+                    <span className={styles.editedTag}> (modifié)</span>
+                  )}
+                </p>
               )}
 
+              {/* Fichier joint */}
+              {msg.file_url && (
+                <div className={styles.attachmentPreview}>
+                  {/\.(jpeg|jpg|png|gif|webp)$/i.test(msg.file_url) ? (
+                    <img
+                      src={msg.file_url}
+                      alt="Pièce jointe"
+                      className={styles.imageAttachment}
+                    />
+                  ) : (
+                    <a
+                      href={msg.file_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.fileLink}
+                    >
+                      📎 {msg.file_url.split("/").pop()}
+                    </a>
+                  )}
+                </div>
+              )}
+
+              {/* Heure d'envoi */}
+              <div className={styles.messageTime}>
+                {new Date(msg.date).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </div>
+
+              {/* Actions */}
               <div className={styles.messageActions}>
                 <button
                   className={styles.actionButton}
