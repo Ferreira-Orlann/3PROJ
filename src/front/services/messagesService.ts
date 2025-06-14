@@ -72,7 +72,7 @@ export async function updatePrivateMessage(
 ): Promise<MessageDTO> {
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-  // Le backend attend un DTO complet, on envoie les champs à mettre à jour
+   
   const payload: any = {};
   if (data.message !== undefined) payload.message = data.message;
   if (data.file_url !== undefined) payload.file_url = data.file_url;
@@ -104,6 +104,6 @@ export async function uploadFile(file: File, token?: string): Promise<string> {
     : { "Content-Type": "multipart/form-data" };
 
   const resp = await axios.post(`${API_BASE}/files/upload`, form, { headers });
-  return resp.data; // resp.data est le UUID (string)
+  return resp.data; 
 }
 

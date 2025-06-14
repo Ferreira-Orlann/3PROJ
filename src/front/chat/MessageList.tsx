@@ -30,7 +30,7 @@ export default function MessageList({
         <p className={styles.empty}>Aucun message</p>
       ) : (
         messages.map((msg) => {
-          console.log("🔍 Message debug:", msg); // <--- 👈 Debug ici
+
 
           const isMine = msg.source_uuid === sessionUserUUID;
           const sender = users.find((u) => u.uuid === msg.source_uuid);
@@ -69,7 +69,7 @@ export default function MessageList({
                     </a>
                   </p>
                 )}
-                
+
                 <div className={styles.messageTime}>
                   {new Date(msg.date).toLocaleTimeString([], {
                     hour: "2-digit",
