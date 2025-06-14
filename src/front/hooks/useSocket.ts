@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { Socket } from "socket.io-client";
-import socketInstance from "../hooks/socketInstance";
+import socketInstance from "../services/socketInstance";
 
 export function useSocket(token?: string): Socket | undefined {
   const socketRef = useRef<Socket>();

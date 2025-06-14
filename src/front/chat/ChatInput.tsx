@@ -1,76 +1,110 @@
-import { useRef, useState } from "react";
-import { Paperclip, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { FiX, FiSend, FiPaperclip } from "react-icons/fi";
 import styles from "../styles/privateChat.module.css";
+import type { Message } from "../types/messages";
 
-const ChatInput = ({ onSend }) => {
+interface Props {
+  editingMessage?: Message | null;
+  onSend: (text: string, file?: File) => void;
+  onCancelEdit: () => void;
+}
+
+export default function ChatInput({
+  editingMessage,
+  onSend,
+  onCancelEdit,
+}: Props) {
   const [message, setMessage] = useState("");
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [file, setFile] = useState<File | null>(null);
+
+  useEffect(() => {
+    if (editingMessage) {
+      setMessage(editingMessage.message ?? "");
+      setFile(null); // On reset le fichier quand on édite (ou tu peux charger fichier si besoin)
+    } else {
+      setMessage("");
+      setFile(null);
+    }
+  }, [editingMessage]);
 
   const handleSend = () => {
-    if (message.trim() || selectedFile) {
-      onSend(message.trim(), selectedFile);
-      setMessage("");
-      setSelectedFile(null);
-    }
+    if (!message.trim() && !file) return;
+    onSend(message.trim(), file ?? undefined);
+    setMessage("");
+    setFile(null);
   };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) setSelectedFile(file);
-  };
-
-  const cancelFile = () => setSelectedFile(null);
 
   return (
-    <div className={styles.inputBar}>
-      <input
-        type="text"
-        placeholder="Écrire un message..."
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-      />
+    <div className={styles.inputBarWrapper}>
+      {editingMessage && (
+        <div className={styles.editingBanner}>
+          ✏️ Modification du message
+          <button
+            onClick={() => {
+              onCancelEdit();
+              setMessage("");
+              setFile(null);
+            }}
+            className={styles.cancelEditButton}
+            title="Annuler la modification"
+          >
+            <FiX size={16} />
+          </button>
+        </div>
+      )}
 
-      {/* Bouton fichier violet avec icône */}
-      <div className={styles.fileInputWrapper}>
-        <button
-          className={styles.fileButton}
-          onClick={() => fileInputRef.current?.click()}
-          title="Ajouter une pièce jointe"
-        >
-          <Paperclip size={18} />
-        </button>
+      <div className={styles.inputBar}>
         <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-          className={styles.hiddenFileInput} // ← tu peux aussi créer ça si tu veux cacher le bouton nativement
+          type="text"
+          placeholder="Écrire un message..."
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          className={styles.textInput}
         />
+
+        <div className={styles.fileInputWrapper}>
+          <label className={styles.fileButton} title="Joindre un fichier">
+            <FiPaperclip />
+            <input
+              type="file"
+              accept="*"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) setFile(f);
+              }}
+            />
+          </label>
+        </div>
+
+        <button
+          className={styles.sendButton}
+          onClick={handleSend}
+          title={editingMessage ? "Modifier le message" : "Envoyer"}
+        >
+          <FiSend />
+        </button>
       </div>
 
-      <button className={styles.sendButton} onClick={handleSend}>
-        Envoyer
-      </button>
-
-      {/* Affichage de prévisualisation du fichier */}
-      {selectedFile && (
+      {file && (
         <div className={styles.selectedFilePreview}>
-          {selectedFile.type.startsWith("image/") ? (
+          {/\.(jpe?g|png|gif|webp)$/i.test(file.name) ? (
             <img
-              src={URL.createObjectURL(selectedFile)}
-              alt="Aperçu"
-              className={styles.imageAttachment}
+              src={URL.createObjectURL(file)}
+              alt="Prévisualisation"
+              className={styles.previewImage}
             />
           ) : (
-            <span className={styles.selectedFileName}>{selectedFile.name}</span>
+            <div className={styles.selectedFileName}>📎 {file.name}</div>
           )}
-          <button className={styles.cancelReplyButton} onClick={cancelFile}>
-            <X size={16} />
+          <button
+            onClick={() => setFile(null)}
+            className={styles.removeFileButton}
+            title="Supprimer le fichier"
+          >
+            <FiX />
           </button>
         </div>
       )}
     </div>
   );
-};
-
-export default ChatInput;
+}

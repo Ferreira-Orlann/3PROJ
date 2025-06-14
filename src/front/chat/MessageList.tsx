@@ -1,38 +1,27 @@
 import { useEffect, useRef } from "react";
 import styles from "../styles/privateChat.module.css";
-
-interface Message {
-  uuid: string;
-  message: string;
-  source_uuid: string;
-  destination_uuid: string;
-  date: string;
-  is_public: boolean;
-  file_url?: string;
-  reply_to_uuid?: string;
-  edited?: boolean;
-}
+import type { Message } from "../types/messages";
+import type { User } from "../types/auth";
+import { FiEdit2 } from "react-icons/fi";
 
 interface Props {
   messages: Message[];
-  allMessages: Message[];
   sessionUserUUID: string;
-  onReply: (m: Message) => void;
-  onEdit: (m: Message) => void;
+  selectedUserUuid: string;
+  users: User[];
+  onEditStart: (m: Message) => void;
 }
-
 
 export default function MessageList({
   messages,
   sessionUserUUID,
-  onReply,
-  onEdit,
-  allMessages,
+  users,
+  onEditStart
 }: Props) {
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   return (
@@ -41,94 +30,70 @@ export default function MessageList({
         <p className={styles.empty}>Aucun message</p>
       ) : (
         messages.map((msg) => {
-          const isMine = msg.source_uuid === sessionUserUUID;
-          const repliedMsg = msg.reply_to_uuid
-            ? allMessages.find((m) => m.uuid === msg.reply_to_uuid)
-            : null;
+          console.log("🔍 Message debug:", msg); // <--- 👈 Debug ici
 
-          const key = msg.uuid || `${msg.source_uuid}-${msg.date}`;
+          const isMine = msg.source_uuid === sessionUserUUID;
+          const sender = users.find((u) => u.uuid === msg.source_uuid);
 
           return (
             <div
-              key={key}
-              className={`${styles.messageBubble} ${
-                isMine ? styles.sent : styles.received
-              }`}
+              key={msg.uuid}
+              className={`${styles.messageBubble} ${isMine ? styles.sent : styles.received}`}
+              onDoubleClick={() => isMine && onEditStart(msg)}
+              title={isMine ? "Double-cliquez pour modifier" : ""}
             >
-              {/* Réponse à un autre message */}
-              {repliedMsg && (
-                <div className={styles.replyPreview}>
-                  <small>
-                    Réponse à :{" "}
-                    {repliedMsg.message.length > 50
-                      ? repliedMsg.message.slice(0, 50) + "..."
-                      : repliedMsg.message}
-                  </small>
-                </div>
-              )}
+              <div className={styles.messageContent}>
+                {!isMine && sender && (
+                  <div className={styles.senderName}>{sender.username}</div>
+                )}
 
-              {/* Corps du message */}
-              {msg.message && (
-                <p>
-                  {msg.message}
-                  {msg.edited && (
-                    <span className={styles.editedTag}> (modifié)</span>
-                  )}
-                </p>
-              )}
+                {msg.message && (
+                  <p className={styles.messageText}>
+                    {msg.message}
+                    {(msg.edited || msg.updated_at) && (
+                      <span className={styles.editedTag}> (modifié)</span>
+                    )}
+                  </p>
+                )}
 
-              {/* Fichier joint */}
-              {msg.file_url && (
-                <div className={styles.attachmentPreview}>
-                  {/\.(jpeg|jpg|png|gif|webp)$/i.test(msg.file_url) ? (
-                    <img
-                      src={msg.file_url}
-                      alt="Pièce jointe"
-                      className={styles.imageAttachment}
-                    />
-                  ) : (
+                {msg.file_url && (
+                  <p className={styles.messageText}>
                     <a
-                      href={msg.file_url}
+                      href={`http://localhost:3000/files/${msg.file_url}`} // Correction ici
+                      download
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={styles.fileLink}
+                      className={styles.fileAttachment}
                     >
-                      📎 {msg.file_url.split("/").pop()}
+                      📎 {msg.file_url}
                     </a>
-                  )}
+                  </p>
+                )}
+                
+                <div className={styles.messageTime}>
+                  {new Date(msg.date).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                  })}
+                </div>
+              </div>
+
+              {isMine && (
+                <div className={styles.messageActions}>
+                  <button
+                    onClick={() => onEditStart(msg)}
+                    title="Modifier"
+                    className={styles.actionButton}
+                  >
+                    <FiEdit2 size={16} />
+                  </button>
                 </div>
               )}
-
-              {/* Heure d'envoi */}
-              <div className={styles.messageTime}>
-                {new Date(msg.date).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </div>
-
-              {/* Actions */}
-              <div className={styles.messageActions}>
-                <button
-                  className={styles.actionButton}
-                  onClick={() => onEdit(msg)}
-                  title="Modifier"
-                >
-                  ✏️
-                </button>
-                <button
-                  className={styles.actionButton}
-                  onClick={() => onReply(msg)}
-                  title="Répondre"
-                >
-                  🔁
-                </button>
-              </div>
             </div>
           );
         })
       )}
-      <div ref={messagesEndRef} />
+      <div ref={bottomRef} />
     </div>
   );
 }

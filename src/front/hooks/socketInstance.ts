@@ -1,3 +1,5 @@
+//hooks/socketInstance.ts
+
 import { io, Socket } from "socket.io-client";
 
 import { UUID } from "crypto";

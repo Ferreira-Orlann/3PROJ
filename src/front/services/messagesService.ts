@@ -13,7 +13,6 @@ export interface MessageDTO {
   edited?: boolean;
 }
 
-
 const API_BASE = "http://localhost:3000";
 
 export async function getPrivateMessages(
@@ -62,13 +61,49 @@ export async function sendPrivateMessage(
   return resp.data;
 }
 
+export async function updatePrivateMessage(
+  userUuid: string,
+  messageUuid: string,
+  data: {
+    message?: string;
+    file_url?: string;
+  },
+  token?: string
+): Promise<MessageDTO> {
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+  // Le backend attend un DTO complet, on envoie les champs à mettre à jour
+  const payload: any = {};
+  if (data.message !== undefined) payload.message = data.message;
+  if (data.file_url !== undefined) payload.file_url = data.file_url;
+
+  const resp = await axios.put(
+    `${API_BASE}/users/${userUuid}/messages/${messageUuid}`,
+    payload,
+    { headers }
+  );
+
+  return resp.data;
+}
+
+export async function deletePrivateMessage(
+  userUuid: string,
+  messageUuid: string,
+  token?: string
+): Promise<void> {
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  await axios.delete(`${API_BASE}/users/${userUuid}/messages/${messageUuid}`, { headers });
+}
 
 export async function uploadFile(file: File, token?: string): Promise<string> {
   const form = new FormData();
   form.append("file", file);
+
   const headers = token
     ? { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" }
-    : {};
+    : { "Content-Type": "multipart/form-data" };
+
   const resp = await axios.post(`${API_BASE}/files/upload`, form, { headers });
-  return resp.data.fileUrl;
+  return resp.data; // resp.data est le UUID (string)
 }
+
