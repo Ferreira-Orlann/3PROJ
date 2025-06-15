@@ -8,17 +8,13 @@ import {
     Post,
     Put,
     Req,
-    UseGuards,
 } from "@nestjs/common";
 import { WorkspacesService } from "./workspaces.service";
 import { CreateWorkspaceDto } from "./workspaces.dto";
 import { Workspace } from "./workspaces.entity";
-import { randomUUID, UUID } from "crypto";
+import { UUID } from "crypto";
 import { HttpAuthGuard } from "../authentication/http.authentication.guard";
-import { AuthorizationGuard } from "../authorization/authorization.guard";
-import { Authorize } from "../authorization/authorization.decorator";
 
-@UseGuards(HttpAuthGuard)
 @Controller("workspaces")
 export class WorkspacesController {
     constructor(private readonly workspacesService: WorkspacesService) {}

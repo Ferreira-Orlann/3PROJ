@@ -8,7 +8,7 @@ const Signup = () => {
         lastname: "",
         email: "",
         address: "",
-        password: "",
+        mdp: "",
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
