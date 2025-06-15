@@ -62,19 +62,7 @@ export default function ChatInput({
           className={styles.textInput}
         />
 
-        <div className={styles.fileInputWrapper}>
-          <label className={styles.fileButton} title="Joindre un fichier">
-            <FiPaperclip />
-            <input
-              type="file"
-              accept="*"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) setFile(f);
-              }}
-            />
-          </label>
-        </div>
+
 
         <button
           className={styles.sendButton}
