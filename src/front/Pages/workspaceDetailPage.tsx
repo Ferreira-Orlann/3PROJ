@@ -1,3 +1,4 @@
+// src/pages/WorkspaceDetailPage.tsx
 import React, { useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import styles from "../styles/workspaceDetailPage.module.css";
