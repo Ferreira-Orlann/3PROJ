@@ -59,7 +59,7 @@ export default function MessageList({
                 {msg.file_url && (
                   <p className={styles.messageText}>
                     <a
-                      href={`http://localhost:3000/files/${msg.file_url}`} // Correction ici
+                      href={`http://localhost:3000/files/${msg.file_url}`} 
                       download
                       target="_blank"
                       rel="noopener noreferrer"

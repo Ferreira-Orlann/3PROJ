@@ -25,7 +25,7 @@ class AuthService {
             if (sessionString) {
                 this.session = JSON.parse(sessionString);
             } else {
-                return null; // ← ne jette plus d'erreur ici
+                return null; 
             }
         }
         return this.session;

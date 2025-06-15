@@ -20,8 +20,8 @@ const Login = () => {
             if (!response.ok) throw new Error("Échec de la connexion");
             const data = await response.json();
 
-            login({ uuid: data.uuid }, data.token); // Save user + token
-            navigate("/dashboard"); // redirect after login
+            login({ uuid: data.uuid }, data.token);
+            navigate("/dashboard"); 
         } catch (err: any) {
             setError(err.message || "Erreur inconnue");
         }

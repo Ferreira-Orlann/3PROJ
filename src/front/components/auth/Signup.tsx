@@ -32,7 +32,7 @@ const Signup = () => {
             const data = await res.data;
             console.log(JSON.stringify(formData));
             console.log("Inscription réussie :", data);
-            // Tu peux rediriger vers /dashboard ici si besoin
+
         } catch (error) {
             console.error("Erreur :", error);
         }

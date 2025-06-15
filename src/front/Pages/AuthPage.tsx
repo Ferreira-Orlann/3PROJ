@@ -21,9 +21,9 @@ const AuthPage = () => {
             }
 
             const session = authService.getSession();
-            console.log("Session:", session); // tu peux stocker le token ici si besoin
+            console.log("Session:", session);
 
-            // Redirection après connexion réussie
+ 
             window.location.href = "/workspaces";
 
             localStorage.setItem(
@@ -43,7 +43,7 @@ const AuthPage = () => {
                     <>
                         <input
                             type="email"
-                            //placeholder="Entrez votre adresse e-mail"
+          
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             id="email"

@@ -20,7 +20,7 @@ export default function ChatInput({
   useEffect(() => {
     if (editingMessage) {
       setMessage(editingMessage.message ?? "");
-      setFile(null); // On reset le fichier quand on édite (ou tu peux charger fichier si besoin)
+      setFile(null); 
     } else {
       setMessage("");
       setFile(null);
