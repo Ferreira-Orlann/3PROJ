@@ -1,133 +1,69 @@
-import { useEffect, useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useAuthContext } from "../context/AuthContext";
+import { usePrivateChat } from "../hooks/usePrivateChat";
 import userService from "../services/usersService";
-import {
-  getPrivateMessages,
-  sendPrivateMessage,
-  uploadFile,
-} from "../services/messagesService";
-import styles from "../styles/privateChat.module.css";
-import type { User } from "../types/auth";
-
 import UserList from "../chat/UserList";
 import MessageList from "../chat/MessageList";
 import ChatInput from "../chat/ChatInput";
-import ReplyPreview from "../chat/ReplyPreview";
-import { UUID } from "crypto";
+import { deletePrivateMessage, updatePrivateMessage, uploadFile } from "../services/messagesService";
+import styles from "../styles/privateChat.module.css";
+import type { User } from "../types/auth";
+import type { Message } from "../types/messages";
 
-interface Message {
-  uuid: UUID;
-  message: string;
-  source_uuid: UUID;
-  destination_uuid: UUID;
-  date: string;
-  is_public: boolean;
-  file_url?: string;
-  reply_to_uuid?: string;
-  edited?: boolean;
-}
+export default function PrivateChat() {
+  const { session } = useAuthContext();
+  const me = session!.owner.uuid;
+  const token = session!.token;
 
-const PrivateChat = () => {
-  const { session, user } = useAuthContext();
-  const [users, setUsers] = useState<User[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [filteredMessages, setFilteredMessages] = useState<Message[]>([]);
-  const [loadingMessages, setLoadingMessages] = useState(false);
-  const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [users, setUsers] = useState<User[]>([]);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [replyTo, setReplyTo] = useState<Message | null>(null);
-  const [messageToEdit, setMessageToEdit] = useState<Message | null>(null);
+  const [editingMessage, setEditingMessage] = useState<Message | null>(null);
 
+  const {
+    messages,
+    sendMessage,
+    updateMessage,
+    deleteMessage,
+    fetchMessages
+  } = usePrivateChat(me, token, selectedUser?.uuid ?? null);
 
-  // Chargement des utilisateurs
   useEffect(() => {
-    console.log("user",user)
-    const fetchUsers = async () => {
-      if (!session?.token || !session?.owner) return;
-      try {
-        const allUsers = await userService.getAll(session.token);
-        const filtered = allUsers.filter((u) => u.uuid !== session.owner.uuid);
-        setUsers(filtered);
-        setFilteredUsers(filtered);
-      } catch {
-        setError("Impossible de charger les utilisateurs.");
-      }
-    };
-    fetchUsers();
-  }, [session]);
+    userService.getAll(token).then((u) => setUsers(u.filter((x) => x.uuid !== me)));
+  }, [token, me]);
 
-  // Chargement des messages privés de l'utilisateur sélectionné
-  useEffect(() => {
-    const fetchMessages = async () => {
-      if (!selectedUser || !session?.token) return;
-      setLoadingMessages(true);
-      try {
-        const data = await getPrivateMessages(selectedUser.uuid, session.token);
-        console.log("selectUser",data)
-        setMessages(data);
-        setFilteredMessages(data);
-        setError("");
-      } catch {
-        setError("Erreur lors de la récupération des messages.");
-      } finally {
-        setLoadingMessages(false);
-      }
-    };
-    fetchMessages();
-  }, [selectedUser, session]);
+  const filteredUsers = useMemo(() => {
+    const term = searchTerm.toLowerCase();
+    return users.filter((u) => u.username.toLowerCase().includes(term));
+  }, [users, searchTerm]);
 
-  // Filtrer utilisateurs et messages selon searchTerm
-  useEffect(() => {
-    setFilteredUsers(
-      users.filter((user) =>
-        user.username.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    );
-
-    if (selectedUser) {
-      setFilteredMessages(
-        messages.filter((msg) =>
-          msg.message.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      );
-    } else {
-      setFilteredMessages([]);
-    }
-  }, [searchTerm, users, messages, selectedUser]);
-
-  // Envoi d'un message (texte + optionnel fichier)
-  const handleSend = async (
-    messageText: string,
-    fileToSend: File | null
-  ) => {
-    if ((!messageText.trim() && !fileToSend) || !selectedUser || !session?.owner || !session?.token) {
-      return;
-    }
+  const handleSend = async (text: string, file?: File) => {
     try {
-      let fileUrl: string | undefined = undefined;
-      if (fileToSend) {
-        fileUrl = await uploadFile(fileToSend, session.token);
-      }
+      const fileUrl = file ? await uploadFile(file, token) : undefined;
 
-      console.log("session",session)
-      const newMsg = await sendPrivateMessage(
-        {
-          message: messageText,
-          is_public: false,
-          source_uuid: user.uuid,
-          destination_uuid: selectedUser.uuid,
-          
-          file_url: fileUrl,
-        },
-        session.token
-      );
-      setMessages((prev) => [...prev, newMsg]);
-      setReplyTo(null);
-      setError("");
-    } catch {
-      setError("Erreur lors de l'envoi du message.");
+      if (editingMessage) {
+        await updatePrivateMessage(me, editingMessage.uuid, {
+          message: text,
+          file_url: fileUrl ?? editingMessage.file_url,
+        }, token);
+        setEditingMessage(null);
+      } else {
+        await sendMessage(text, fileUrl, replyTo?.uuid);
+      }
+    } catch (err) {
+      console.error("Erreur lors de l'envoi ou modification du message :", err);
+    }
+
+    setReplyTo(null);
+  };
+
+  const handleDelete = async (msg: Message) => {
+    if (!window.confirm("Voulez-vous vraiment supprimer ce message ?")) return;
+    try {
+      await deletePrivateMessage(me, msg.uuid, token);
+    } catch (err) {
+      console.error("Erreur lors de la suppression du message :", err);
     }
   };
 
@@ -136,60 +72,47 @@ const PrivateChat = () => {
       <aside className={styles.userSidebar}>
         <h2>Discussions privées</h2>
         <input
-          type="text"
-          placeholder="Rechercher utilisateur ou message..."
-          className={styles.searchInput}
+          placeholder="Rechercher utilisateur..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          className={styles.searchInput}
         />
-        {error && <p className={styles.error}>{error}</p>}
         <UserList
           users={filteredUsers}
           selectedUser={selectedUser}
-          onSelectUser={(user) => {
-            setSelectedUser(user);
+          onSelectUser={(u) => {
+            setSelectedUser(u);
             setReplyTo(null);
+            setEditingMessage(null);
           }}
         />
       </aside>
 
       <main className={styles.chatMain}>
         {!selectedUser ? (
-          <div className={styles.emptyChatMessage}>
-            <p>Sélectionnez un utilisateur pour discuter.</p>
-          </div>
+          <p className={styles.emptyChatMessage}>Sélectionnez un utilisateur.</p>
         ) : (
           <>
             <header className={styles.chatHeader}>
-              Discussion avec <strong>{selectedUser.username}</strong>
+              Chat avec <strong>{selectedUser.username}</strong>
             </header>
 
             <MessageList
-            messages={filteredMessages}
-            sessionUserUUID={session.owner?.uuid || ""}
-            onReply={(msg) => setReplyTo(msg)}
-            onEdit={() => {}}  // <-- AJOUTÉ ici
-            allMessages={messages}
-          />
+              messages={messages}
+              sessionUserUUID={me}
+              selectedUserUuid={selectedUser.uuid}
+              users={users}
+              onEditStart={setEditingMessage}
+            />
 
-            {replyTo && (
-              <ReplyPreview
-                replyTo={replyTo}
-                onCancel={() => setReplyTo(null)}
-              />
-            )}
-
-          <ChatInput
-                  onSend={handleSend}
-                  replyTo={replyTo}
-                  messageToEdit={messageToEdit}
-                  onCancelEdit={() => setMessageToEdit(null)}
-                />
+            <ChatInput
+              onSend={handleSend}
+              editingMessage={editingMessage}
+              onCancelEdit={() => setEditingMessage(null)}
+            />
           </>
         )}
       </main>
     </div>
   );
-};
-
-export default PrivateChat;
+}

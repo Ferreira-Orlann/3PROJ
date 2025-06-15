@@ -1,68 +1,98 @@
-// ChatInput.tsx
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { FiX, FiSend, FiPaperclip } from "react-icons/fi";
 import styles from "../styles/privateChat.module.css";
-
-interface Message {
-  uuid: string;
-  message: string;
-}
+import type { Message } from "../types/messages";
 
 interface Props {
-  onSend: (messageText: string, file: File | null) => void;
-  replyTo: Message | null;
-  messageToEdit: Message | null;
+  editingMessage?: Message | null;
+  onSend: (text: string, file?: File) => void;
   onCancelEdit: () => void;
 }
 
 export default function ChatInput({
+  editingMessage,
   onSend,
-  replyTo,
-  messageToEdit,
   onCancelEdit,
 }: Props) {
-  const [text, setText] = useState("");
+  const [message, setMessage] = useState("");
   const [file, setFile] = useState<File | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (messageToEdit) {
-      setText(messageToEdit.message);
+    if (editingMessage) {
+      setMessage(editingMessage.message ?? "");
+      setFile(null); // On reset le fichier quand on édite (ou tu peux charger fichier si besoin)
+    } else {
+      setMessage("");
+      setFile(null);
     }
-  }, [messageToEdit]);
+  }, [editingMessage]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSend(text, file);
-    setText("");
+  const handleSend = () => {
+    if (!message.trim() && !file) return;
+    onSend(message.trim(), file ?? undefined);
+    setMessage("");
     setFile(null);
   };
 
   return (
-    <form onSubmit={handleSubmit} className={styles.inputBar}>
-      <input
-        ref={inputRef}
-        type="text"
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder={
-          messageToEdit ? "Modifier le message..." : replyTo ? "Répondre..." : "Écrire un message..."
-        }
-      />
-      <input
-        type="file"
-        onChange={(e) => setFile(e.target.files?.[0] || null)}
-        style={{ display: "none" }}
-        id="fileInput"
-      />
-      <label htmlFor="fileInput" className={styles.actionButton}>
-        📎
-      </label>
-      {messageToEdit && (
-        <button type="button" onClick={onCancelEdit} className={styles.actionButton}>
-          ❌
-        </button>
+    <div className={styles.inputBarWrapper}>
+      {editingMessage && (
+        <div className={styles.editingBanner}>
+          ✏️ Modification du message
+          <button
+            onClick={() => {
+              onCancelEdit();
+              setMessage("");
+              setFile(null);
+            }}
+            className={styles.cancelEditButton}
+            title="Annuler la modification"
+          >
+            <FiX size={16} />
+          </button>
+        </div>
       )}
-      <button type="submit">Envoyer</button>
-    </form>
+
+      <div className={styles.inputBar}>
+        <input
+          type="text"
+          placeholder="Écrire un message..."
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          className={styles.textInput}
+        />
+
+
+
+        <button
+          className={styles.sendButton}
+          onClick={handleSend}
+          title={editingMessage ? "Modifier le message" : "Envoyer"}
+        >
+          <FiSend />
+        </button>
+      </div>
+
+      {file && (
+        <div className={styles.selectedFilePreview}>
+          {/\.(jpe?g|png|gif|webp)$/i.test(file.name) ? (
+            <img
+              src={URL.createObjectURL(file)}
+              alt="Prévisualisation"
+              className={styles.previewImage}
+            />
+          ) : (
+            <div className={styles.selectedFileName}>📎 {file.name}</div>
+          )}
+          <button
+            onClick={() => setFile(null)}
+            className={styles.removeFileButton}
+            title="Supprimer le fichier"
+          >
+            <FiX />
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
