@@ -47,7 +47,6 @@ export const {
   setPushNotifications,
 } = settingsSlice.actions;
 
-// Selectors
 export const selectDarkMode = (state: RootState) => state.settings.darkMode;
 export const selectEmailNotifications = (state: RootState) => state.settings.emailNotifications;
 export const selectPushNotifications = (state: RootState) => state.settings.pushNotifications;

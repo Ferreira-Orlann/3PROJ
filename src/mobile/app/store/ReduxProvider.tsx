@@ -9,10 +9,8 @@ interface ReduxProviderProps {
 
 export default function ReduxProvider({ children }: ReduxProviderProps) {
   useEffect(() => {
-    // Setup RTK Query listeners when the component mounts
     const unsubscribeListeners = setupListeners();
     
-    // Cleanup listeners when component unmounts
     return () => {
       if (unsubscribeListeners) {
         unsubscribeListeners();

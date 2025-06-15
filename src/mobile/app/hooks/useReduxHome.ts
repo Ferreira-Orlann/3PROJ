@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { Alert } from "react-native";
 import { UUID } from "crypto";
-import { CreateWorkspaceForm } from "../screens/homeScreen.types";
+import { CreateWorkspaceForm } from "../styles/homeScreen.types";
 import { useAuth } from "../context/AuthContext";
 
 // Import API hooks from Redux

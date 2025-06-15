@@ -44,6 +44,11 @@ export const styles = StyleSheet.create({
         fontSize: 36,
         fontWeight: "bold",
     },
+    avatarImage: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+    },
     editAvatarButton: {
         position: "absolute",
         bottom: 0,

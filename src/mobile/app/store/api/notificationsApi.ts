@@ -7,8 +7,7 @@ export const notificationsApi = apiSlice.injectEndpoints({
     getUserNotifications: builder.query<Notification[], UUID>({
       query: (userUuid) => `/notifications/users/${userUuid}/notifications`,
       transformResponse: (response: any[]) => {
-        // La transformation est déjà gérée dans le service d'API, mais nous pourrions
-        // ajouter une transformation supplémentaire ici si nécessaire
+        
         return response;
       },
       providesTags: (result) => 
@@ -23,7 +22,7 @@ export const notificationsApi = apiSlice.injectEndpoints({
     getUnreadNotifications: builder.query<Notification[], UUID>({
       query: (userUuid) => `/notifications/users/${userUuid}/notifications/unread`,
       transformResponse: (response: any[]) => {
-        // La transformation est déjà gérée dans le service d'API
+        
         return response;
       },
       providesTags: (result) => 

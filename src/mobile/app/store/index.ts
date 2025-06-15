@@ -23,14 +23,11 @@ export const store = configureStore({
     }).concat(apiSlice.middleware),
 });
 
-// Setup listeners for RTK Query cache invalidation and other side effects
 import { setupListeners as setupApiListeners } from '@reduxjs/toolkit/query';
 
-// Setup listeners middleware for RTK Query
 export const setupListeners = () => setupApiListeners(store.dispatch);
 
 export const persistor = persistStore(store);
 
-// Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

@@ -59,9 +59,24 @@ export default function WorkspaceScreen() {
         showAddMemberModal: false,
         showRemoveMemberModal: false,
         showRemoveChannelModal: false,
+        showEditChannelModal: false,
         channelToRemove: null,
+        channelToEdit: null,
         memberToRemove: null,
     });
+    
+    // État pour l'édition des informations du canal
+    const [editedChannelInfo, setEditedChannelInfo] = useState<{
+        name: string;
+        description: string;
+        is_public: boolean;
+    }>({ name: "", description: "", is_public: true });
+
+    // État pour stocker les membres du canal en cours d'édition
+    const [channelMembers, setChannelMembers] = useState<Member[]>([]);
+    
+    // État pour indiquer si une invitation est en cours
+    const [invitingMember, setInvitingMember] = useState<UUID | null>(null);
 
     // Définition des onglets
     const tabs = [
@@ -366,7 +381,7 @@ export default function WorkspaceScreen() {
             memberToRemove: member,
         });
     };
-
+    
     // Ouvrir le modal de suppression de canal
     const handleOpenRemoveChannelModal = (channel: Channel) => {
         setModalState({
@@ -375,8 +390,117 @@ export default function WorkspaceScreen() {
             channelToRemove: channel,
         });
     };
+    
+    // Ouvrir le modal d'édition de canal
+    const handleOpenEditChannelModal = async (channel: Channel) => {
+        setEditedChannelInfo({
+            name: channel.name,
+            description: channel.description,
+            is_public: channel.is_public,
+        });
+        
+        // Récupérer les membres du canal
+        try {
+            const channelMembersList = await channelService.getChannelMembers(channel.uuid);
+            setChannelMembers(channelMembersList);
+        } catch (error) {
+            console.error("Erreur lors de la récupération des membres du canal:", error);
+            setChannelMembers([]);
+        }
+        
+        setModalState({
+            ...modalState,
+            showEditChannelModal: true,
+            channelToEdit: channel,
+        });
+    };
+    
+    // Mettre à jour le formulaire d'édition de canal
+    const updateEditedChannelInfo = (field: string, value: any) => {
+        setEditedChannelInfo({
+            ...editedChannelInfo,
+            [field]: value,
+        });
+    };
+    
+    // Inviter un membre à rejoindre le canal
+    const handleInviteMemberToChannel = async (memberId: UUID) => {
+        if (!modalState.channelToEdit) return;
+        
+        setInvitingMember(memberId);
+        
+        try {
+            await channelService.inviteMemberToChannel(
+                modalState.channelToEdit.uuid,
+                memberId
+            );
+            
+            // Mettre à jour la liste des membres du canal
+            const updatedMembers = await channelService.getChannelMembers(modalState.channelToEdit.uuid);
+            setChannelMembers(updatedMembers);
+            
+            window.alert("Invitation envoyée avec succès.");
+        } catch (error) {
+            console.error("Erreur lors de l'invitation du membre:", error);
+            window.alert("Erreur lors de l'envoi de l'invitation.");
+        } finally {
+            setInvitingMember(null);
+        }
+    };
+    
+    // Vérifier si un membre est déjà dans le canal
+    const isMemberInChannel = (memberId: UUID): boolean => {
+        return channelMembers.some(member => member.uuid === memberId);
+    };
+    
+    // Gérer la mise à jour d'un canal
+    const handleUpdateChannel = async () => {
+        try {
+            setIsLoading(true);
+            
+            if (!workspace || !modalState.channelToEdit) {
+                throw new Error("Workspace ou canal non défini");
+            }
+            
+            // Préparer les données à mettre à jour
+            const channelData = {
+                name: editedChannelInfo.name,
+                description: editedChannelInfo.description,
+                is_public: editedChannelInfo.is_public,
+            };
+            
+            const updatedChannel = await channelService.updateChannel(
+                workspaceId as UUID,
+                modalState.channelToEdit.uuid,
+                channelData
+            );
+            
+            // Mettre à jour l'état local
+            setWorkspace({
+                ...workspace,
+                channels: workspace.channels.map(c => 
+                    c.uuid === modalState.channelToEdit?.uuid 
+                        ? {
+                            ...c,
+                            name: updatedChannel.name,
+                            description: updatedChannel.description,
+                            is_public: updatedChannel.is_public,
+                          }
+                        : c
+                ),
+            });
+            
+            handleCloseModals();
+            window.alert("Les informations du canal ont été mises à jour avec succès.");
+        } catch (err) {
+            console.error("Erreur lors de la mise à jour du canal:", err);
+            window.alert("Impossible de mettre à jour les informations du canal.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-    // Ouvrir le modal de création de canal
+
     const handleOpenNewChannelModal = () => {
         setModalState({
             ...modalState,
@@ -384,7 +508,6 @@ export default function WorkspaceScreen() {
         });
     };
 
-    // Ouvrir le modal d'ajout de membre
     const handleOpenAddMemberModal = () => {
         setModalState({
             ...modalState,
@@ -392,19 +515,22 @@ export default function WorkspaceScreen() {
         });
     };
 
-    // Fermer tous les modals
     const handleCloseModals = () => {
         setModalState({
             showNewChannelModal: false,
             showAddMemberModal: false,
             showRemoveMemberModal: false,
             showRemoveChannelModal: false,
+            showEditChannelModal: false,
             channelToRemove: null,
+            channelToEdit: null,
             memberToRemove: null,
         });
+        // Réinitialiser les états liés au modal d'édition de canal
+        setChannelMembers([]);
+        setInvitingMember(null);
     };
 
-    // Mettre à jour le formulaire de création de canal
     const updateNewChannelForm = (field: string, value: any) => {
         setNewChannelForm({
             ...newChannelForm,
@@ -531,13 +657,26 @@ export default function WorkspaceScreen() {
                             style={styles.memberActionButton}
                             onPress={(e) => {
                                 e.stopPropagation();
+                                handleOpenEditChannelModal(item);
+                            }}
+                        >
+                            <Ionicons
+                                name="create-outline"
+                                size={22}
+                                color="#8e9297"
+                            />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.memberActionButton}
+                            onPress={(e) => {
+                                e.stopPropagation();
                                 handleOpenRemoveChannelModal(item);
                             }}
                         >
                             <Ionicons
-                                name="remove-circle-outline"
+                                name="trash-outline"
                                 size={22}
-                                color="#8e9297"
+                                color="#ED4245"
                             />
                         </TouchableOpacity>
                     </View>
@@ -1687,69 +1826,278 @@ export default function WorkspaceScreen() {
                 </View>
             </Modal>
 
-            {/* Remove Channel Confirmation Modal */}
+            {/* Modal pour supprimer un canal */}
             <Modal
                 visible={modalState.showRemoveChannelModal}
                 transparent={true}
                 animationType="fade"
-                onRequestClose={() => handleCloseModals()}
-                statusBarTranslucent={true}
+                onRequestClose={handleCloseModals}
             >
-                <View style={styles.confirmModalOverlay}>
-                    <View style={styles.confirmModalContent}>
-                        <View style={styles.confirmModalHeader}>
-                            <Ionicons
-                                name="warning"
-                                size={28}
-                                color="#ED4245"
-                            />
-                            <Text style={styles.confirmModalTitle}>
-                                Supprimer un canal
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>
+                                Supprimer le canal
                             </Text>
-                        </View>
-
-                        <View style={styles.confirmModalBody}>
-                            <Text style={styles.confirmModalText}>
-                                Êtes-vous sûr de vouloir supprimer{" "}
-                                <Text style={styles.confirmModalHighlight}>
-                                    {modalState.channelToRemove?.name ||
-                                        "ce canal"}
-                                </Text>{" "}
-                                de cet espace de travail ?
-                            </Text>
-                            <Text style={styles.confirmModalSubtext}>
-                                Cette action est irréversible et le canal sera
-                                supprimé immédiatement.
-                            </Text>
-                        </View>
-
-                        <View style={styles.confirmModalFooter}>
                             <TouchableOpacity
-                                style={styles.confirmCancelButton}
-                                onPress={() => handleCloseModals()}
-                            >
-                                <Text style={styles.confirmCancelButtonText}>
-                                    Annuler
-                                </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={styles.confirmDeleteButton}
-                                onPress={() =>
-                                    modalState.channelToRemove &&
-                                    handleRemoveChannel(
-                                        modalState.channelToRemove.uuid,
-                                    )
-                                }
+                                onPress={handleCloseModals}
+                                style={styles.closeButton}
                             >
                                 <Ionicons
-                                    name="trash-outline"
-                                    size={18}
-                                    color="#fff"
+                                    name="close"
+                                    size={24}
+                                    color="#8e9297"
                                 />
-                                <Text style={styles.confirmDeleteButtonText}>
-                                    Supprimer
-                                </Text>
                             </TouchableOpacity>
+                        </View>
+
+                        <View style={styles.modalBody}>
+                            <Text style={styles.modalText}>
+                                Êtes-vous sûr de vouloir supprimer le canal
+                                {modalState.channelToRemove?.name
+                                    ? ` "${modalState.channelToRemove.name}"`
+                                    : ""}? Cette action est irréversible.
+                            </Text>
+
+                            <View style={styles.modalActions}>
+                                <TouchableOpacity
+                                    style={styles.cancelButton}
+                                    onPress={handleCloseModals}
+                                >
+                                    <Text style={styles.cancelButtonText}>
+                                        Annuler
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={styles.deleteButton}
+                                    onPress={() =>
+                                        modalState.channelToRemove &&
+                                        handleRemoveChannel(
+                                            modalState.channelToRemove.uuid,
+                                        )
+                                    }
+                                >
+                                    <Text style={styles.deleteButtonText}>
+                                        Supprimer
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Modal pour éditer un canal */}
+            <Modal
+                visible={modalState.showEditChannelModal}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={handleCloseModals}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>
+                                Modifier le canal
+                            </Text>
+                            <TouchableOpacity
+                                onPress={handleCloseModals}
+                                style={styles.closeButton}
+                            >
+                                <Ionicons
+                                    name="close"
+                                    size={24}
+                                    color="#8e9297"
+                                />
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={styles.modalBody}>
+                            <View style={styles.formGroup}>
+                                <Text style={styles.formLabel}>Nom du canal</Text>
+                                <TextInput
+                                    style={styles.formInput}
+                                    value={editedChannelInfo.name}
+                                    onChangeText={(text) =>
+                                        updateEditedChannelInfo("name", text)
+                                    }
+                                    placeholder="Nom du canal"
+                                    placeholderTextColor="#8e9297"
+                                />
+                            </View>
+
+                            <View style={styles.formGroup}>
+                                <Text style={styles.formLabel}>Description</Text>
+                                <TextInput
+                                    style={[styles.formInput, styles.textArea]}
+                                    value={editedChannelInfo.description}
+                                    onChangeText={(text) =>
+                                        updateEditedChannelInfo("description", text)
+                                    }
+                                    placeholder="Description du canal"
+                                    placeholderTextColor="#8e9297"
+                                    multiline={true}
+                                    numberOfLines={4}
+                                />
+                            </View>
+
+                            <View style={styles.formGroup}>
+                                <Text style={styles.formLabel}>Visibilité</Text>
+                                <View style={styles.visibilityOptions}>
+                                    <TouchableOpacity
+                                        style={[
+                                            styles.visibilityOption,
+                                            editedChannelInfo.is_public &&
+                                                styles.visibilityOptionActive,
+                                        ]}
+                                        onPress={() =>
+                                            updateEditedChannelInfo("is_public", true)
+                                        }
+                                    >
+                                        <Ionicons
+                                            name="globe-outline"
+                                            size={20}
+                                            color={
+                                                editedChannelInfo.is_public
+                                                    ? "#fff"
+                                                    : "#8e9297"
+                                            }
+                                        />
+                                        <Text
+                                            style={[
+                                                styles.visibilityOptionText,
+                                                editedChannelInfo.is_public &&
+                                                    styles.visibilityOptionTextActive,
+                                            ]}
+                                        >
+                                            Public
+                                        </Text>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity
+                                        style={[
+                                            styles.visibilityOption,
+                                            !editedChannelInfo.is_public &&
+                                                styles.visibilityOptionActive,
+                                        ]}
+                                        onPress={() =>
+                                            updateEditedChannelInfo("is_public", false)
+                                        }
+                                    >
+                                        <Ionicons
+                                            name="lock-closed-outline"
+                                            size={20}
+                                            color={
+                                                !editedChannelInfo.is_public
+                                                    ? "#fff"
+                                                    : "#8e9297"
+                                            }
+                                        />
+                                        <Text
+                                            style={[
+                                                styles.visibilityOptionText,
+                                                !editedChannelInfo.is_public &&
+                                                    styles.visibilityOptionTextActive,
+                                            ]}
+                                        >
+                                            Privé
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                            
+                            {/* Section des membres du workspace */}
+                            <View style={styles.formGroup}>
+                                <Text style={styles.formLabel}>Membres du workspace</Text>
+                                <Text style={styles.formDescription}>
+                                    Cliquez sur un membre pour l'inviter à rejoindre ce canal.
+                                </Text>
+                                
+                                <View style={styles.channelMembersList}>
+                                    {workspace?.members.map((member) => {
+                                        const isInChannel = isMemberInChannel(member.uuid);
+                                        const isInviting = invitingMember === member.uuid;
+                                        
+                                        return (
+                                            <View key={member.uuid} style={styles.channelMemberItem}>
+                                                <View style={styles.channelMemberItemAvatar}>
+                                                    <Text style={styles.channelMemberItemAvatarText}>
+                                                        {(member.name || member.user.username || "U").charAt(0)}
+                                                    </Text>
+                                                </View>
+                                                <View style={styles.channelMemberItemInfo}>
+                                                    <Text style={styles.channelMemberItemName}>
+                                                        {member.name || member.user.username}
+                                                    </Text>
+                                                    
+                                                    <TouchableOpacity
+                                                        style={[
+                                                            styles.channelInviteButton, 
+                                                            isInviting && styles.channelInvitingButton,
+                                                            isInChannel && styles.channelMemberButton
+                                                        ]}
+                                                        onPress={() => !isInChannel && handleInviteMemberToChannel(member.uuid)}
+                                                        disabled={isInChannel || isInviting}
+                                                    >
+                                                        {isInviting ? (
+                                                            <>
+                                                                <Ionicons name="hourglass-outline" size={16} color="#fff" />
+                                                                <Text style={styles.channelInviteButtonText}>En cours...</Text>
+                                                            </>
+                                                        ) : isInChannel ? (
+                                                            <>
+                                                                <Ionicons name="checkmark" size={16} color="#fff" />
+                                                                <Text style={styles.channelInviteButtonText}>Membre</Text>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <Ionicons name="add-circle-outline" size={16} color="#fff" />
+                                                                <Text style={styles.channelInviteButtonText}>Inviter</Text>
+                                                            </>
+                                                        )}
+                                                    </TouchableOpacity>
+                                                </View>
+                                            </View>
+                                        );
+                                    })}
+                                </View>
+                            </View>
+
+                            <View style={styles.modalActions}>
+                                <TouchableOpacity
+                                    style={styles.cancelButton}
+                                    onPress={handleCloseModals}
+                                >
+                                    <Text style={styles.cancelButtonText}>
+                                        Annuler
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={styles.saveButton}
+                                    onPress={handleUpdateChannel}
+                                >
+                                    <Text style={styles.saveButtonText}>
+                                        Enregistrer
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+
+                            <View style={styles.dangerZone}>
+                                <Text style={styles.dangerZoneTitle}>Zone de danger</Text>
+                                <TouchableOpacity
+                                    style={styles.deleteButton}
+                                    onPress={() => {
+                                        handleCloseModals();
+                                        if (modalState.channelToEdit) {
+                                            handleOpenRemoveChannelModal(modalState.channelToEdit);
+                                        }
+                                    }}
+                                >
+                                    <Text style={styles.deleteButtonText}>
+                                        Supprimer ce canal
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
                     </View>
                 </View>

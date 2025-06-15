@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-// Liste d'emojis organisés par catégories
+
 const EMOJI_DATA = {
     "Smileys & Emotion": [
         "😀",
@@ -252,7 +252,7 @@ const EMOJI_DATA = {
     ],
 };
 
-// Convertir les données en format pour FlatList
+
 const CATEGORIES = Object.keys(EMOJI_DATA);
 const ALL_EMOJIS = Object.values(EMOJI_DATA).flat();
 
@@ -269,9 +269,9 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({
     const [selectedCategory, setSelectedCategory] = useState(CATEGORIES[0]);
 
     const screenWidth = Dimensions.get("window").width;
-    const numColumns = Math.floor(screenWidth / 45); // Ajustez selon la taille d'emoji souhaitée
+    const numColumns = Math.floor(screenWidth / 45);
 
-    // Filtrer les emojis en fonction de la recherche
+
     const filteredEmojis = searchText.trim()
         ? ALL_EMOJIS.filter((emoji) => emoji.includes(searchText))
         : EMOJI_DATA[selectedCategory as keyof typeof EMOJI_DATA];

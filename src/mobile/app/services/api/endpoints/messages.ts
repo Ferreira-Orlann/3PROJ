@@ -68,9 +68,6 @@ const messageService = {
     },
 
     getDirectMessages: async (recipientUuid: UUID): Promise<Message[]> => {
-        // Pour les messages privés, on utilise la nouvelle API users/recipientId/messages
-        // où recipientId est l'ID de l'utilisateur avec qui on discute
-
         console.log(`Fetching direct messages with user ${recipientUuid}`);
         const response = await apiClient.get<Message[]>(
             `/users/${recipientUuid}/messages`,
@@ -94,10 +91,6 @@ const messageService = {
         recipientUuid: UUID,
         messageData: CreateMessageData,
     ): Promise<Message> => {
-        // Pour les messages privés, on utilise la nouvelle API users/recipientId/messages
-        // où recipientId est l'ID de l'utilisateur à qui on envoie le message
-
-        // Vérification des paramètres
         if (!recipientUuid) {
             console.error("sendDirectMessage - recipientUuid est vide ou null");
             throw new Error("L'UUID du destinataire est requis");
@@ -119,7 +112,6 @@ const messageService = {
             );
         }
 
-        // S'assurer que les UUIDs dans messageData correspondent aux attentes
         if (messageData.destination_uuid !== recipientUuid) {
             console.warn(
                 "sendDirectMessage - destination_uuid ne correspond pas à recipientUuid, correction automatique",

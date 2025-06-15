@@ -20,17 +20,14 @@ export default function HomeScreen() {
     const insets = useSafeAreaInsets();
     const router = useRouter();
 
-    // Handle workspace selection
     const handleWorkspaceSelect = (workspaceId: UUID) => {
         console.log("Navigating to workspace with ID:", workspaceId);
 
-        // Vérifier si workspaceId est défini
         if (!workspaceId) {
             console.error("Erreur: ID du workspace non défini");
             return;
         }
 
-        // Convertir en string si nécessaire
         const id = typeof workspaceId === "object" ? workspaceId : workspaceId;
 
         console.log("ID formaté pour la navigation:", id);
@@ -42,7 +39,6 @@ export default function HomeScreen() {
             <Sidebar />
             <View style={[styles.container, { paddingTop: insets.top }]}>
                 <View style={styles.mainContent}>
-                    {/* Utiliser le WorkspaceListContainer qui intègre le hook workspaces */}
                     <WorkspaceListContainer
                         onSelectWorkspace={handleWorkspaceSelect}
                     />

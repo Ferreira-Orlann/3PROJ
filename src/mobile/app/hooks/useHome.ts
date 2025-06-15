@@ -7,7 +7,7 @@ import {
     HomeScreenState,
     CreateWorkspaceForm,
     Workspace,
-} from "../screens/homeScreen.types";
+} from "../styles/homeScreen.types";
 import workspaceService from "../services/api/endpoints/workspaces";
 import { useAuth } from "../context/AuthContext";
 

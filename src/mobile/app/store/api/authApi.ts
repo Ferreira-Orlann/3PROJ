@@ -13,11 +13,11 @@ export const authApi = apiSlice.injectEndpoints({
       async onQueryStarted(_, { queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          // Store token in AsyncStorage
+          
           if (data.token) {
             await AsyncStorage.setItem('userToken', data.token);
           }
-          // Store user data if available
+          
           if (data.user) {
             await AsyncStorage.setItem('userData', JSON.stringify(data.user));
           }
@@ -45,7 +45,7 @@ export const authApi = apiSlice.injectEndpoints({
       async onQueryStarted(_, { queryFulfilled }) {
         try {
           await queryFulfilled;
-          // Clear stored auth data
+          
           await AsyncStorage.removeItem('userToken');
           await AsyncStorage.removeItem('userData');
         } catch (error) {

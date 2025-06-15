@@ -14,7 +14,6 @@ import ChatContainer from "@/app/components/chat/ChatContainer";
 import BottomBar from "@/app/components/layout/bottomBar";
 import WebSocketDebugger from "@/app/components/debug/WebSocketDebugger";
 
-// Importation des fichiers séparés
 import { Message as UIMessage } from "../../../services/private_messages";
 import { useDirectMessage } from "@/app/hooks/private_messages";
 import { styles } from "@/app/styles/private_messages";
@@ -29,8 +28,6 @@ export default function DirectMessageScreen() {
     const router = useRouter();
     const userId = params.userId as string;
 
-    // Utiliser le hook personnalisé pour la logique de l'écran
-    // Utiliser une assertion de type pour s'assurer que TypeScript reconnaît correctement le type de retour
     const directMessageHook = useDirectMessage(userId);
     const {
         user,
@@ -41,7 +38,6 @@ export default function DirectMessageScreen() {
         handleSendMessage,
     } = directMessageHook;
 
-    // Logs détaillés pour déboguer
     console.log("DirectMessageScreen - userId:", userId);
     console.log("DirectMessageScreen - currentUserUuid:", currentUserUuid);
     console.log("DirectMessageScreen - user:", JSON.stringify(user));
@@ -53,14 +49,10 @@ export default function DirectMessageScreen() {
         );
     }
 
-    // Convertir les messages UI en format API pour le ChatContainer
-    // Le ChatContainer attend des messages au format API
     const apiMessages = useMemo(() => {
         return messages.map((uiMessage) => {
-            // Créer un message au format API à partir du message UI
             const reactions: ApiReaction[] = [];
 
-            // Convertir les réactions si elles existent
             if (uiMessage.reactions && uiMessage.reactions.length > 0) {
                 uiMessage.reactions.forEach((r) => {
                     const userUuid = r.users[0] || currentUserUuid;
@@ -76,7 +68,6 @@ export default function DirectMessageScreen() {
                 });
             }
 
-            // Déterminer la source du message
             let source: string | { uuid: UUID; username: string };
             if (uiMessage.sender === "Moi" && currentUserUuid) {
                 source = {
@@ -90,7 +81,6 @@ export default function DirectMessageScreen() {
                 };
             }
 
-            // Déterminer le destinataire
             let destination_user: string | { uuid: UUID } | null;
             if (uiMessage.sender === "Moi") {
                 destination_user = { uuid: userId as UUID };
@@ -113,10 +103,8 @@ export default function DirectMessageScreen() {
         });
     }, [messages, currentUserUuid, userId]);
 
-    // Log pour déboguer la conversion des messages
     console.log("Nombre de messages API après conversion:", apiMessages.length);
 
-    // Afficher un état de chargement
     if (loading) {
         return (
             <>
@@ -138,7 +126,6 @@ export default function DirectMessageScreen() {
         );
     }
 
-    // Afficher un message d'erreur si une erreur s'est produite
     if (error || !user) {
         return (
             <>
@@ -228,17 +215,15 @@ export default function DirectMessageScreen() {
                         </View>
                     </View>
 
-                    {/* Chat container */}
                     <ChatContainer
                         workspaceUuid={null}
                         userUuid={currentUserUuid as UUID}
                         channelUuid={userId as UUID}
                         channelName={user?.name || ""}
                         currentUser="Moi"
-                        initialMessages={apiMessages} // Passer les messages convertis au format API
+                        initialMessages={apiMessages} 
                         onSendMessage={handleSendMessage}
                     />
-                    {/* Afficher le nombre de messages pour déboguer */}
                     <View
                         style={{
                             position: "absolute",
@@ -260,4 +245,3 @@ export default function DirectMessageScreen() {
     );
 }
 
-// Les styles sont importés depuis index.styles.ts

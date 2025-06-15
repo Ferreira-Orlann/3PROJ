@@ -14,12 +14,15 @@ export interface User {
 
 export interface UpdateUserData {
     username?: string;
-    fullName?: string;
+    firstname?: string;
+    lastname?: string;
     email?: string;
-    password?: string;
+    mdp?: string;
     currentPassword?: string;
-    avatar?: File;
+    address?: string;
+    avatar?: File | string;
     status?: "en ligne" | "absent" | "hors ligne";
+    uuid?: string;
 }
 
 const userService = {
@@ -41,18 +44,39 @@ const userService = {
     },
 
     updateProfile: async (userData: UpdateUserData): Promise<User> => {
-        if (userData.avatar) {
+        // Get the user UUID
+        const uuid = userData.uuid;
+        if (!uuid) {
+            throw new Error("UUID de l'utilisateur requis pour la mise à jour du profil");
+        }
+        
+        const { uuid: _, ...dataToSend } = userData;
+        
+        if (dataToSend.avatar) {
             const formData = new FormData();
 
-            Object.entries(userData).forEach(([key, value]) => {
+            Object.entries(dataToSend).forEach(([key, value]) => {
                 if (key === "avatar") {
-                    formData.append("avatar", value);
-                } else if (value !== undefined) {
+                    if (typeof value === 'object' && 'uri' in value) {
+                        const imageFile = value as unknown as {
+                            uri: string;
+                            name: string;
+                            type: string;
+                        };
+                        formData.append("avatar", {
+                            uri: imageFile.uri,
+                            name: imageFile.name,
+                            type: imageFile.type
+                        } as unknown as Blob);
+                    } else {
+                        formData.append("avatar", value.toString());
+                    }
+                } else if (value !== undefined && key !== "uuid") {
                     formData.append(key, value.toString());
                 }
             });
 
-            const response = await apiClient.put<User>("/users", formData, {
+            const response = await apiClient.put<User>(`/users/${uuid}`, formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
@@ -60,7 +84,7 @@ const userService = {
             return response.data;
         }
 
-        const response = await apiClient.put<User>("/users", userData);
+        const response = await apiClient.put<User>(`/users/${uuid}`, dataToSend);
         return response.data;
     },
 

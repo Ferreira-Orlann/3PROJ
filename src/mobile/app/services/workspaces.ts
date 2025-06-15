@@ -74,7 +74,7 @@ export interface ModalState {
     memberToRemove: Member | null;
 }
 
-// Default export for routing purposes
+
 const WorkspaceTypes = {};
 
 export default WorkspaceTypes;

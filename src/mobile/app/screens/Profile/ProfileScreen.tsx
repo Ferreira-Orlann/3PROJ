@@ -8,19 +8,63 @@ import {
     Switch,
     Modal,
     ActivityIndicator,
+    Image,
+    Alert,
+    StyleSheet,
+    ImageStyle,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
+import * as ImagePicker from "expo-image-picker";
+import { API_BASE_URL } from "../../services/api/config";
+import { useGetFileUrlQuery } from "../../store/api/filesApi";
+import { UUID } from "crypto";
 
-// Importation des fichiers séparés
-import { useProfileManagement } from "../../hooks/useProfils";
+// Avatar Image Component
+interface AvatarImageProps {
+    selectedImage: string | null;
+    avatarUuid: string | undefined;
+    style: ImageStyle;
+}
+
+const AvatarImage = ({ selectedImage, avatarUuid, style }: AvatarImageProps) => {
+    const skipQuery = !avatarUuid || selectedImage !== null || (avatarUuid && avatarUuid.startsWith('http'));
+    
+    const { data: fileUrl, isLoading } = useGetFileUrlQuery(
+        avatarUuid as unknown as UUID, 
+        {
+            skip: skipQuery || !avatarUuid,
+        }
+    );
+    
+    const imageUri = selectedImage || 
+                    (avatarUuid?.startsWith('http') ? avatarUuid : fileUrl);
+    
+    if (isLoading) {
+        return <ActivityIndicator size="small" color="#0000ff" />;
+    }
+    
+    if (!imageUri) {
+        return null;
+    }
+    
+    return (
+        <Image 
+            source={{ uri: imageUri }} 
+            style={style} 
+            resizeMode="cover"
+        />
+    );
+};
+
+import { useProfileManagement, UserProfile } from "../../hooks/useProfils";
 import { styles } from "../../styles/profils";
 
 export default function ProfileScreen() {
-    // États locaux pour suivre les différentes opérations
     const [isSaving, setIsSaving] = useState(false);
     const [changingPassword, setChangingPassword] = useState(false);
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
     const {
         userProfile,
@@ -38,8 +82,43 @@ export default function ProfileScreen() {
         isExporting,
         exportUserData,
         saveProfile,
-        isLoading, // Utiliser l'état de chargement du hook au lieu de le gérer localement
+        isLoading,
     } = useProfileManagement();
+    
+    const handleSelectProfileImage = async () => {
+        try {
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== 'granted') {
+                Alert.alert('Permission refusée', 'Nous avons besoin de votre permission pour accéder à vos photos.');
+                return;
+            }
+
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                aspect: [1, 1],
+                quality: 0.5,
+            });
+
+            if (!result.canceled) {
+                setSelectedImage(result.assets[0].uri);
+                
+                const fileNameParts = result.assets[0].uri.split('/');
+                const fileName = fileNameParts[fileNameParts.length - 1];
+                
+                const avatarFile = {
+                    uri: result.assets[0].uri,
+                    name: fileName,
+                    type: 'image/jpeg', 
+                };
+                
+                updateProfile("avatarFile" as keyof UserProfile, avatarFile as any);
+            }
+        } catch (error) {
+            console.error('Erreur lors de la sélection de l\'image:', error);
+            Alert.alert('Erreur', 'Une erreur est survenue lors de la sélection de l\'image');
+        }
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -98,12 +177,21 @@ export default function ProfileScreen() {
                     <>
                         <View style={styles.avatarSection}>
                             <View style={styles.avatarContainer}>
-                                <Text style={styles.avatarText}>
-                                    {userProfile.firstName.charAt(0)}
-                                    {userProfile.lastName.charAt(0)}
-                                </Text>
+                                {selectedImage || userProfile.uuid ? (
+                                    <AvatarImage 
+                                        selectedImage={selectedImage} 
+                                        avatarUuid={userProfile.uuid} 
+                                        style={styles.avatarImage}
+                                    />
+                                ) : (
+                                    <Text style={styles.avatarText}>
+                                        {userProfile.firstName.charAt(0)}
+                                        {userProfile.lastName.charAt(0)}
+                                    </Text>
+                                )}
                                 <TouchableOpacity
                                     style={styles.editAvatarButton}
+                                    onPress={handleSelectProfileImage}
                                 >
                                     <FontAwesome
                                         name="camera"

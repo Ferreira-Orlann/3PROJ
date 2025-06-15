@@ -12,17 +12,14 @@ import { FontAwesome } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 
-// Importation des fichiers séparés
 import { Notification } from "../../services/notifications";
 import useNotificationsApi from "../../hooks/useNotifications";
 import useWebSocket from "../../hooks/useWebSocket";
 import { styles } from "../../styles/Notifications";
 
 export default function NotificationsScreen() {
-    // Utilisation du hook WebSocket pour la connexion en temps réel
     const { socket } = useWebSocket();
     
-    // Utilisation du hook personnalisé pour la gestion des notifications
     const {
         notifications,
         preferences,
@@ -36,14 +33,12 @@ export default function NotificationsScreen() {
         refreshNotifications
     } = useNotificationsApi(socket);
     
-    // Rafraîchir les notifications quand l'écran est affiché
     React.useEffect(() => {
         refreshNotifications();
         
-        // Configurer un intervalle pour rafraîchir périodiquement les notifications
         const refreshInterval = setInterval(() => {
             refreshNotifications();
-        }, 5000); // Rafraîchir toutes les 5 secondes
+        }, 5000); 
         
         return () => clearInterval(refreshInterval);
     }, [refreshNotifications]);
@@ -52,10 +47,8 @@ export default function NotificationsScreen() {
         <TouchableOpacity
             style={[styles.notification, !item.read && styles.unread]}
             onPress={() => {
-                // Marquer la notification comme lue
                 markAsRead(item.uuid);
 
-                // Naviguer vers la source de la notification
                 if (
                     item.sourceType === "channel" &&
                     item.workspaceId &&
@@ -94,7 +87,6 @@ export default function NotificationsScreen() {
         </TouchableOpacity>
     );
 
-    // Rendu du modal des préférences de notification
     const renderPreferencesModal = () => (
         <Modal
             visible={showPreferences}

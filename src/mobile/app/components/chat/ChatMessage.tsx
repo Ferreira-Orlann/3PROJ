@@ -12,7 +12,7 @@ import reactionService, { Reaction } from "../../services/api/endpoints/reaction
 import { useAuth } from "../../context/AuthContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// Type pour les réactions regroupées dans l'UI (nécessaire pour l'affichage)
+
 interface UIReaction {
     emoji: string;
     count: number;
@@ -60,7 +60,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     const isMounted = useRef(true);
     const { user } = useAuth();
 
-    // Fonction pour obtenir l'UUID de l'utilisateur courant
+
     const getCurrentUserUuid = useCallback(async () => {
         if (userUuid) {
             return userUuid;
@@ -79,7 +79,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         return null;
     }, [userUuid]);
 
-    // Fonction pour charger les réactions depuis l'API
+
     const fetchReactions = useCallback(async () => {
         if (!message.uuid || !channelUuid || isLoadingReactions) {
             return;
@@ -90,9 +90,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         try {
             let reactions: Reaction[] = [];
 
-            // Déterminer si nous sommes dans un message direct ou un canal de workspace
+
             if (workspaceUuid) {
-                // Canal de workspace
+
                 reactions = await reactionService.getReactions(
                     workspaceUuid,
                     channelUuid,
@@ -100,7 +100,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                 );
                 
             } else {
-                // Message direct
+
                 const currentUserUuid = await getCurrentUserUuid();
                 if (currentUserUuid) {
                     reactions = await reactionService.getDirectMessageReactions(
@@ -111,9 +111,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                 }
             }
 
-            // Vérifier que les réactions appartiennent bien à ce message
+
             const filteredReactions = reactions.filter(reaction => {
-                // Vérifier si la réaction a un message et si l'UUID du message correspond
+
                 return reaction.message && 
                        ((typeof reaction.message === 'object' && reaction.message.uuid === message.uuid) ||
                         (typeof reaction.message === 'string' && reaction.message === message.uuid));
@@ -131,7 +131,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         }
     }, [message.uuid, channelUuid, workspaceUuid, getCurrentUserUuid, isLoadingReactions]);
 
-    // Gérer l'ajout ou la suppression d'une réaction
+
     const handleReaction = useCallback(async (emoji: string) => {
         if (!channelUuid || !message.uuid) {
             return;
@@ -145,24 +145,24 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                 return;
             }
 
-            // Vérifier si l'utilisateur a déjà réagi avec cet emoji
+
             const hasReacted = hasUserReacted(emoji);
 
             if (hasReacted) {
-                // Trouver l'UUID de la réaction à supprimer
+
                 const reactionToRemove = messageReactions.find(
                     (r) => r.emoji === emoji && (
                         (typeof r.user === 'object' && r.user.uuid === currentUserUuid) ||
                         (typeof r.user === 'string' && r.user === currentUserUuid)
                     ) && (
-                        // Vérifier que la réaction appartient bien à ce message
+
                         (typeof r.message === 'object' && r.message.uuid === message.uuid) ||
                         (typeof r.message === 'string' && r.message === message.uuid)
                     )
                 );
 
                 if (reactionToRemove && reactionToRemove.uuid) {
-                    // Supprimer la réaction
+
                     if (workspaceUuid) {
                         await reactionService.removeReaction(
                             workspaceUuid,
@@ -180,7 +180,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                     }
                 }
             } else {
-                // Ajouter une nouvelle réaction
+
                 const data = {
                     emoji,
                     user_uuid: currentUserUuid,
@@ -204,10 +204,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                 }
             }
 
-            // Recharger les réactions après modification
+
             await fetchReactions();
 
-            // Si un gestionnaire externe est fourni, l'appeler aussi
+
             if (onAddReaction) {
                 onAddReaction(message.uuid, emoji);
             }
@@ -219,18 +219,18 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         }
     }, [message.uuid, channelUuid, workspaceUuid, getCurrentUserUuid, onAddReaction, messageReactions, fetchReactions]);
 
-    // Convertir les réactions API en réactions UI pour l'affichage
+
     const getUIReactions = useCallback((): UIReaction[] => {
         const groupedReactions: UIReaction[] = [];
 
-        // Utiliser les réactions chargées depuis l'API
+
         if (!messageReactions || messageReactions.length === 0) {
             return [];
         }
         
-        // Traiter chaque réaction et les regrouper par emoji
+
         messageReactions.forEach((reaction) => {
-            // Vérifier que la réaction est valide
+
             if (!reaction || !reaction.emoji || !reaction.user) {
                 return;
             }
@@ -245,23 +245,23 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                 return;
             }
             
-            // Extraire l'UUID de l'utilisateur (peut être un objet ou une chaîne)
+
             const userUuid = typeof reaction.user === 'object' ? reaction.user.uuid : reaction.user;
             
-            // Rechercher si cette réaction existe déjà dans notre groupe
+
             const existingReaction = groupedReactions.find(
                 (r) => r.emoji === reaction.emoji
             );
             
             if (existingReaction) {
-                // Incrémenter le compteur et ajouter l'utilisateur
+
                 existingReaction.count++;
-                // Éviter les doublons d'utilisateurs dans la liste
+
                 if (!existingReaction.users.includes(userUuid)) {
                     existingReaction.users.push(userUuid);
                 }
             } else {
-                // Créer une nouvelle entrée pour cette réaction
+
                 groupedReactions.push({
                     emoji: reaction.emoji,
                     count: 1,
@@ -273,13 +273,13 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         return groupedReactions;
     }, [messageReactions, message.uuid]);
     
-    // Vérifier si l'utilisateur courant a déjà réagi avec un emoji spécifique
+
     const hasUserReacted = useCallback((emoji: string): boolean => {
         if (!messageReactions || messageReactions.length === 0) {
             return false;
         }
         
-        // Récupérer l'UUID de l'utilisateur courant depuis les props ou le contexte
+
         const currentUserUuidValue = userUuid || 
             (typeof user?.uuid === 'string' ? user.uuid : null);
         
@@ -302,7 +302,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                 return false;
             }
             
-            // Vérifier si l'utilisateur de la réaction correspond à l'utilisateur courant
+
             if (typeof reaction.user === 'object' && reaction.user.uuid) {
                 return reaction.user.uuid === currentUserUuidValue;
             } else if (typeof reaction.user === 'string') {
@@ -313,9 +313,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         });
     }, [messageReactions, userUuid, user, message.uuid]);
     
-    // Afficher la liste des utilisateurs qui ont réagi avec un emoji spécifique
+
     const handleShowReactionUsers = useCallback(async (emoji: string) => {
-        // Filtrer les réactions pour cet emoji et ce message
+
         const filteredReactions = messageReactions.filter(reaction => 
             reaction && reaction.emoji === emoji && (
                 // Vérifier que la réaction appartient bien à ce message
@@ -324,7 +324,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             )
         );
         
-        // Extraire les informations des utilisateurs
+
         const users: {uuid: string, username: string}[] = [];
         
         for (const reaction of filteredReactions) {
@@ -339,7 +339,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             } else if (typeof reaction.user === 'string') {
                 userUuid = reaction.user;
                 try {
-                    // Récupérer les informations de l'utilisateur si nécessaire
+
                     const userInfo = await userService.getUserById(reaction.user as UUID);
                     if (userInfo && userInfo.username) {
                         username = userInfo.username;
@@ -348,7 +348,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                     console.error("Erreur lors de la récupération des informations utilisateur:", error);
                 }
             } else {
-                continue; // Ignorer les réactions avec des utilisateurs invalides
+                continue;
             }
             
             // Éviter les doublons
@@ -364,10 +364,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
 
     const reactions = getUIReactions();
     
-    // Format timestamp correctly with proper error handling
+
     let timestamp = "";
     try {
-        // Vérifier si la date est valide
+
         if (message.date && !isNaN(new Date(message.date).getTime())) {
             const date = new Date(message.date);
             timestamp = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -380,32 +380,30 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         timestamp = "";
     }
 
-    // Effet pour marquer le composant comme démonté lors du nettoyage
+
     useEffect(() => {
         return () => {
             isMounted.current = false;
         };
     }, []);
     
-    // Charger les réactions au montage du composant et lorsque le message change
+
     useEffect(() => {
         fetchReactions();
     }, [fetchReactions, message.uuid]);
     
-    // Fetch user information when the component mounts or when the message source changes
+
     useEffect(() => {
         const fetchUserInfo = async () => {
             try {
-                // Vérifier si message.source est un objet ou une chaîne
                 if (
                     typeof message.source === "object" &&
                     message.source !== null &&
                     message.source.username
                 ) {
-                    // Si c'est un objet avec un username, utiliser directement
+
                     setSenderName(message.source.username);
                 } else if (typeof message.source === "string") {
-                    // Si c'est une chaîne (UUID), récupérer les infos utilisateur
                     try {
                         const user = await userService.getUserById(
                             message.source as UUID,
@@ -413,16 +411,14 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                         if (isMounted.current && user && user.username) {
                             setSenderName(user.username);
                         } else {
-                            // Si l'utilisateur n'a pas de nom d'utilisateur valide
+
                             setSenderName(isCurrentUser ? "Vous" : "Utilisateur");
                         }
                     } catch (userError) {
                         console.warn("Impossible de récupérer les infos utilisateur:", userError);
-                        // Utiliser un nom par défaut plus convivial
                         setSenderName(isCurrentUser ? "Vous" : "Utilisateur");
                     }
                 } else if (message.uuid && (typeof message.uuid === 'string' ? message.uuid.startsWith('temp-') : String(message.uuid).startsWith('temp-'))) {
-                    // Pour les messages temporaires, utiliser un nom par défaut
                     setSenderName(isCurrentUser ? "Vous" : "Utilisateur");
                 } else {
                     console.warn(
@@ -430,14 +426,12 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                         message.source,
                     );
                     if (isMounted.current) {
-                        // Utiliser un nom par défaut plus convivial
                         setSenderName(isCurrentUser ? "Vous" : "Utilisateur");
                     }
                 }
             } catch (error) {
                 console.error("Error fetching user info:", error);
                 if (isMounted.current) {
-                    // Utiliser un nom par défaut plus convivial
                     setSenderName(isCurrentUser ? "Vous" : "Utilisateur");
                 }
             }
@@ -467,9 +461,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
 
             <Text style={styles.messageText}>{message.message}</Text>
 
-            {/* Attachments - À implémenter quand les pièces jointes seront disponibles */}
 
-            {/* Reactions */}
+
+
             {reactions.length > 0 && (
                 <View style={styles.reactionsContainer}>
                     {reactions.map((reaction, index) => {
@@ -499,7 +493,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                 </View>
             )}
 
-            {/* Message actions */}
+
             <View style={styles.messageActions}>
                 <TouchableOpacity
                     style={styles.actionButton}
@@ -524,7 +518,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                 </TouchableOpacity>
             </View>
 
-            {/* Emoji Picker Modal */}
+
             {showEmojiPicker && (
                 <Modal
                     transparent={true}
@@ -552,7 +546,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                 </Modal>
             )}
 
-            {/* Reaction Users Modal */}
+
             {showReactionUsers && (
                 <Modal
                     transparent={true}
@@ -580,7 +574,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                                     data={reactionUsers}
                                     keyExtractor={(item) => item.uuid}
                                     renderItem={({ item }) => {
-                                        // Vérifier si c'est l'utilisateur courant
+
                                         const isCurrentUser = item.uuid === userUuid || 
                                             (typeof user?.uuid === 'string' && item.uuid === user.uuid);
                                         
@@ -612,7 +606,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                 </Modal>
             )}
             
-            {/* Actions Modal */}
+
             {showActionsModal && (
                 <Modal
                     transparent={true}

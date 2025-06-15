@@ -5,6 +5,113 @@ const styles = StyleSheet.create({
     main: {
         flex: 1,
     },
+    // Styles pour les boutons d'invitation et les membres dans le modal d'édition de canal
+    closeButton: {
+        position: "absolute",
+        top: 10,
+        right: 10,
+    },
+    modalText: {
+        color: Colors.white,
+        fontSize: 16,
+        marginBottom: 20,
+    },
+    modalActions: {
+        flexDirection: "row" as "row",
+        justifyContent: "space-between" as "space-between",
+        marginTop: 20,
+    },
+    membersList: {
+        marginTop: 15,
+        maxHeight: 200,
+    },
+    memberItem: {
+        flexDirection: "row" as "row",
+        alignItems: "center" as "center",
+        padding: 10,
+        backgroundColor: "#2e2e2e",
+        borderRadius: 5,
+        marginBottom: 10,
+    },
+    memberItemAvatar: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: "#3a3a3a",
+        justifyContent: "center" as "center",
+        alignItems: "center" as "center",
+        marginRight: 10,
+    },
+    memberItemAvatarText: {
+        color: Colors.white,
+        fontSize: 18,
+        fontWeight: "bold" as "bold",
+    },
+    memberItemInfo: {
+        flex: 1,
+        flexDirection: "row" as "row",
+        justifyContent: "space-between" as "space-between",
+        alignItems: "center" as "center",
+    },
+    memberItemName: {
+        color: Colors.white,
+        fontSize: 16,
+    },
+    memberItemBadge: {
+        flexDirection: "row" as "row",
+        alignItems: "center" as "center",
+        backgroundColor: "#52c41a",
+        padding: 5,
+        borderRadius: 5,
+    },
+    memberItemBadgeText: {
+        color: Colors.white,
+        fontSize: 12,
+        marginLeft: 5,
+    },
+    inviteButton: {
+        backgroundColor: "#1890ff",
+        flexDirection: "row" as "row",
+        alignItems: "center" as "center",
+        padding: 8,
+        borderRadius: 5,
+        marginLeft: 10,
+    },
+    invitingButton: {
+        backgroundColor: "#666",
+        opacity: 0.7,
+    },
+    memberButton: {
+        backgroundColor: "#52c41a",
+    },
+    inviteButtonText: {
+        color: Colors.white,
+        fontSize: 12,
+        marginLeft: 5,
+    },
+    formDescription: {
+        color: "#aaa",
+        fontSize: 14,
+        marginBottom: 10,
+    },
+    visibilityOptionActive: {
+        backgroundColor: "#333",
+        padding: 5,
+        borderRadius: 5,
+    },
+    visibilityOptionText: {
+        color: "#aaa",
+        fontSize: 14,
+        marginLeft: 5,
+    },
+    visibilityOptionTextActive: {
+        color: Colors.white,
+        fontWeight: "bold" as "bold",
+    },
+    deleteButtonText: {
+        color: Colors.white,
+        fontSize: 16,
+    },
     container: {
         flex: 1,
         flexDirection: "row",
@@ -128,7 +235,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         paddingBottom: 16,
     },
-    inviteButton: {
+    workspaceInviteButton: {
         flexDirection: "row",
         alignItems: "center",
         backgroundColor: Colors.primary,
@@ -141,7 +248,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: 1.5,
     },
-    inviteButtonText: {
+    workspaceInviteButtonText: {
         color: Colors.white,
         marginLeft: 8,
         fontWeight: "bold",
@@ -927,6 +1034,77 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         zIndex: 10,
+    },
+    dangerZone: {
+        marginTop: 20,
+        padding: 15,
+        borderWidth: 1,
+        borderColor: Colors.error,
+        borderRadius: 8,
+        backgroundColor: "rgba(220, 53, 69, 0.1)",
+    },
+    dangerZoneTitle: {
+        color: Colors.error,
+        fontSize: 16,
+        fontWeight: "bold",
+        marginBottom: 10,
+    },
+    channelMemberItem: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 12,
+        backgroundColor: "#2f3136",
+        borderRadius: 8,
+        padding: 10,
+    },
+    channelMemberItemAvatar: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: Colors.primary,
+        alignItems: "center",
+        justifyContent: "center",
+        marginRight: 10,
+    },
+    channelMemberItemAvatarText: {
+        color: Colors.white,
+        fontSize: 16,
+        fontWeight: "bold",
+    },
+    channelMemberItemInfo: {
+        flex: 1,
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+    },
+    channelMemberItemName: {
+        color: Colors.white,
+        fontSize: 16,
+        flex: 1,
+    },
+    channelInviteButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: Colors.primary,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 16,
+        justifyContent: "center",
+    },
+    channelInviteButtonText: {
+        color: Colors.white,
+        fontSize: 12,
+        fontWeight: "bold",
+        marginLeft: 4,
+    },
+    channelInvitingButton: {
+        backgroundColor: Colors.warning,
+    },
+    channelMemberButton: {
+        backgroundColor: Colors.success,
+    },
+    channelMembersList: {
+        marginTop: 10,
     },
 });
 

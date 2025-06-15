@@ -87,7 +87,6 @@ const mapBackendNotification = (backendNotif: any): Notification => {
 };
 
 export const Notifications = {
-  // Récupérer toutes les notifications d'un utilisateur
   getUserNotifications: async (userUuid: UUID): Promise<Notification[]> => {
     try {
       const response = await apiClient.get(`/notifications/users/${userUuid}/notifications`);
@@ -102,7 +101,6 @@ export const Notifications = {
     }
   },
 
-  // Récupérer les notifications non lues d'un utilisateur
   getUnreadNotifications: async (userUuid: UUID): Promise<Notification[]> => {
     try {
       const response = await apiClient.get(`/notifications/users/${userUuid}/notifications/unread`);
@@ -113,32 +111,26 @@ export const Notifications = {
     }
   },
 
-  // Marquer une notification comme lue
   markAsRead: async (userUuid: UUID, notificationUuid: UUID): Promise<void> => {
     try {
       await apiClient.put(`/notifications/users/${userUuid}/notifications/${notificationUuid}/read`);
     } catch (error) {
-      console.error('Erreur lors du marquage de la notification comme lue:', error);
       throw error;
     }
   },
 
-  // Marquer toutes les notifications comme lues
   markAllAsRead: async (userUuid: UUID): Promise<void> => {
     try {
       await apiClient.put(`/notifications/users/${userUuid}/notifications/read-all`);
     } catch (error) {
-      console.error('Erreur lors du marquage de toutes les notifications comme lues:', error);
       throw error;
     }
   },
 
-  // Supprimer une notification
   deleteNotification: async (userUuid: UUID, notificationUuid: UUID): Promise<void> => {
     try {
       await apiClient.delete(`/notifications/users/${userUuid}/notifications/${notificationUuid}`);
     } catch (error) {
-      console.error('Erreur lors de la suppression de la notification:', error);
       throw error;
     }
   }

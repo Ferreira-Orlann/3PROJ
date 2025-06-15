@@ -1,9 +1,6 @@
 import apiClient from "../client";
 import { UUID } from "crypto";
 
-/**
- * Interface pour un membre d'un workspace
- */
 export interface Member {
     uuid: UUID;
     joinedAt: string;
@@ -26,21 +23,13 @@ export interface Member {
     };
 }
 
-/**
- * Interface pour ajouter un membre à un workspace
- */
 export interface AddMemberData {
     userId: UUID;
     role?: "admin" | "member";
 }
 
-/**
- * Service pour les membres d'un workspace
- */
+
 const memberService = {
-    /**
-     * Récupérer tous les membres d'un workspace
-     */
     getWorkspaceMembers: async (workspaceId: UUID): Promise<Member[]> => {
         const response = await apiClient.get<Member[]>(
             `/workspaces/${workspaceId}/members`,
@@ -48,9 +37,7 @@ const memberService = {
         return response.data;
     },
 
-    /**
-     * Ajouter un membre à un workspace
-     */
+
     addMember: async (
         workspaceId: UUID,
         memberData: AddMemberData,
@@ -62,18 +49,14 @@ const memberService = {
         return response.data;
     },
 
-    /**
-     * Supprimer un membre d'un workspace
-     */
+
     removeMember: async (workspaceId: UUID, memberId: UUID): Promise<void> => {
         await apiClient.delete(
             `/workspaces/${workspaceId}/members/${memberId}`,
         );
     },
 
-    /**
-     * Mettre à jour le rôle d'un membre
-     */
+
     updateMemberRole: async (
         workspaceId: UUID,
         memberId: UUID,

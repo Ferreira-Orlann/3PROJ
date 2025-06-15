@@ -20,15 +20,13 @@ export interface CreateReactionData {
     message_uuid: UUID;
 }
 
-// Configuration spécifique pour les requêtes de réactions
 const REACTIONS_CONFIG = {
-    timeout: 8000,  // 8 secondes pour les réactions (plus court que 15s pour éviter de bloquer l'UI trop longtemps)
-    validateStatus: (status: number) => status < 500, // Accepter les codes 2xx, 3xx et 4xx
-    retries: 2,     // Nombre de tentatives max
-    initialDelay: 1000, // Délai initial entre les tentatives
+    timeout: 8000,  
+    validateStatus: (status: number) => status < 500, 
+    retries: 2,     
+    initialDelay: 1000, 
 };
 
-// Fonction utilitaire pour les tentatives de requête avec retry
 async function retryRequest<T>(requestFn: () => Promise<T>, maxRetries = REACTIONS_CONFIG.retries, delay = REACTIONS_CONFIG.initialDelay): Promise<T> {
     let lastError: any;
     
@@ -38,7 +36,6 @@ async function retryRequest<T>(requestFn: () => Promise<T>, maxRetries = REACTIO
         } catch (error) {
             lastError = error;
             
-            // Si ce n'est pas une erreur de timeout ou de réseau, ne pas réessayer
             if (axios.isAxiosError(error)) {
                 const axiosError = error as AxiosError;
                 if (axiosError.code !== 'ECONNABORTED' && !axiosError.message.includes('timeout') && axiosError.response) {
@@ -46,15 +43,12 @@ async function retryRequest<T>(requestFn: () => Promise<T>, maxRetries = REACTIO
                 }
             }
             
-            // Dernier essai échoué, ne pas afficher de message
             if (attempt < maxRetries - 1) {
                 console.log(`Tentative ${attempt + 1}/${maxRetries} échouée, nouvelle tentative dans ${delay}ms...`);
             }
             
-            // Attendre avant de réessayer
             await new Promise(resolve => setTimeout(resolve, delay));
             
-            // Augmenter le délai pour la prochaine tentative (backoff exponentiel)
             delay *= 2;
         }
     }

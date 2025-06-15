@@ -14,31 +14,52 @@ export const usersApi = apiSlice.injectEndpoints({
       providesTags: (result, error, userId) => [{ type: 'User', id: userId }],
     }),
     
-    updateProfile: builder.mutation<User, UpdateUserData>({
+    updateProfile: builder.mutation<User, UpdateUserData & { uuid?: string }>({
       query: (userData) => {
-        if (userData.avatar) {
+        console.log('updateProfile mutation called with data:', JSON.stringify(userData));
+        
+        const uuid = userData.uuid;
+        if (!uuid) {
+          console.error('User UUID is missing in updateProfile mutation');
+          throw new Error('User UUID is required for updating profile');
+        }
+        
+        console.log('Using UUID for profile update:', uuid);
+        
+        const { uuid: _, ...dataToSend } = userData;
+        
+        if (dataToSend.avatar) {
+          console.log('Avatar detected in update data, creating FormData');
           const formData = new FormData();
           
-          Object.entries(userData).forEach(([key, value]) => {
+          Object.entries(dataToSend).forEach(([key, value]) => {
             if (key === 'avatar') {
-              formData.append('avatar', value as any);
+              if (typeof value === 'object' && 'uri' in value) {
+                console.log('Adding File object to FormData:', key);
+                formData.append('avatar', value as any);
+              } else {
+                console.log('Adding avatar UUID to FormData:', value);
+                formData.append('avatar', value.toString());
+              }
             } else if (value !== undefined) {
               formData.append(key, value.toString());
             }
           });
           
+          console.log('Sending PUT request to:', `/users/${uuid}`);
           return {
-            url: '/users',
+            url: `/users/${uuid}`,
             method: 'PUT',
             body: formData,
             formData: true,
           };
         }
         
+        console.log('Sending regular JSON PUT request to:', `/users/${uuid}`);
         return {
-          url: '/users',
+          url: `/users/${uuid}`,
           method: 'PUT',
-          body: userData,
+          body: dataToSend,
         };
       },
       invalidatesTags: ['User'],

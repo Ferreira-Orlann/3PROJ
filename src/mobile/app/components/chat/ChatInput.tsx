@@ -45,13 +45,13 @@ const ChatInput: React.FC<ChatInputProps> = ({
     const [message, setMessage] = useState("");
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [showAttachmentOptions, setShowAttachmentOptions] = useState(false);
-    const [attachments, setAttachments] = useState<Attachment[]>([]);
+    const [attachments, setAttachments] = useState<ApiAttachment[]>([]);
     const [isSending, setIsSending] = useState(false);
     const [isWebSocketConnected, setIsWebSocketConnected] = useState<boolean>(
         websocketService.isConnected(),
     );
 
-    // Vérifier périodiquement l'état de la connexion WebSocket
+
     useEffect(() => {
         const checkInterval = setInterval(() => {
             const connected = websocketService.isConnected();
@@ -64,13 +64,13 @@ const ChatInput: React.FC<ChatInputProps> = ({
         return () => clearInterval(checkInterval);
     }, [isWebSocketConnected]);
 
-    // Toggle emoji picker
+
     const toggleEmojiPicker = () => {
         setShowEmojiPicker(!showEmojiPicker);
         setShowAttachmentOptions(false);
     };
 
-    // Handle emoji selection
+
     const handleEmojiSelect = (emoji: string) => {
         if (onAddReaction) {
             onAddReaction(emoji);
@@ -80,20 +80,20 @@ const ChatInput: React.FC<ChatInputProps> = ({
         setShowEmojiPicker(false);
     };
 
-    // Toggle attachment options
+
     const toggleAttachmentOptions = () => {
         setShowAttachmentOptions(!showAttachmentOptions);
         setShowEmojiPicker(false);
     };
 
-    // Handle sending a message
+
     const handleSend = async () => {
         if (!message.trim()) return;
 
         try {
             setIsSending(true);
 
-            // Informer l'utilisateur si le mode hors ligne est actif
+
             if (!isWebSocketConnected && Platform.OS === "android") {
                 ToastAndroid.show(
                     "Mode hors ligne: Le message sera envoyé mais ne sera pas visible en temps réel pour les autres utilisateurs",
@@ -101,10 +101,10 @@ const ChatInput: React.FC<ChatInputProps> = ({
                 );
             }
 
-            // Envoyer le message
+
             await onSendMessage(message, attachments);
 
-            // Réinitialiser les états
+
             setMessage("");
             setAttachments([]);
             if (replyMessage && onCancelReply) {
@@ -126,37 +126,24 @@ const ChatInput: React.FC<ChatInputProps> = ({
         }
     };
 
-    // Handle attachment selection
+
     const handleAttachmentSelect = async (type: string) => {
         if (onPickFile) {
-            // Utiliser la fonction onPickFile fournie par le parent
+
             const attachment = await onPickFile();
             if (attachment) {
                 setAttachments([...attachments, attachment]);
             }
         } else {
-            // Fallback sur l'implémentation mock si onPickFile n'est pas fourni
-            const mockAttachments = {
-                image: { type: "image", name: "image.jpg", size: "1.2 MB" },
-                video: { type: "video", name: "video.mp4", size: "5.4 MB" },
-                document: {
-                    type: "document",
-                    name: "document.pdf",
-                    size: "2.3 MB",
-                },
-            };
 
-            setAttachments([
-                ...attachments,
-                mockAttachments[type as keyof typeof mockAttachments],
-            ]);
+            console.log(`Attachment selection of type ${type} requested but no onPickFile handler provided`);
         }
         setShowAttachmentOptions(false);
     };
 
     return (
         <>
-            {/* Reply indicator */}
+
             {replyMessage && (
                 <View style={styles.replyContainer}>
                     <View style={styles.replyContent}>
@@ -182,9 +169,9 @@ const ChatInput: React.FC<ChatInputProps> = ({
                 </View>
             )}
 
-            {/* Input area */}
+
             <View style={styles.inputContainer}>
-                {/* Indicateur d'état de connexion */}
+
                 <View
                     style={[
                         styles.connectionIndicator,
@@ -194,7 +181,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                     ]}
                 />
 
-                {/* Attachment button */}
+
                 <TouchableOpacity
                     onPress={toggleAttachmentOptions}
                     style={styles.iconButton}
@@ -202,7 +189,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                     <Ionicons name="attach" size={24} color="#8e9297" />
                 </TouchableOpacity>
 
-                {/* Text input */}
+
                 <TextInput
                     style={styles.input}
                     placeholder={
@@ -216,7 +203,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                     editable={!isSending}
                 />
 
-                {/* Emoji button */}
+
                 <TouchableOpacity
                     onPress={toggleEmojiPicker}
                     style={styles.iconButton}
@@ -225,7 +212,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                     <Ionicons name="happy-outline" size={24} color="#8e9297" />
                 </TouchableOpacity>
 
-                {/* Send button */}
+
                 {isSending ? (
                     <View style={styles.sendButton}>
                         <ActivityIndicator size="small" color="#fff" />
@@ -248,7 +235,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                 )}
             </View>
 
-            {/* Emoji picker modal */}
+
             <Modal
                 visible={showEmojiPicker}
                 transparent={true}
@@ -269,7 +256,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                 </TouchableOpacity>
             </Modal>
 
-            {/* Attachment options */}
+
             {showAttachmentOptions && (
                 <View style={styles.attachmentOptions}>
                     <TouchableOpacity
@@ -341,10 +328,10 @@ const styles = StyleSheet.create({
         marginRight: 8,
     },
     connected: {
-        backgroundColor: "#43b581", // Vert pour indiquer connecté
+        backgroundColor: "#43b581",
     },
     disconnected: {
-        backgroundColor: "#f04747", // Rouge pour indiquer déconnecté
+        backgroundColor: "#f04747",
     },
     iconButton: {
         padding: 8,

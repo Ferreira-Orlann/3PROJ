@@ -72,6 +72,17 @@ const channelService = {
     leaveChannel: async (channelId: UUID): Promise<void> => {
         await apiClient.post(`/channels/${channelId}/leave`);
     },
+
+    // Inviter un membre à rejoindre un canal
+    inviteMemberToChannel: async (channelId: UUID, memberId: UUID): Promise<void> => {
+        await apiClient.post(`/channels/${channelId}/invite/${memberId}`);
+    },
+
+    // Obtenir les membres d'un canal
+    getChannelMembers: async (channelId: UUID): Promise<any[]> => {
+        const response = await apiClient.get(`/channels/${channelId}/members`);
+        return response.data;
+    },
 };
 
 export default channelService;

@@ -10,7 +10,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { UUID } from "crypto";
 import { styles } from "../styles/home";
-import { Workspace, CreateWorkspaceForm } from "./homeScreen.types";
+import { Workspace, CreateWorkspaceForm } from "../styles/homeScreen.types";
 import { Colors } from "../theme/colors";
 import useHomeScreen from "../hooks/useHome";
 import { Member } from "../services/workspaces";
@@ -212,7 +212,6 @@ export const WorkspaceList = ({
             showsVerticalScrollIndicator={false}
         >
             {workspaces.map((workspace, index) => {
-                // Utiliser uuid si disponible, sinon workspaceId, sinon utiliser l'index comme fallback
                 const workspaceId =
                     workspace?.uuid?.toString() ||
                     workspace?.workspaceId?.toString() ||
@@ -239,7 +238,6 @@ export const WorkspaceListContainer = ({
     onSelectWorkspace,
     initialSearchQuery = "",
 }: WorkspaceListContainerProps) => {
-    // Utiliser le hook home pour gérer les données et la logique
     const {
         state,
         filteredWorkspaces,
@@ -249,7 +247,6 @@ export const WorkspaceListContainer = ({
         handleCreateWorkspace,
     } = useHomeScreen();
 
-    // Synchroniser la recherche initiale si fournie
     React.useEffect(() => {
         if (initialSearchQuery) {
             setSearchQuery(initialSearchQuery);

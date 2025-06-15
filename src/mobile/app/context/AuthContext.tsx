@@ -37,7 +37,6 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     const [token, setToken] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Check for existing session on app start
     useEffect(() => {
         checkExistingSession();
     }, []);
@@ -50,14 +49,12 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
             console.log("Stored user:", storedUser);
 
             if (storedToken && storedUser) {
-                // Configurer le client API avec le token
                 apiClient.defaults.headers.common["Authorization"] = `Bearer ${storedToken}`;
                 
-                // Mettre à jour l'état
                 setToken(storedToken);
                 setUser(JSON.parse(storedUser));
                 
-                // Ne pas rediriger automatiquement si l'utilisateur est déjà sur une page protégée
+          
                 const currentPath = window.location.pathname;
                 if (currentPath === "/" || currentPath.includes("/auth/")) {
                     router.replace("/screens/homeScreen");
@@ -65,7 +62,6 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
             }
         } catch (error) {
             console.error("Error restoring token:", error);
-            // En cas d'erreur, effacer les données de session pour éviter des problèmes
             await AsyncStorage.removeItem("userToken");
             await AsyncStorage.removeItem("userData");
             setToken(null);
@@ -75,23 +71,15 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
-    // Simulate API call delay
-    const delay = (ms: number) =>
-        new Promise((resolve) => setTimeout(resolve, ms));
-
     const login = async (email: string, password: string) => {
         setIsLoading(true);
         try {
-            // Utiliser directement le service d'authentification avec email/password
             console.log("Tentative de connexion avec email:", email, password);
             const authResponse = await authService.login(email, password);
             console.log("Login response:", authResponse);
-
-            // Extraire le token de la réponse
             const { token: authToken, uuid } = authResponse;
             console.log("Token:", authToken);
 
-            // Récupérer les informations utilisateur
             try {
                 const userResponse = await apiClient.get(`/users/${email}`, {
                     headers: {
@@ -102,14 +90,12 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
                 const userData = userResponse.data;
                 console.log("User data:", userData);
 
-                // Récupérer le bon utilisateur qui correspond à l'email et au mot de passe
                 const currentUser = Array.isArray(userData)
                     ? userData.find((user) => user.email === email)
                     : userData;
 
                 console.log("Current user:", currentUser);
 
-                // Créer l'objet utilisateur à partir des données
                 const mappedUser: User = {
                     uuid: currentUser.uuid,
                     username:
@@ -125,24 +111,20 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
                             | "offline") || "online",
                 };
 
-                // Configurer le client API avec le token
                 apiClient.defaults.headers.common["Authorization"] = `Bearer ${authToken}`;
                 
-                // Stocker les données de session
                 await AsyncStorage.setItem("userToken", authToken);
                 await AsyncStorage.setItem(
                     "userData",
                     JSON.stringify(mappedUser),
                 );
 
-                // Mettre à jour l'état et rediriger
                 setToken(authToken);
                 setUser(mappedUser);
 
                 router.replace("/screens/homeScreen");
             } catch (userError) {
                 console.error("Error fetching user data:", userError);
-                // Même en cas d'erreur, on stocke le token et on redirige
                 await AsyncStorage.setItem("userToken", authToken);
                 setToken(authToken);
                 router.replace("/screens/homeScreen");
@@ -154,7 +136,6 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
             setIsLoading(false);
         }
     };
-    // Supprimer le log de debug qui pollue la console
 
     const register = async (
         username: string,
@@ -163,31 +144,26 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     ) => {
         setIsLoading(true);
         try {
-            // Préparer les données d'inscription
             const registerData = {
                 username,
                 email,
                 password,
-                firstname: username.split(" ")[0] || username, // First part of username as firstname
-                lastname: username.split(" ")[1] || "User", // Second part or default
+                firstname: username.split(" ")[0] || username,
+                lastname: username.split(" ")[1] || "User",
                 mdp: password,
                 address: "Default Address",
                 status: "online",
             };
             console.log("Register data:", registerData);
 
-            // Utiliser le service d'authentification pour l'inscription
             const userResponse = await authService.register(registerData);
             console.log("Registration response:", userResponse);
 
-            // Après l'inscription réussie, connecter l'utilisateur
             const authResponse = await authService.login(email, password);
             console.log("Auto-login after registration:", authResponse);
 
-            // Extraire le token et l'UUID
             const { token: authToken, uuid } = authResponse;
 
-            // Récupérer les informations utilisateur
             try {
                 const userDataResponse = await apiClient.get(`/users/${uuid}`, {
                     headers: {
@@ -198,14 +174,12 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
                 const userData = userDataResponse.data;
                 console.log("User data after registration:", userData);
 
-                // Récupérer le bon utilisateur qui correspond à l'email
                 const currentUser = Array.isArray(userData)
                     ? userData.find((user) => user.email === email)
                     : userData;
 
                 console.log("Current registered user:", currentUser);
 
-                // Créer l'objet utilisateur
                 const mappedUser: User = {
                     uuid: currentUser.uuid,
                     username:
@@ -223,14 +197,12 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
                             | "offline") || "online",
                 };
 
-                // Stocker les données de session
                 await AsyncStorage.setItem("userToken", authToken);
                 await AsyncStorage.setItem(
                     "userData",
                     JSON.stringify(mappedUser),
                 );
 
-                // Mettre à jour l'état et rediriger
                 setToken(authToken);
                 setUser(mappedUser);
                 router.replace("/screens/homeScreen");
@@ -239,7 +211,6 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
                     "Error fetching user data after registration:",
                     userError,
                 );
-                // Même en cas d'erreur, on stocke le token et on redirige
                 await AsyncStorage.setItem("userToken", authToken);
                 setToken(authToken);
                 router.replace("/screens/homeScreen");
@@ -255,15 +226,12 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     const logout = async () => {
         setIsLoading(true);
         try {
-            // Clear stored data
             await AsyncStorage.removeItem("userToken");
             await AsyncStorage.removeItem("userData");
 
-            // Reset state
             setToken(null);
             setUser(null);
 
-            // Navigate to login screen
             router.replace("../auth/login");
         } catch (error) {
             console.error("Logout error:", error);
@@ -272,8 +240,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
-    // Context value
-    const value = {
+        const value = {
         user,
         token,
         login,
@@ -287,7 +254,6 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     );
 }
 
-// Custom hook to use auth context
 export function useAuth() {
     const context = useContext(AuthContext);
     if (context === undefined) {
@@ -296,5 +262,4 @@ export function useAuth() {
     return context;
 }
 
-// Default export
 export default AuthProvider;

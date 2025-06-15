@@ -29,8 +29,6 @@ export interface User {
     avatar: string | null;
 }
 
-// Type pour les conversations
 export type Conversations = Record<string, Message[]>;
 
-// Type pour les utilisateurs
 export type Users = Record<string, User>;

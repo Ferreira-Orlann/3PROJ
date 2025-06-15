@@ -1,19 +1,39 @@
 import { useState, useEffect } from "react";
 import { Alert } from "react-native";
-import { useAuth } from "../context/AuthContext";
+import { useAuth, User as AuthUser } from "../context/AuthContext";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as WebBrowser from "expo-web-browser";
 import {
-    UserProfile,
     UserPreferences,
     OAuthConnections,
     PasswordChangeInfo,
 } from "../services/Profile";
-import userService, { UpdateUserData } from "../services/api/endpoints/users";
+import userService, { UpdateUserData, User as ApiUser } from "../services/api/endpoints/users";
+// Remove the import for the traditional files service
+// import filesService from "../services/api/endpoints/files";
+// Use only the RTK Query implementation
+import { useUploadFileMutation } from "../store/api/filesApi";
+
+export interface UserProfile {
+    username: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    bio: string;
+    status: string;
+    uuid?: string; // User UUID
+    avatarFile?: {
+        uri: string;
+        name: string;
+        type: string;
+    };
+}
 
 export const useProfileManagement = () => {
     const { user } = useAuth();
+    const [uploadFile] = useUploadFileMutation();
+    
     const [userProfile, setUserProfile] = useState<UserProfile>({
         username: "",
         firstName: "",
@@ -73,6 +93,7 @@ export const useProfileManagement = () => {
                             ? nameParts.slice(1).join(" ")
                             : "";
 
+                    // Utiliser le type correct pour userData (AuthUser)
                     setUserProfile({
                         username: userData.username || "",
                         firstName: firstName,
@@ -85,6 +106,7 @@ export const useProfileManagement = () => {
                                 : userData.status === "away"
                                   ? "Absent"
                                   : "Hors ligne",
+                        uuid: userData.uuid, // Store the user UUID from AuthContext
                     });
 
                     console.log(
@@ -190,22 +212,62 @@ export const useProfileManagement = () => {
 
     const saveProfile = async () => {
         try {
+            if (!userProfile.uuid) {
+                console.error("UUID de l'utilisateur manquant");
+                Alert.alert(
+                    "Erreur",
+                    "Impossible de mettre à jour le profil: identifiant utilisateur manquant"
+                );
+                return;
+            }
+            
+            console.log("Mise à jour du profil avec UUID:", userProfile.uuid);
+            
             const userData: UpdateUserData = {
                 username: userProfile.username,
-                fullName: `${userProfile.firstName} ${userProfile.lastName}`,
+                firstname: userProfile.firstName, // Required field
+                lastname: userProfile.lastName,   // Required field
                 email: userProfile.email,
+                mdp: "password123",               // Required field - using a default value
+                address: "123 Main St",           // Required field - using a default value
                 status:
                     userProfile.status === "En ligne"
                         ? "en ligne"
                         : userProfile.status === "Absent"
                           ? "absent"
                           : "hors ligne",
+                uuid: userProfile.uuid, // Include the user UUID for the API endpoint
             };
-
-            console.log(
-                "Mise à jour du profil utilisateur via l'API...",
-                userData,
-            );
+            
+            console.log("Données utilisateur à envoyer:", JSON.stringify(userData));
+            
+            // Si une image de profil a été sélectionnée, l'uploader d'abord via l'API files
+            if (userProfile.avatarFile) {
+                try {
+                    console.log("Uploading avatar file...", userProfile.avatarFile);
+                    
+                    // S'assurer que le fichier est correctement formaté pour l'API
+                    const fileToUpload = {
+                        uri: userProfile.avatarFile.uri,
+                        name: userProfile.avatarFile.name || 'avatar.jpg',
+                        type: userProfile.avatarFile.type || 'image/jpeg'
+                    };
+                    
+                    console.log("Formatted file for upload:", fileToUpload);
+                    const fileUploadResponse = await uploadFile(fileToUpload).unwrap();
+                    console.log("Avatar file uploaded successfully, UUID:", fileUploadResponse);
+                    
+                    // Mettre à jour l'avatar avec l'UUID du fichier téléchargé
+                    userData.avatar = fileUploadResponse;
+                } catch (error) {
+                    console.error("Error uploading avatar file:", error);
+                    Alert.alert(
+                        "Erreur",
+                        "Impossible de télécharger l'image de profil"
+                    );
+                    // Continue sans mettre à jour l'avatar
+                }
+            }
 
             const updatedUser = await userService.updateProfile(userData);
             console.log(

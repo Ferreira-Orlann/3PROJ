@@ -20,7 +20,7 @@ export const attachmentsApi = apiSlice.injectEndpoints({
     
     getFile: builder.query<Blob, UUID>({
       query: (fileUuid) => `/files/${fileUuid}`,
-      // Utiliser transformResponse pour gérer la réponse blob
+      
       async transformResponse(response: Response) {
         return await response.blob();
       },
@@ -92,7 +92,6 @@ export const attachmentsApi = apiSlice.injectEndpoints({
       ],
     }),
     
-    // Méthode utilitaire qui combine uploadFile et attachFileToMessage/attachFileToDirectMessage
     uploadAndAttachFile: builder.mutation<
       UUID, 
       { 
@@ -105,16 +104,11 @@ export const attachmentsApi = apiSlice.injectEndpoints({
     >({
       async onQueryStarted({ file, workspaceUuid, userUuid, channelUuid, messageUuid }, { dispatch, queryFulfilled }) {
         try {
-          // Cette méthode sera implémentée côté client en utilisant les autres mutations
-          // car RTK Query ne supporte pas directement les mutations composées
-          
-          // Note: Dans un composant React, vous devrez utiliser useUploadFileMutation et 
-          // useAttachFileToMessageMutation ou useAttachFileToDirectMessageMutation séparément
         } catch (error) {
           console.error('Error uploading and attaching file:', error);
         }
       },
-      query: () => ({ url: '', method: 'POST' }), // Dummy query that won't be used
+      query: () => ({ url: '', method: 'POST' }),
     }),
   }),
 });
