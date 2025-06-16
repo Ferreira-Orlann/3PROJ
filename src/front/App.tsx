@@ -6,7 +6,6 @@ import {
 } from "react-router-dom";
 
 import HomePage from "../front/Pages/index";
-import NotificationsPage from "../front/Pages/notifications";
 import WorkspacesPage from "../front/Pages/workspaces";
 
 import PrivateChatPage from "../front/Pages/PrivateChatPage";
@@ -31,7 +30,7 @@ const AppRoutes = () => {
 
             {/* Routes accessibles après connexion */}
             <Route path="/dashboard" element={<HomePage />} />
-            <Route path="/notifications" element={<NotificationsPage />} />
+
             <Route path="/workspaces" element={<WorkspacesPage />} />
 
             <Route path="/chat/private/:userUuid" element={<PrivateChatPage />} />
