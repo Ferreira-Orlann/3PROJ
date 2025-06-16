@@ -17,7 +17,6 @@ const CreateWorkspaceModal = ({
     const [visibility, setVisibility] = useState("public");
     const [error, setError] = useState("");
 
-    console.log("workspacesService dans le composant", workspacesService);
 
 const handleCreate = async () => {
     if (!name || !description) {
@@ -25,14 +24,14 @@ const handleCreate = async () => {
         return;
     }
 
-    const isPublic = visibility === "public"; // ✅ conversion claire et explicite
-    console.log("is_public envoyé au service:", isPublic); // ✅ log important ici
+    const isPublic = visibility === "public"; 
+
 
     try {
         const data = await workspacesService.create(
             name,
             description,
-            isPublic, // ✅ valeur claire et vérifiée
+            isPublic, 
         );
 
         console.log("Workspace créé:", data);

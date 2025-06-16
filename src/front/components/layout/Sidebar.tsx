@@ -1,3 +1,4 @@
+// src/components/layout/Sidebar.tsx
 import styles from "../../styles/workspacesPage.module.css";
 
 type SidebarProps = {
@@ -9,7 +10,7 @@ const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
   return (
     <aside className={styles.sidebar}>
       <div className={styles.sidebarSection}>
-        <h2 className={styles.sidebarTitle}>Navigation</h2>
+      <h3 className={styles.sidebarSubtitle}>Navigation</h3>
         <ul className={styles.sidebarList}>
           <li
             className={activeTab === "workspaces" ? styles.active : ""}
