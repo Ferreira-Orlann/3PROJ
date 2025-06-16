@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import "../styles/auth.css";
+import { SESSION_LOCALSTORE_NAME } from "../consts";
 import { Session } from "../types/auth";
+
 import authService from "../services/auth.service";
-import Signup from "../components/auth/Signup"; 
-
-
-export const SESSION_LOCALSTORE_NAME = "xxxx"
+import Signup from "../components/auth/Signup";
+import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 
 const AuthPage = () => {
     const [isLogin, setIsLogin] = useState(true);
@@ -16,24 +16,36 @@ const AuthPage = () => {
     const handleLogin = async () => {
         try {
             const succesful = await authService.login(email, password);
-            if (!succesful) {
-                return;
-            }
+            if (!succesful) return;
+
 
             const session = authService.getSession();
-            console.log("Session:", session);
-
- 
-            window.location.href = "/workspaces";
-
             localStorage.setItem(
                 SESSION_LOCALSTORE_NAME,
                 JSON.stringify(session),
             );
+            window.location.href = "/workspaces";
         } catch (err: any) {
             setError(err.message || "Erreur inconnue");
         }
     };
+
+    const handleGoogleLogin = async (credentialResponse: CredentialResponse) => {
+        try {
+            if (!credentialResponse.credential) {
+                setError("Aucun token Google reçu");
+                return;
+            }
+
+            const session = await authService.loginWithGoogle(credentialResponse.credential);
+
+            localStorage.setItem(SESSION_LOCALSTORE_NAME, JSON.stringify(session));
+            //window.location.href = "/workspaces";
+        } catch (err: any) {
+            setError(err.message || "Erreur lors de la connexion Google");
+        }
+    };
+
     return (
         <div className="auth-container">
             <div className="auth-box">
@@ -43,10 +55,9 @@ const AuthPage = () => {
                     <>
                         <input
                             type="email"
-          
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            id="email"
+                            placeholder="Adresse e-mail"
                         />
                         <input
                             type="password"
@@ -54,8 +65,14 @@ const AuthPage = () => {
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="Mot de passe"
                         />
-
                         <button onClick={handleLogin}>Se connecter</button>
+
+                        <div style={{ marginTop: "20px" }}>
+                            <GoogleLogin
+                                onSuccess={handleGoogleLogin}
+                                onError={() => setError("Échec de la connexion avec Google")}
+                            />
+                        </div>
 
                         {error && <p style={{ color: "red" }}>{error}</p>}
                     </>

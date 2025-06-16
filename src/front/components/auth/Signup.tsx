@@ -83,7 +83,7 @@ const Signup = () => {
                 />
                 <input
                     type="text"
-                    name="password"
+                    name="mdp"
                     placeholder="Mot de passe"
                     value={formData.mdp}
                     onChange={handleChange}

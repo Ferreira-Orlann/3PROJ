@@ -4,41 +4,105 @@ import styles from "../styles/workspacesPage.module.css";
 
 import Sidebar from "../components/layout/Sidebar";
 import CreateWorkspaceModal from "../components/workspaces/CreateWorkspaceModal";
+import workspaceService from "../services/workspaces.service";
+import { workspaceMembersService } from "../services/workspaceMembers.service";
 import PrivateChatList from "../chat/PrivateChat";
 import NotificationsSettings from "../components/settings/NotificationsSettings";
-import workspaceService from "../services/workspaces.service";
+import authService from "../services/auth.service";
+
 
 const WorkspacesPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [workspaces, setWorkspaces] = useState([]);
   const [error, setError] = useState("");
-  const [activeTab, setActiveTab] = useState("workspaces");
-
   const navigate = useNavigate();
+  
+  const session = authService.getSession();
+  if (!session) return <p>Utilisateur non connecté</p>;
+  
+  const userUuid = session.owner;
+  console.log("User UUID:", userUuid);
+  
 
-  // Récupère tous les workspaces à l'initialisation
-  useEffect(() => {
-    const fetchWorkspaces = async () => {
+  const fetchWorkspaces = async () => {
+  try {
+    const allWorkspaces = await workspaceService.getAll();
+
+    const filteredWorkspaces = [];
+    console.log("Workspaces récupérés:", filteredWorkspaces);
+
+
+    for (const workspace of allWorkspaces) {
       try {
-        const data = await workspaceService.getAll();
-        setWorkspaces(data);
-      } catch (err: any) {
-        console.error("Erreur lors de la récupération des workspaces:", err);
-        setError(err.message || "Erreur inconnue");
-      }
-    };
+        const members = await workspaceMembersService.getAll(workspace.uuid);
 
+        const isMember = members.some(
+          (member: any) => member.user?.uuid === userUuid
+        );
+
+        if (isMember) {
+          filteredWorkspaces.push(workspace);
+          console.log(workspace)
+        }
+      } catch (err) {
+        console.warn(`Erreur pour les membres de ${workspace.name}`, err);
+        // Tu peux choisir d’ignorer ou bloquer ici
+      }
+    }
+
+    setWorkspaces(filteredWorkspaces);
+  } catch (err: any) {
+    console.error("Erreur lors de la récupération des workspaces:", err);
+    setError(err.message || "Erreur inconnue");
+  }
+
+};
+
+
+  useEffect(() => {
     fetchWorkspaces();
   }, []);
 
-  // Redirige vers un workspace spécifique
   const goToWorkspace = (workspace: any) => {
     navigate(`/workspace/${workspace.uuid}`, { state: workspace });
   };
 
+  const goToNotifications = () => {
+    navigate("/notifications"); // ← Redirection vers la page Notifications
+  };
+
   return (
     <div className={styles.container}>
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <aside className={styles.sidebar}>
+        <h2 className={styles.sidebarTitle}>ESPACES DE TRAVAIL</h2>
+        <div className={styles.workspaceList}>
+          {workspaces.map((workspace: any) => (
+            <div
+              key={workspace.uuid}
+              className={styles.workspaceItem}
+              onClick={() => goToWorkspace(workspace)}
+              style={{ cursor: "pointer" }}
+            >
+              <div className={styles.workspaceIcon}>
+                {workspace.name.charAt(0).toUpperCase()}
+              </div>
+              <div className={styles.workspaceInfo}>
+                <p>{workspace.name}</p>
+                <span>{workspace.is_public ? "Public" : "Privé"}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Bouton Notifications */}
+        <button
+          className={styles.notificationsButton}
+          onClick={goToNotifications}
+          style={{ marginTop: "20px" }}
+        >
+          🔔 Notifications
+        </button>
+      </aside>
 
       <main className={styles.main}>
         <div className={styles.mainHeader}>
@@ -53,36 +117,26 @@ const WorkspacesPage = () => {
 
         {error && <p className={styles.error}>{error}</p>}
 
-        {/* Contenu dynamique selon l'onglet sélectionné */}
-        {activeTab === "workspaces" && (
-          <div className={styles.workspaceCards}>
-            {workspaces.map((workspace: any) => (
-              <div
-                key={workspace.uuid}
-                className={styles.workspaceCard}
-                onClick={() => goToWorkspace(workspace)}
-              >
-                <div className={styles.workspaceAvatar}>
-                  {workspace.name.charAt(0).toUpperCase()}
-                </div>
-                <p>{workspace.name}</p>
+        <div className={styles.workspaceCards}>
+          {workspaces.map((workspace: any) => (
+            <div
+              key={workspace.uuid}
+              className={styles.workspaceCard}
+              onClick={() => goToWorkspace(workspace)}
+            >
+              <div className={styles.workspaceAvatar}>
+                {workspace.name.charAt(0).toUpperCase()}
               </div>
-            ))}
-          </div>
-        )}
-
-        {activeTab === "chats" && <PrivateChatList />}
-        {activeTab === "settings" && <NotificationsSettings />}
+              <p>{workspace.name}</p>
+            </div>
+          ))}
+        </div>
       </main>
 
       {showModal && (
         <CreateWorkspaceModal
           onClose={() => setShowModal(false)}
-          onWorkspaceCreated={() => {
-            setShowModal(false);
-            // Recharger les workspaces après création
-            workspaceService.getAll().then(setWorkspaces).catch(console.error);
-          }}
+          onWorkspaceCreated={fetchWorkspaces}
         />
       )}
     </div>

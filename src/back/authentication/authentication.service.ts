@@ -5,6 +5,8 @@ import { Repository } from "typeorm";
 import { JwtService } from "@nestjs/jwt";
 import { randomUUID, UUID } from "crypto";
 import { User } from "../users/users.entity";
+import { OAuth2Client } from "google-auth-library";
+
 
 @Injectable()
 export class AuthService {
@@ -65,4 +67,19 @@ export class AuthService {
         expirationDate.setSeconds(expirationDate.getSeconds() + duration);
         return expirationDate > new Date();
     }
+
+        private client = new OAuth2Client("1045079684157-9m71af2ln6f3capjav5vj05q1cha7ahk.apps.googleusercontent.com");
+
+    async verifyGoogleToken(token: string): Promise<any | null> {
+        try {
+            const ticket = await this.client.verifyIdToken({
+                idToken: token,
+                audience: "1045079684157-9m71af2ln6f3capjav5vj05q1cha7ahk.apps.googleusercontent.com",
+            });
+            return ticket.getPayload(); // payload contient email, name, etc.
+        } catch (error) {
+            return null;
+        }
+    }
+
 }

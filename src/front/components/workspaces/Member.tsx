@@ -5,6 +5,8 @@ import styles from "../../styles/workspaceDetailPage.module.css";
 
 interface MemberProps {
     name: string;
+    uuid: string; // Ajout
+
 }
 
 const Member = ({ name }: MemberProps) => (

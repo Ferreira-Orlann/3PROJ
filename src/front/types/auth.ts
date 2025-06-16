@@ -7,10 +7,11 @@ export type User = {
 };
 
 export type Session = {
-  uuid: string;
-  revoked: boolean;
-  created_time: Date;
-  second_duraction: number;
-  token: string; 
-  owner: User;
+    uuid: UUID;
+    owner: UUID;              
+
+    revoked: boolean;
+    created_time: Date;
+    second_duraction: number;
+    token: string;
 };

@@ -10,13 +10,21 @@ class WorkspacesService {
         description: string,
         is_public: boolean,
     ): Promise<Workspace> {
+        console.log("Payload envoyé à l'API:", {
+  name,
+  description,
+  is_public,
+});
+
         const response = await axios.post<Workspace>(
+            
             "http://localhost:3000/workspaces",
             JSON.stringify({
                 name,
                 description,
                 is_public,
             }),
+            
             {
                 headers: {
                     "Content-Type": "application/json",
@@ -106,6 +114,8 @@ class WorkspacesService {
         return response.data;
       }
       
+      
+    
 }
 
 export default new WorkspacesService();

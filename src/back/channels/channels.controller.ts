@@ -37,10 +37,15 @@ export class ChannelsController {
     }
 
     @Post("workspaces/:workspaceUuid/channels")
-    async createWorkspaceChannel(@Body() dto: CreateChannelDto) {
+    async createWorkspaceChannel(
+        @Param("workspaceUuid") workspaceUuid: UUID,
+        @Body() dto: CreateChannelDto
+    ) {
+        dto.workspace_uuid = workspaceUuid; // 👈 injection manuelle
         const entity = await this.channelService.add(dto);
         return entity;
     }
+    
 
     @Delete("channels/:id")
     async deleteChannel(@Param("id") id: UUID) {

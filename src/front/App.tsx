@@ -6,12 +6,15 @@ import {
 } from "react-router-dom";
 
 import HomePage from "../front/Pages/index";
-import WorkspacesPage from "../front/Pages/workspaces";
-
-import PrivateChatPage from "../front/Pages/PrivateChatPage";
+import NotificationsPage from "../front/Pages/NotificationsPage";
+import WorkspacesPage from "./Pages/Workspaces";
+import WorkspaceDetailPage from "./Pages/WorkspaceDetailPage";
+import { AuthProvider } from "./context/AuthContext";
 import LoginPage from "../front/Pages/AuthPage";
+import ChannelPage from "./pages/ChannelPage";
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import PrivateChatPage from "./Pages/PrivateChatPage";
 
-import { AuthProvider, useAuthContext } from "./context/AuthContext";
 
 // Sous-composant pour gérer les routes avec redirection en fonction de l'authentification
 const AppRoutes = () => {
@@ -44,10 +47,28 @@ const App = () => {
     return (
         <Router>
             <AuthProvider>
-                <AppRoutes />
+                <Routes>
+                    <Route
+                        path="/"
+                        element={<Navigate to="/workspaces" replace />}
+                    />
+                    <Route path="/dashboard" element={<HomePage />} />{" "}
+                    {/* 👈 Page principale renommée */}
+                    <Route
+                        path="/notifications"
+                        element={<NotificationsPage />}
+                    />
+                    <Route path="/workspaces" element={<WorkspacesPage />} />
+                    <Route
+                        path="/workspace/:uuid"
+                        element={<WorkspaceDetailPage />}
+                    />{" "}
+                    {/* L'ID sera passé ici */}
+                </Routes>
             </AuthProvider>
         </Router>
     );
 };
+
 
 export default App;
