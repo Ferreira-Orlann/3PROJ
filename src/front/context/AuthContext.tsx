@@ -1,71 +1,60 @@
+// src/context/AuthContext.tsx
 import React, { createContext, useContext, useEffect, useState } from "react";
 import authService from "../services/auth.service";
-import { UUID } from "crypto";
-
-type User = {
-  uuid: UUID;
-};
-
-type Session = {
-  token: string;
-  owner: {
-    uuid: UUID;
-  };
-};
+import { Session, User } from "../types/auth";
 
 type AuthContextType = {
   user: User | null;
   token: string | null;
   session: Session | null;
-  login: (user: User, token: string) => void;
+  login: (session: Session) => void;
   logout: () => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
 
-  const login = (user: User, token: string) => {
-    localStorage.setItem("xxxx", JSON.stringify({ uuid: user.uuid, token }));
-    setUser(user);
-    setToken(token);
+  const login = (session: Session) => {
+    setSession(session);
+    localStorage.setItem("xxxx", JSON.stringify(session));
   };
 
   const logout = () => {
-    localStorage.removeItem("xxxx");
-    setUser(null);
-    setToken(null);
+    authService.clearSession();
+    setSession(null);
   };
 
   useEffect(() => {
-    const stockageSession = authService.getSession();
-    console.log("stok",stockageSession)
-    if (stockageSession != null) {
-      setUser({ uuid: stockageSession.owner });
-      setToken(stockageSession.token);
+    const existing = authService.getSession();
+    if (existing) {
+      setSession(existing);
     }
-    console.log("users",user)
   }, []);
 
-
-  const session: Session | null =
-    user && token
-      ? {
-          token,
-          owner: { uuid: user.uuid },
-        }
-      : null;
+  const user = session
+    ? {
+        uuid: session.owner,
+        username: "", // si tu veux le charger depuis l'API plus tard
+        email: "",
+      }
+    : null;
 
   return (
-    <AuthContext.Provider value={{ user, token, session, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token: session?.token || null,
+        session,
+        login,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
-
-
 
 export const useAuth = () => {
   const ctx = useContext(AuthContext);

@@ -1,56 +1,59 @@
+// src/services/auth.service.ts
 import axios from "axios";
 import { Session } from "../types/auth";
 
-export const SESSION_LOCALSTORE_NAME = "xxxx"
+export const SESSION_LOCALSTORE_NAME = "xxxx";
 
 class AuthService {
-    private session: Session;
+  private session: Session | null = null;
 
-    public async login(email: string, password: string): Promise<boolean> {
-        const res = await axios.post<Session>(
-            "http://localhost:3000/auth/login",
-            { email, password },
-        );
-        console.log("Response:", res);
-        if (res.status !== 201) {
-            return false;
-        }
-        this.session = res.data;
-        return true;
+  public async login(email: string, password: string): Promise<Session> {
+    const res = await axios.post<Session>("http://localhost:3000/auth/login", {
+      email,
+      password,
+    });
+
+    if (res.status !== 201) {
+      throw new Error("Échec de la connexion");
     }
 
-public async loginWithGoogle(googleToken: string): Promise<boolean> {
+    this.session = res.data;
+    localStorage.setItem(SESSION_LOCALSTORE_NAME, JSON.stringify(this.session));
+    return this.session;
+  }
+
+  public async loginWithGoogle(googleToken: string): Promise<Session> {
+    const res = await axios.post<Session>("http://localhost:3000/auth/google", {
+      token: googleToken,
+    });
+
+    if (res.status !== 200 && res.status !== 201) {
+      throw new Error("Échec de la connexion Google");
+    }
+
+    this.session = res.data;
+    localStorage.setItem(SESSION_LOCALSTORE_NAME, JSON.stringify(this.session));
+    return this.session;
+  }
+
+  public getSession(): Session | null {
+    if (this.session) return this.session;
+
+    const raw = localStorage.getItem(SESSION_LOCALSTORE_NAME);
+    if (!raw) return null;
+
     try {
-        const res = await axios.post<Session>(
-            "http://localhost:3000/auth/google",
-            { token: googleToken }, // <-- ici dans le body, pas dans les headers
-        );
-
-        if (res.status !== 201 && res.status !== 200) {
-            return false;
-        }
-
-        this.session = res.data;
-        localStorage.setItem(SESSION_LOCALSTORE_NAME, JSON.stringify(this.session));
-        return true;
-    } catch (err) {
-        console.error("Erreur login Google", err);
-        return false;
+      this.session = JSON.parse(raw) as Session;
+      return this.session;
+    } catch {
+      return null;
     }
-}
+  }
 
-    public getSession(): Session | null {
-        if (!this.session) {
-            const sessionString = localStorage.getItem(SESSION_LOCALSTORE_NAME);
-            if (sessionString) {
-                this.session = JSON.parse(sessionString);
-            } else {
-                return null;
-            }
-        }
-        return this.session;
-    }
-    
+  public clearSession(): void {
+    this.session = null;
+    localStorage.removeItem(SESSION_LOCALSTORE_NAME);
+  }
 }
 
 export default new AuthService();

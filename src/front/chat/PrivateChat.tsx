@@ -12,7 +12,7 @@ import type { Message } from "../types/messages";
 
 export default function PrivateChat() {
   const { session } = useAuthContext();
-  const me = session!.owner.uuid;
+  const me = session!.owner; 
   const token = session!.token;
 
   const [searchTerm, setSearchTerm] = useState("");
