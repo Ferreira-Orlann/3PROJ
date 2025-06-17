@@ -8,12 +8,14 @@ import {
     Post,
     Put,
     Req,
+    UseGuards,
 } from "@nestjs/common";
 import { WorkspacesService } from "./workspaces.service";
 import { CreateWorkspaceDto } from "./workspaces.dto";
 import { Workspace } from "./workspaces.entity";
 import { UUID } from "crypto";
 import { HttpAuthGuard } from "../authentication/http.authentication.guard";
+import { AuthorizationGuard } from "../authorization/authorization.guard";
 
 @Controller("workspaces")
 export class WorkspacesController {
@@ -37,6 +39,9 @@ export class WorkspacesController {
     }
 
     @Post()
+    
+    @UseGuards(HttpAuthGuard, AuthorizationGuard)
+
     async create(@Req() request: any, @Body() dto: CreateWorkspaceDto) {
         console.log("Creating workspace with DTO:", dto);
         const user = request.user;
