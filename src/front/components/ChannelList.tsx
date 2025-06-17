@@ -12,7 +12,7 @@ export default function ChannelList() {
 
   useEffect(() => {
     fetch("http://localhost:3000/channels", {
-      credentials: "include", // Utile si tu as une auth avec cookies
+      credentials: "include", 
     })
       .then((res) => {
         if (!res.ok) throw new Error("Erreur HTTP " + res.status);

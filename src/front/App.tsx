@@ -3,8 +3,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import { AuthProvider } from "./context/AuthContext";
 import AppRoutes from "./AppRoutes";
 
-// Remplace par ton vrai Client ID ici (depuis Google Cloud Console)
-const clientId = "TON_CLIENT_ID_GOOGLE_OAUTH";
+const clientId = "1045079684157-9m71af2ln6f3capjav5vj05q1cha7ahk.apps.googleusercontent.com";
 
 const App = () => {
   return (

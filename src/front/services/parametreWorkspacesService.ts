@@ -14,7 +14,7 @@ const updateName = async (token: string, workspaceId: string, name: string) => {
     throw new Error(err?.message || "Erreur lors du renommage du workspace");
   }
 
-  return res.json(); // workspace mis à jour retourné par l’API
+  return res.json();
 };
 
 export default { updateName };

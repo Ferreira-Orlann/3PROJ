@@ -5,7 +5,7 @@ export async function addWorkspaceMember(workspaceId: string, user_uuid: string)
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`, // adapte selon ton auth
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
       body: JSON.stringify({ user_uuid }),
     });

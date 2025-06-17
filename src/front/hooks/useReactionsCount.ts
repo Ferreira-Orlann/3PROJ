@@ -15,7 +15,7 @@ export const useAllReactions = () => {
   useEffect(() => {
     const fetchReactions = async () => {
       try {
-        const data = await reactionService.getAllReactions(); // à adapter à ton service
+        const data = await reactionService.getAllReactions(); 
         setReactions(data);
       } catch (error) {
         console.error("Erreur lors de la récupération des réactions :", error);

@@ -11,7 +11,7 @@ export const fileService = {
     const response = await fetch("http://localhost:3000/files/upload", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${token}`, // Important si le contrôleur est protégé
+        Authorization: `Bearer ${token}`, 
       },
       body: formData,
     });
@@ -20,7 +20,7 @@ export const fileService = {
       throw new Error("Erreur lors de l'envoi du fichier");
     }
 
-    return await response.text(); // UUID renvoyé par le back
+    return await response.text(); 
   },
 
   getFileUrl: (uuid: string): string => {

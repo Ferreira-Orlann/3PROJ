@@ -8,7 +8,7 @@ import WorkspacesPage from "../front/Pages/workspaces";
 import PrivateChatPage from "../front/Pages/PrivateChatPage";
 import NotificationsPage from "../front/Pages/NotificationsPage";
 import WorkspaceDetailPage from "../front/Pages/WorkspaceDetailPage";
-import ChannelPage from "../front/Pages/ChannelPage"; // ✅ Nouvelle page pour les channels
+import ChannelPage from "../front/Pages/ChannelPage"; 
 
 // Layout
 import ProtectedLayout from "../front/components/layout/ProtectedLayout";

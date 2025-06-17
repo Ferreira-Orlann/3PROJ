@@ -36,7 +36,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const user = session
     ? {
         uuid: session.owner,
-        username: "", // si tu veux le charger depuis l'API plus tard
+        username: "", 
         email: "",
       }
     : null;

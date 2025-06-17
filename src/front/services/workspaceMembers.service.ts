@@ -15,6 +15,6 @@ export const workspaceMembersService = {
       throw new Error("Impossible de charger les membres");
     }
 
-    return await response.json(); // doit retourner un tableau de membres
+    return await response.json(); 
   },
 };

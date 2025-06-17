@@ -8,7 +8,7 @@ const NotificationsSettings = () => {
       <h2>Paramètres de Notifications</h2>
       <p>Cette section vous permet de gérer vos paramètres de notifications.</p>
 
-      {/* Tu peux ajouter des options plus tard, comme un toggle pour activer/désactiver les notifications */}
+      {}
       <div className={styles.notificationOption}>
         <label htmlFor="emailNotifications">Notifications par Email</label>
         <input

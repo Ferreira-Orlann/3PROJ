@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import MessageItem from "./MessageItem"; // <– importe ton nouveau composant
+import MessageItem from "./MessageItem"; 
 
 const MessageList = ({ messages }: { messages: any[] }) => {
   const bottomRef = useRef<HTMLDivElement>(null);

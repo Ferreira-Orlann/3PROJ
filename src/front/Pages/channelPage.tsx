@@ -15,7 +15,7 @@ const ChannelPage = () => {
   return (
     <div
       style={{
-        height: "calc(100vh - 50px)", // ajuster si tu as une nav bar de 50px
+        height: "calc(100vh - 50px)", 
         display: "flex",
         flexDirection: "column",
         

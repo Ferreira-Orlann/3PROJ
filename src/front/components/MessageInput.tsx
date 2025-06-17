@@ -21,10 +21,10 @@ const MessageInput = ({ onSend }: { onSend: (content: string) => void }) => {
     const uuid = await handleUpload(file);
     if (uuid) {
       const fileUrl = fileService.getFileUrl(uuid);
-      const message = `📎 Fichier : [${file.name}](${fileUrl})`; // Markdown-like, ou juste le lien si pas supporté
-      onSend(message); // Envoie un message contenant un lien
+      const message = `📎 Fichier : [${file.name}](${fileUrl})`; 
+      onSend(message); 
     }
-    e.target.value = ""; // reset le champ input file
+    e.target.value = ""; 
   };
 
   return (

@@ -1,4 +1,4 @@
-import authService from './auth.service';  // Correctement importé
+import authService from './auth.service';  
 
 
 export const channelService = {

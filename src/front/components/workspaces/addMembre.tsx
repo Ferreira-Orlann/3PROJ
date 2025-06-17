@@ -18,7 +18,7 @@ export const AddMemberForm = ({ workspaceId }: AddMemberFormProps) => {
     try {
       await addMember(workspaceId, userUUID.trim());
       setMessage("Membre ajouté avec succès !");
-      setUserUUID(""); // reset input
+      setUserUUID(""); 
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "Erreur inconnue.");
     }

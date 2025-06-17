@@ -1,7 +1,7 @@
 // src/services/reactions.service.ts
 import axios from "axios";
 
-const BASE_URL = "http://localhost:3000"; // remplace si besoin
+const BASE_URL = "http://localhost:3000"; 
 
 const addReaction = async ({
   messageUuid,
@@ -13,7 +13,7 @@ const addReaction = async ({
   userUuid: string;
 }) => {
   const res = await axios.post(
-    `${BASE_URL}/users/${userUuid}/channels/1/messages/${messageUuid}/reactions`, // adapte `channels/1`
+    `${BASE_URL}/users/${userUuid}/channels/1/messages/${messageUuid}/reactions`, 
     {
       emoji,
     },
